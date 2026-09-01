@@ -9,7 +9,8 @@ Button::Button(const std::string& text, const sf::Vector2f& pos, const sf::Vecto
 
 void Button::setText(const std::string& t) {
     text_.setFont(font_util::defaultFont());
-    text_.setString(t);
+    // 中文必须显式 UTF-8 转换,否则 SFML 按 ANSI 解码会乱码
+    text_.setString(str_util::utf8(t.c_str()));
     text_.setCharacterSize(22);
     text_.setFillColor(sf::Color::White);
     centerText();
