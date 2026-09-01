@@ -3,6 +3,9 @@ build/
 cmake-build-*/
 out/
 
+# SFML 解压目录(只保留 zip,CMake 自动解压)
+third_party/SFML-2.6.1/
+
 # C++ 编译中间文件
 *.o
 *.obj
