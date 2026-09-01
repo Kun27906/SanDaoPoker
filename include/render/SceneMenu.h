@@ -2,10 +2,11 @@
 #include "render/SceneManager.h"
 #include "ui/Button.h"
 #include "ui/TextBox.h"
+#include <array>
 
-// ====== 主菜单场景(阶段3骨架) ======
-// 阶段4将在此实现房间选择(ROOM_CONFIGS 16 种)。
-// 当前:显示标题 + 三个入口按钮,验证状态机切换。
+// ====== 主菜单场景(阶段4:选房间) ======
+// 显示 16 种房间(ROOM_CONFIGS: 人数/底注/轮次),点击选中(高亮),
+// 点"开始游戏"创建 Room 并进入组牌界面。
 
 class SceneMenu : public Scene {
 public:
@@ -16,11 +17,14 @@ public:
     void draw(sf::RenderWindow& win) override;
 
 private:
+    void refreshRoomButtonColors();  // 刷新选中高亮
+    void startGame();                // 创建 Room 并进入组牌
+
     SceneManager* mgr_;
-    sf::Sprite bg_;              // 桌面背景
-    TextBox title_;              // 游戏标题
-    TextBox subtitle_;           // 副标题
-    Button btnArrange_;          // 进入组牌界面
-    Button btnBattle_;           // 进入比牌界面
-    Button btnResult_;           // 进入结算界面
+    sf::Sprite bg_;
+    TextBox title_;
+    TextBox subtitle_;
+    std::array<Button, 16> roomBtns_;  // 16 个房间按钮(两列)
+    Button btnStart_;                  // 开始游戏
+    int selected_ = 7;                 // 默认选中"4人·休闲房"(下标7)
 };

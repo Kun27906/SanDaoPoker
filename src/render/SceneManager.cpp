@@ -1,4 +1,5 @@
 #include "render/SceneManager.h"
+#include "core/Room.h"
 #include "render/SceneMenu.h"
 #include "render/SceneArrange.h"
 #include "render/SceneBattle.h"
