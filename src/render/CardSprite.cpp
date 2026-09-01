@@ -42,8 +42,9 @@ void CardSprite::updateTexture() {
     const AssetManager& am = AssetManager::instance();
     const sf::Texture* t = nullptr;
     if (faceUp_) {
-        // 大小王贴图未就绪 -> 用牌背兜底
-        t = joker_ ? am.backTexture(backIndex_) : am.cardTexture(card_.getSuit(), card_.getRank());
+        // 大小王走 Jokers 贴图(cardTexture 已支持);加载失败时用牌背兜底
+        t = am.cardTexture(card_.getSuit(), card_.getRank());
+        if (!t) t = am.backTexture(backIndex_);
     } else {
         t = am.backTexture(backIndex_);
     }

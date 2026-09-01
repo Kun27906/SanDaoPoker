@@ -31,6 +31,7 @@ private:
 
     float maxSeconds_ = 10.f;
     float remaining_ = 10.f;
+    float fillWidth_ = 0.f;    // 填充条初始满宽(修正指数衰减 bug 用)
     bool running_ = false;
     bool finished_ = false;
     sf::RectangleShape bg_;    // 背景槽

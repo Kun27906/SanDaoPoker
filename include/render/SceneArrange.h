@@ -43,4 +43,5 @@ private:
     std::array<std::array<bool, 3>, 3> slotUsed_{};  // 槽是否已占
     int currentLine_ = 0;              // 当前选中的道(0头/1中/2尾)
     bool submitted_ = false;           // 已交牌(防重复)
+    bool timeoutFired_ = false;        // 超时自动交牌只触发一次(场景实例级,非static)
 };

@@ -15,7 +15,8 @@ CountdownBar::CountdownBar(float maxSeconds, const sf::Vector2f& pos, const sf::
     bg_.setOutlineThickness(2.f);
 
     // 填充条:初始为满宽,绿色
-    fill_.setSize(sf::Vector2f(size.x - 4.f, size.y - 4.f));
+    fillWidth_ = size.x - 4.f;
+    fill_.setSize(sf::Vector2f(fillWidth_, size.y - 4.f));
     fill_.setPosition(pos.x + 2.f, pos.y + 2.f);
     fill_.setFillColor(sf::Color(60, 180, 80));
 
@@ -57,11 +58,11 @@ void CountdownBar::update(float dt) {
 void CountdownBar::draw(sf::RenderWindow& win) {
     win.draw(bg_);
 
-    // 填充条宽度按剩余比例
+    // 填充条宽度按剩余比例(基于初始满宽,避免逐帧乘当前宽度导致的指数衰减)
     float ratio = maxSeconds_ > 0.f ? (remaining_ / maxSeconds_) : 0.f;
     if (ratio < 0.f) ratio = 0.f;
-    sf::Vector2f fsize = fill_.getSize();
-    fill_.setSize(sf::Vector2f(fsize.x * ratio, fsize.y));
+    if (ratio > 1.f) ratio = 1.f;
+    fill_.setSize(sf::Vector2f(fillWidth_ * ratio, fill_.getSize().y));
 
     // 颜色:前 2/3 绿色,后 1/3 红色(警示)
     fill_.setFillColor(ratio > 0.33f ? sf::Color(60, 180, 80) : sf::Color(220, 60, 50));

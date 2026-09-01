@@ -222,12 +222,11 @@ void SceneArrange::handleEvent(const sf::Event& e, const sf::RenderWindow& win) 
 
 void SceneArrange::update(float dt) {
     countdown_.update(dt);
-    // 超时自动交牌(只触发一次)
-    static bool wasFinished = false;
-    if (countdown_.isFinished() && !wasFinished) {
+    // 超时自动交牌(只触发一次;实例级标志,场景重建后重置)
+    if (countdown_.isFinished() && !timeoutFired_) {
+        timeoutFired_ = true;
         autoSubmit();
     }
-    wasFinished = countdown_.isFinished();
 }
 
 void SceneArrange::draw(sf::RenderWindow& win) {
