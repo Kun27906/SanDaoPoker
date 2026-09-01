@@ -1,22 +1,33 @@
-# 构建产物
+# ===== 构建产物 =====
 build/
 cmake-build-*/
 out/
-
-# SFML 解压目录(只保留 zip,CMake 自动解压)
-third_party/SFML-2.6.1/
-
-# C++ 编译中间文件
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
 *.o
 *.obj
+*.a
+*.lib
 *.exe
 *.dll
 *.pdb
+*.ilk
+*.exp
 
-# 编辑器/系统
+# ===== SFML 解压目录（只保留 zip 进仓库，CMake 自动解压）=====
+third_party/SFML-2.6.1/
+
+# ===== IDE / 编辑器配置 =====
+*.user
+*.suo
 .vs/
 .idea/
 .vscode/
-*.user
+
+# ===== 系统杂项 =====
 .DS_Store
 Thumbs.db
+Desktop.ini
