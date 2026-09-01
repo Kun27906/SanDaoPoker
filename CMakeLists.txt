@@ -128,11 +128,18 @@ add_custom_command(TARGET SanDaoPoker POST_BUILD
 
 # ------------------------------------------------------------
 # 编译器警告
-# ------------------------------------------------------------
+# 编译器警告 + UTF-8 源文件支持(中文注释必需)
 if(MSVC)
-    target_compile_options(SanDaoPoker PRIVATE /W4 /utf-8)
+    add_compile_options(/utf-8)
+    target_compile_options(SanDaoPoker PRIVATE /W4)
+    if(TARGET test_hand_evaluator)
+        target_compile_options(test_hand_evaluator PRIVATE /W4)
+    endif()
 else()
     target_compile_options(SanDaoPoker PRIVATE -Wall -Wextra)
+    if(TARGET test_hand_evaluator)
+        target_compile_options(test_hand_evaluator PRIVATE -Wall -Wextra)
+    endif()
 endif()
 
 # ------------------------------------------------------------
@@ -142,7 +149,10 @@ endif()
 option(BUILD_TESTS "Build unit tests" OFF)
 if(BUILD_TESTS)
     enable_testing()
-    add_executable(test_hand_evaluator tests/test_hand_evaluator.cpp)
+    add_executable(test_hand_evaluator
+        tests/test_hand_evaluator.cpp
+        src/core/Card.cpp
+        src/core/HandEvaluator.cpp)
     target_include_directories(test_hand_evaluator PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/src)
