@@ -23,6 +23,23 @@
 3. 下班前 push 到自己的分支
 4. D 每日合并到 main,解决冲突后通知全员
 
-## 构建方法
+## 构建方法(Windows)
 
-(待 D 完成后补充)
+### 需要的工具
+1. **Visual Studio 2022 Community**(免费)— 安装时勾选 **"使用 C++ 的桌面开发"**
+2. **CMake** — VS 安装器里勾选,或到 cmake.org 下载
+3. **SFML 2.6**(渲染库)— 暂时没有也能编译纯 C++ 骨架
+
+### 编译步骤
+```bash
+git clone git@github.com:Kun27906/SanDaoPoker.git
+cd SanDaoPoker
+cmake -B build
+cmake --build build
+```
+或用 VS:打开文件夹 → 选 SanDaoPoker → VS 自动识别 CMakeLists → 生成 → 全部生成
+
+### 运行
+```
+build\SanDaoPoker.exe   (或 VS 里点"运行")
+```
