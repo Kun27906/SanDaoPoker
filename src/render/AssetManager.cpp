@@ -75,6 +75,15 @@ bool AssetManager::loadCardTextures() {
             }
         }
     }
+    // 大小王(Jokers 文件夹,由 tools/gen_jokers.py 生成)
+    if (!jokerTex_[0].loadFromFile("assets/cards/Jokers/small.png")) {
+        allOk = false;
+        std::fprintf(stderr, "[AssetManager] 加载失败: assets/cards/Jokers/small.png\n");
+    }
+    if (!jokerTex_[1].loadFromFile("assets/cards/Jokers/big.png")) {
+        allOk = false;
+        std::fprintf(stderr, "[AssetManager] 加载失败: assets/cards/Jokers/big.png\n");
+    }
     return allOk;
 }
 
@@ -105,8 +114,12 @@ bool AssetManager::loadMiscTextures() {
 }
 
 const sf::Texture* AssetManager::cardTexture(Suit s, Rank r) const {
-    if (r == Rank::SmallJoker || r == Rank::BigJoker) {
-        return nullptr;  // 大小王贴图未就绪(等 D 成员),由 CardSprite 用牌背兜底
+    // 大小王:Jokers 贴图 [0]=small [1]=big
+    if (r == Rank::SmallJoker) {
+        return jokerTex_[0].getSize().x > 0 ? &jokerTex_[0] : nullptr;
+    }
+    if (r == Rank::BigJoker) {
+        return jokerTex_[1].getSize().x > 0 ? &jokerTex_[1] : nullptr;
     }
     int idx = cardIndex(r);
     if (idx < 0 || idx > 12) return nullptr;

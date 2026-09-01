@@ -6,9 +6,11 @@
 #include "ui/CountdownBar.h"
 #include <array>
 
-// ====== 组牌界面场景(阶段3骨架) ======
-// 阶段5将实现完整组牌(9张手牌分三道+交牌)。
-// 当前:显示 3 张随机牌(验证 CardSprite+素材)+ 1 张牌背 + 倒计时条演示。
+// ====== 组牌界面(阶段5: 分三道) ======
+// 玩法:9 张手牌点选放入三道(头道/中道/尾道,每道 3 张),
+//      选道用左侧三个按钮(当前道高亮),交牌前可重置重摆,
+//      倒计时(20秒)归零自动按序摆完并交牌。
+// 交牌后:AI 玩家自动随机组牌(阶段8替换为 AIPlayer),切到比牌界面。
 
 class SceneArrange : public Scene {
 public:
@@ -19,12 +21,27 @@ public:
     void draw(sf::RenderWindow& win) override;
 
 private:
+    void placeCard(int handIdx);   // 把手牌放入当前道空槽
+    void resetArrange();           // 清空重摆
+    void submit();                 // 交牌(含AI组牌) -> 比牌
+    void autoSubmit();             // 超时自动摆完并交牌
+    bool allPlaced() const;        // 9 张是否全部摆完
+
     SceneManager* mgr_;
     sf::Sprite bg_;
     TextBox title_;
     TextBox hint_;
-    std::array<CardSprite, 3> cardSprites_;  // 3 张随机牌(正面)
-    CardSprite backSprite_;                  // 1 张牌背
-    CountdownBar countdown_;                 // 倒计时条演示
-    Button btnBack_;                         // 返回菜单
+    std::array<CardSprite, 9> handSprites_;            // 手牌区
+    std::array<std::array<CardSprite, 3>, 3> lineSprites_;  // 三道已摆牌
+    std::array<sf::RectangleShape, 9> handSlotRects_;       // 手牌空位框
+    std::array<std::array<sf::RectangleShape, 3>, 3> lineSlotRects_;  // 槽位框
+    std::array<Button, 3> lineBtns_;   // 头/中/尾道选择
+    Button btnReset_;                  // 重置
+    Button btnSubmit_;                 // 交牌
+    CountdownBar countdown_;           // 20 秒倒计时
+    std::array<bool, 9> handUsed_{};   // 手牌是否已用
+    std::array<std::array<bool, 3>, 3> slotUsed_{};  // 槽是否已占
+    int currentLine_ = 0;              // 当前选中的道(0头/1中/2尾)
+    bool submitted_ = false;           // 已交牌(防重复)
+    bool timeoutFired_ = false;        // 超时自动交牌只触发一次(场景实例级,非static)
 };

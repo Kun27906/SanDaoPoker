@@ -1,11 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <memory>
-
-// ====== 场景状态机(阶段3) ======
-// 场景流: 菜单(Menu) -> 组牌(Arrange) -> 比牌(Battle) -> 结算(Result) -> 菜单
-// Scene 为场景基类,四个场景继承并实现 handleEvent/update/draw。
-// SceneManager 持有当前场景,负责切换(changeTo)。
+#include "core/Room.h"   // 完整类型(unique_ptr<Room> 析构需要)
 
 enum class SceneId {
     Menu,      // 主菜单(阶段4:选房间)
@@ -35,6 +31,9 @@ public:
     void handleEvent(const sf::Event& e, const sf::RenderWindow& win);
     void update(float dt);
     void draw(sf::RenderWindow& win);
+
+    // ---- 游戏会话状态(阶段4起,跨场景共享) ----
+    std::unique_ptr<Room> room;   // 当前房间(菜单选房后创建,组牌/比牌/结算使用)
 
 private:
     std::unique_ptr<Scene> createScene(SceneId id);
