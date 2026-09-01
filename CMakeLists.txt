@@ -142,9 +142,14 @@ endif()
 option(BUILD_TESTS "Build unit tests" OFF)
 if(BUILD_TESTS)
     enable_testing()
-    add_executable(test_hand_evaluator tests/test_hand_evaluator.cpp)
+    add_executable(test_hand_evaluator
+        tests/test_hand_evaluator.cpp
+        ${CORE_SOURCES})
     target_include_directories(test_hand_evaluator PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    if(MSVC)
+        target_compile_options(test_hand_evaluator PRIVATE /utf-8)
+    endif()
     add_test(NAME hand_evaluator COMMAND test_hand_evaluator)
 endif()
