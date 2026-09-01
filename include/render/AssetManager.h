@@ -6,8 +6,8 @@
 
 // ====== AssetManager 资源管理器(阶段2) ======
 // 单例,统一加载和管理游戏素材:
-//   - 扑克牌贴图 52 张:  assets/cards/{spades,hearts,clubs,diamonds}/{1..13}.png
-//     (命名约定见 assets/README.md:A=1.png, 2=2.png, ..., K=13.png)
+//   - 扑克牌贴图 52 张:  assets/cards/{spades,hearts,clubs,diamonds}/{A,2..10,J,Q,K}.png
+//     (命名约定见 assets/README.md:文件名即点数名,如 A.png/10.png/J.png/Q.png/K.png)
 //   - 牌背 3 张:         assets/cards/back/{red,blue,black}.png
 //   - 桌面背景:          assets/ui/backgrounds/table_bg.png
 //   - 按钮四态图:        assets/ui/buttons/btn_{normal,hover,pressed,disabled}.png
@@ -38,7 +38,7 @@ private:
     bool loadCardTextures();
     bool loadMiscTextures();
 
-    // [花色][文件序号0..12] (1.png=A ... 13.png=K)
+    // [花色][下标0..12] (0=2 ... 8=10, 9=J, 10=Q, 11=K, 12=A)
     sf::Texture cardTex_[4][13];
     std::vector<sf::Texture> backTex_;   // 3 张牌背
     sf::Texture bgTex_;                  // 桌面背景
