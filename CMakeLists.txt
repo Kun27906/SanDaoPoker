@@ -105,15 +105,13 @@ if(SFML_FOUND)
     message(STATUS "SFML 2.6 已找到,渲染模块可用")
 
     # 拷贝 SFML DLL 到 exe 旁边(双击就能跑)
+    # 用 copy_directory 全量拷贝 bin/:Debug(-d-2.dll)与 Release DLL 都在,
+    # 避免构建类型与拷贝的 DLL 不匹配导致运行报"找不到 sfml-xxx-d-2.dll"
     if(WIN32)
         set(SFML_DLL_DIR "${SFML_ROOT}/bin")
         add_custom_command(TARGET SanDaoPoker POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${SFML_DLL_DIR}/sfml-graphics-2.dll"
-                "${SFML_DLL_DIR}/sfml-window-2.dll"
-                "${SFML_DLL_DIR}/sfml-system-2.dll"
-                "${SFML_DLL_DIR}/sfml-audio-2.dll"
-                "${SFML_DLL_DIR}/sfml-network-2.dll"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${SFML_DLL_DIR}"
                 $<TARGET_FILE_DIR:SanDaoPoker>)
         message(STATUS "已配置 DLL 自动拷贝到 exe 目录")
     endif()
