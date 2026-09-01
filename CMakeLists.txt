@@ -16,6 +16,12 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# 全局 UTF-8 源文件支持(中文注释必需)
+# 注意:add_compile_options 必须放在所有 add_executable 之前才会对目标生效
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 # ------------------------------------------------------------
 # 模块目录(各成员往里填代码)
 #   include/core + src/core       - 核心逻辑 (A)
@@ -99,15 +105,13 @@ if(SFML_FOUND)
     message(STATUS "SFML 2.6 已找到,渲染模块可用")
 
     # 拷贝 SFML DLL 到 exe 旁边(双击就能跑)
+    # 用 copy_directory 全量拷贝 bin/:Debug(-d-2.dll)与 Release DLL 都在,
+    # 避免构建类型与拷贝的 DLL 不匹配导致运行报"找不到 sfml-xxx-d-2.dll"
     if(WIN32)
         set(SFML_DLL_DIR "${SFML_ROOT}/bin")
         add_custom_command(TARGET SanDaoPoker POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${SFML_DLL_DIR}/sfml-graphics-2.dll"
-                "${SFML_DLL_DIR}/sfml-window-2.dll"
-                "${SFML_DLL_DIR}/sfml-system-2.dll"
-                "${SFML_DLL_DIR}/sfml-audio-2.dll"
-                "${SFML_DLL_DIR}/sfml-network-2.dll"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${SFML_DLL_DIR}"
                 $<TARGET_FILE_DIR:SanDaoPoker>)
         message(STATUS "已配置 DLL 自动拷贝到 exe 目录")
     endif()
@@ -129,10 +133,9 @@ add_custom_command(TARGET SanDaoPoker POST_BUILD
 # ------------------------------------------------------------
 # 编译器警告
 # 编译器警告 + UTF-8 源文件支持(中文注释必需)
-# 注意:add_compile_options 须在 add_executable 之前调用才会对目标生效,
-#      因此这里对 SanDaoPoker 目标显式追加 /utf-8
+# 全局 /utf-8 已在文件顶部设置(须在 add_executable 之前);
+# 这里对 SanDaoPoker 目标再显式追加一次,双保险
 if(MSVC)
-    add_compile_options(/utf-8)
     target_compile_options(SanDaoPoker PRIVATE /W4 /utf-8)
     if(TARGET test_hand_evaluator)
         target_compile_options(test_hand_evaluator PRIVATE /W4)
