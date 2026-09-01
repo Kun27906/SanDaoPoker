@@ -129,9 +129,11 @@ add_custom_command(TARGET SanDaoPoker POST_BUILD
 # ------------------------------------------------------------
 # 编译器警告
 # 编译器警告 + UTF-8 源文件支持(中文注释必需)
+# 注意:add_compile_options 须在 add_executable 之前调用才会对目标生效,
+#      因此这里对 SanDaoPoker 目标显式追加 /utf-8
 if(MSVC)
     add_compile_options(/utf-8)
-    target_compile_options(SanDaoPoker PRIVATE /W4)
+    target_compile_options(SanDaoPoker PRIVATE /W4 /utf-8)
     if(TARGET test_hand_evaluator)
         target_compile_options(test_hand_evaluator PRIVATE /W4)
     endif()
