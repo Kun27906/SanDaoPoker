@@ -165,3 +165,63 @@ if(BUILD_TESTS)
     endif()
     add_test(NAME hand_evaluator COMMAND test_hand_evaluator)
 endif()
+
+# ------------------------------------------------------------
+# 开发工具构建接口 (成员B 2026-09)
+# 用法示例:
+#   cmake --build build --target gen_winrate_table   # 生成胜率表
+#   cmake --build build --target evaluate_ai         # AI 对战评估
+#   cmake --build build --target human_test          # 人性化检验
+#   cmake --build build --target gen_assets          # 素材生成(python)
+# 说明: 工具只依赖 core+ai, 不链接 SFML
+# ------------------------------------------------------------
+option(BUILD_TOOLS "Build dev tools (winrate/evaluate/human)" ON)
+if(BUILD_TOOLS)
+    set(TOOL_COMMON_SOURCES
+        ${CORE_SOURCES}
+        ${AI_SOURCES}
+    )
+    set(TOOL_INCLUDE_DIRS
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+    )
+
+    # 1. 胜率表生成器(训练): 输出 assets/ai/winrate.bin
+    add_executable(gen_winrate_table
+        tools/gen_winrate_table.cpp
+        ${TOOL_COMMON_SOURCES})
+    target_include_directories(gen_winrate_table PRIVATE ${TOOL_INCLUDE_DIRS})
+    if(MSVC)
+        target_compile_options(gen_winrate_table PRIVATE /utf-8)
+    endif()
+
+    # 2. AI 对战评估器
+    add_executable(evaluate_ai
+        tools/evaluate_ai.cpp
+        ${TOOL_COMMON_SOURCES})
+    target_include_directories(evaluate_ai PRIVATE ${TOOL_INCLUDE_DIRS})
+    if(MSVC)
+        target_compile_options(evaluate_ai PRIVATE /utf-8)
+    endif()
+
+    # 3. 人性化快速检验
+    add_executable(human_test
+        tools/human_test.cpp
+        ${TOOL_COMMON_SOURCES})
+    target_include_directories(human_test PRIVATE ${TOOL_INCLUDE_DIRS})
+    if(MSVC)
+        target_compile_options(human_test PRIVATE /utf-8)
+    endif()
+
+    # 4. 素材生成(需 python3 + pillow): 牌面贴图 + UI 素材
+    find_package(Python3 COMPONENTS Interpreter QUIET)
+    if(Python3_FOUND)
+        add_custom_target(gen_assets
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_card_sheet.py
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_ui_assets.py
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "生成牌面/UI 素材 (需 pillow)")
+    else()
+        message(WARNING "未找到 Python3,跳过 gen_assets 素材生成目标")
+    endif()
+endif()
