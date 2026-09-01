@@ -16,6 +16,12 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# 全局 UTF-8 源文件支持(中文注释必需)
+# 注意:add_compile_options 必须放在所有 add_executable 之前才会对目标生效
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 # ------------------------------------------------------------
 # 模块目录(各成员往里填代码)
 #   include/core + src/core       - 核心逻辑 (A)
@@ -129,10 +135,9 @@ add_custom_command(TARGET SanDaoPoker POST_BUILD
 # ------------------------------------------------------------
 # 编译器警告
 # 编译器警告 + UTF-8 源文件支持(中文注释必需)
-# 注意:add_compile_options 须在 add_executable 之前调用才会对目标生效,
-#      因此这里对 SanDaoPoker 目标显式追加 /utf-8
+# 全局 /utf-8 已在文件顶部设置(须在 add_executable 之前);
+# 这里对 SanDaoPoker 目标再显式追加一次,双保险
 if(MSVC)
-    add_compile_options(/utf-8)
     target_compile_options(SanDaoPoker PRIVATE /W4 /utf-8)
     if(TARGET test_hand_evaluator)
         target_compile_options(test_hand_evaluator PRIVATE /W4)

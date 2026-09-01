@@ -1,12 +1,8 @@
-// SanDaoPoker 框架入口(第1天空工程骨架,保证可编译)
-#include <iostream>
+// SanDaoPoker 程序入口(成员C,阶段0:窗口 + 主循环)
+#include "render/GameApp.h"
 
 int main() {
-#ifdef WITH_SFML
-    std::cout << "SanDaoPoker v0.1 (SFML 模式) - 框架编译成功!" << std::endl;
-#else
-    std::cout << "SanDaoPoker v0.1 框架编译成功! (纯C++骨架,渲染模块第2天接入)"
-              << std::endl;
-#endif
+    GameApp app;
+    app.run();
     return 0;
 }
