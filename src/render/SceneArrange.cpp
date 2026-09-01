@@ -16,7 +16,7 @@ constexpr float HAND_X[9] = {90.f, 210.f, 330.f, 450.f, 570.f,
                              690.f, 810.f, 930.f, 1050.f};  // 手牌 x
 constexpr float HAND_Y = 640.f;
 constexpr float CARD_SCALE = 0.5f;   // 200x280 -> 100x140
-constexpr float COUNTDOWN_SECONDS = 20.f;
+constexpr float COUNTDOWN_SECONDS = 25.f;  // 组牌限时(常量,后期可调)
 
 sf::RectangleShape makeSlot(const sf::Vector2f& pos, const sf::Vector2f& size) {
     sf::RectangleShape r(size);
@@ -109,8 +109,8 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     }
     lineBtns_[0].setColors(sf::Color(46, 160, 80), sf::Color(70, 190, 100), sf::Color(30, 120, 55));  // 默认选中头道
 
-    // 重置 / 交牌
-    btnReset_.setText("重置");
+    // 一键重置 / 交牌
+    btnReset_.setText("一键重置");
     btnReset_.setPosition(sf::Vector2f(1140.f, 150.f));
     btnReset_.setSize(sf::Vector2f(110.f, 50.f));
     btnReset_.setCallback([this]() { resetArrange(); });
@@ -146,8 +146,8 @@ void SceneArrange::resetArrange() {
     mgr_->room->players[0].clearRound();  // 清空 lines + hasArranged
     handUsed_.fill(false);
     for (auto& row : slotUsed_) row.fill(false);
-    countdown_.start();
-    hint_.setText("已重置, 重新分三道");
+    // 方案1:一键重置不重置倒计时(倒计时持续走,超时仍会自动交牌,杜绝无限重置)
+    hint_.setText("已一键重置, 请重新分三道(倒计时继续)");
 }
 
 bool SceneArrange::allPlaced() const {
