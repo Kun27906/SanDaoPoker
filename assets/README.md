@@ -32,3 +32,14 @@ cards/back/<color>.png     牌背: black|blue|red
 | `fonts/SourceHanSansSC-Regular.otf` | 思源黑体（开源可分发） |
 
 生成脚本：`tools/gen_ui_assets.py`（底图+按钮，改风格重跑即可）
+
+## 小素材（第4天）
+
+| 文件 | 说明 |
+|------|------|
+| `ui/table/countdown_bar_bg.png` | 倒计时条底（400×24，深色圆角） |
+| `ui/table/countdown_fill_green/yellow/red.png` | 倒计时填充（按剩余时间选色） |
+| `ui/chips/chip_1/5/10/50/100.png` | 筹码 5 种面值（80×80） |
+| `ui/table/mark_win.png` | 胜利标记（胜，绿） |
+| `ui/table/mark_lose.png` | 失败标记（负，灰） |
+| `ui/table/mark_draw.png` | 平局标记（平，黄） |
