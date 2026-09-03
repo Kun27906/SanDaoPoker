@@ -27,8 +27,10 @@ public:
     const sf::Texture* cardTexture(Suit s, Rank r) const;
     // 牌背纹理:0=红 1=蓝 2=黑(默认红)
     const sf::Texture* backTexture(int index = 0) const;
-    // 桌面背景(2000x1200)
+    // 桌面背景(游戏场景,1920x1080)
     const sf::Texture* background() const;
+    // 主菜单背景(1920x1080),加载失败时回退到桌面背景
+    const sf::Texture* menuBackground() const;
     // 按钮图:0=normal 1=hover 2=pressed 3=disabled
     const sf::Texture* buttonTexture(int state) const;
 
@@ -43,7 +45,8 @@ private:
     sf::Texture cardTex_[4][13];
     sf::Texture jokerTex_[2];          // 大小王: [0]=small [1]=big
     std::vector<sf::Texture> backTex_;   // 3 张牌背
-    sf::Texture bgTex_;                  // 桌面背景
+    sf::Texture bgTex_;                  // 桌面背景(游戏场景)
+    sf::Texture menuTex_;                // 主菜单背景
     sf::Texture btnTex_[4];              // 按钮四态
     bool loaded_ = false;
 };

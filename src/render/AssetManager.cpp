@@ -102,6 +102,10 @@ bool AssetManager::loadMiscTextures() {
     if (!bgTex_.loadFromFile("assets/ui/backgrounds/table_bg.png")) {
         std::fprintf(stderr, "[AssetManager] 加载失败: assets/ui/backgrounds/table_bg.png\n");
     }
+    // 主菜单背景(单独一张;失败则场景代码回退到 table_bg)
+    if (!menuTex_.loadFromFile("assets/ui/backgrounds/menu.jpg")) {
+        std::fprintf(stderr, "[AssetManager] 加载失败: assets/ui/backgrounds/menu.jpg\n");
+    }
     const char* btnStates[4] = {"normal", "hover", "pressed", "disabled"};
     for (int i = 0; i < 4; i++) {
         char path[128];
@@ -137,6 +141,11 @@ const sf::Texture* AssetManager::backTexture(int index) const {
 
 const sf::Texture* AssetManager::background() const {
     return bgTex_.getSize().x > 0 ? &bgTex_ : nullptr;
+}
+
+const sf::Texture* AssetManager::menuBackground() const {
+    if (menuTex_.getSize().x > 0) return &menuTex_;
+    return bgTex_.getSize().x > 0 ? &bgTex_ : nullptr;  // 回退到桌面背景
 }
 
 const sf::Texture* AssetManager::buttonTexture(int state) const {

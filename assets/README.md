@@ -27,22 +27,18 @@ cards/Jokers/big.png       大王（红色 JOKER，万能红花色）
 
 | 文件 | 说明 |
 |------|------|
-| `ui/backgrounds/table_bg.png` | 游戏桌面底图（2000×1200，绿呢赌桌） |
-| `ui/buttons/btn_normal.png` | 按钮-常态（240×80，透明圆角） |
+| `ui/backgrounds/table_bg.png` | 游戏桌面背景（1920×1080，绿呢桌面） |
+| `ui/backgrounds/menu.jpg` | 主菜单背景（1920×1080，场景画） |
+| `ui/buttons/btn_normal.png` | 按钮-常态（240×80，亮金渐变） |
 | `ui/buttons/btn_hover.png` | 按钮-悬停 |
 | `ui/buttons/btn_pressed.png` | 按钮-按下 |
 | `ui/buttons/btn_disabled.png` | 按钮-禁用 |
+| `ui/chips/chip_1/5/10/25/50/100.png` | 筹码 6 种面值（416×416，3D 渲染高清，CC0） |
+| `ui/icons/mark_win.png` | 胜利标记（绿底奖杯） |
+| `ui/icons/mark_lose.png` | 失败标记（灰底叉） |
+| `ui/icons/mark_draw.png` | 平局标记（黄底横杠） |
+| `ui/table/countdown_bar_bg.png` | 倒计时条底 |
+| `ui/table/countdown_fill_*.png` | 倒计时填充（绿/黄/红） |
 | `fonts/SourceHanSansSC-Regular.otf` | 思源黑体（开源可分发） |
 
-生成脚本：`tools/gen_ui_assets.py`（底图+按钮，改风格重跑即可）
-
-## 小素材（第4天）
-
-| 文件 | 说明 |
-|------|------|
-| `ui/table/countdown_bar_bg.png` | 倒计时条底（400×24，深色圆角） |
-| `ui/table/countdown_fill_green/yellow/red.png` | 倒计时填充（按剩余时间选色） |
-| `ui/chips/chip_1/5/10/50/100.png` | 筹码 5 种面值（80×80） |
-| `ui/table/mark_win.png` | 胜利标记（胜，绿） |
-| `ui/table/mark_lose.png` | 失败标记（负，灰） |
-| `ui/table/mark_draw.png` | 平局标记（平，黄） |
+素材来源：poker_pack（CC0，筹码/桌），Kenney UI Pack（CC0，按钮），Kenney Game Icons（CC0，标记图标），[SVG-cards](https://github.com/htdebeer/SVG-cards)（LGPL-2.1，牌面）。

@@ -19,8 +19,8 @@ std::string roomLabel(int i) {
 }
 
 SceneMenu::SceneMenu(SceneManager* mgr) : mgr_(mgr) {
-    // 背景
-    if (const sf::Texture* bg = AssetManager::instance().background()) {
+    // 背景(主菜单专用背景,失败自动回退到桌面背景)
+    if (const sf::Texture* bg = AssetManager::instance().menuBackground()) {
         bg_.setTexture(*bg);
         float sx = static_cast<float>(WW) / bg->getSize().x;
         float sy = static_cast<float>(WH) / bg->getSize().y;
