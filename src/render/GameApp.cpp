@@ -20,6 +20,8 @@ GameApp::GameApp()
     AssetManager::instance().loadAll();
     // 加载全部音效(发牌/翻牌/筹码/胜负/按钮点击;失败静默)
     SoundManager::instance().loadAll();
+    // 启动即循环播放主菜单 BGM
+    SoundManager::instance().playBgmMenu();
     window_.setFramerateLimit(60);
 }
 

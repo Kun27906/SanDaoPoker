@@ -26,13 +26,21 @@ public:
     void playShuffle();   // 洗牌
     void playBet();       // 下注
 
+    // ---- BGM 循环(主菜单/对局,MP3 整曲循环) ----
+    void playBgmMenu();   // 主菜单循环
+    void playBgmGame();   // 对局循环
+    void stopBgm();
+
 private:
     SoundManager() = default;
     bool loadBuffer(int idx, const char* path);
     void play(int idx);
+    void playBgm(int idx);
 
-    enum { CLICK, DEAL, FLIP, CHIP, WIN, LOSE, SHUFFLE, BET, COUNT };
+    enum { CLICK, DEAL, FLIP, CHIP, WIN, LOSE, SHUFFLE, BET,
+           BGM_MENU, BGM_GAME, COUNT };
     sf::SoundBuffer bufs_[COUNT];
     sf::Sound sound_;      // 单声道播放器(短音效串行足够)
+    sf::Sound bgm_;        // BGM 循环播放器
     bool loaded_ = false;
 };

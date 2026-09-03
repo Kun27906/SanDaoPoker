@@ -21,6 +21,12 @@ void SceneManager::changeTo(SceneId id) {
         case SceneId::Result:  SoundManager::instance().playChip(); break;
         default: break;
     }
+    // BGM:主菜单播菜单曲,游戏场景播对局曲(当前同曲,后续可换)
+    if (id == SceneId::Menu) {
+        SoundManager::instance().playBgmMenu();
+    } else {
+        SoundManager::instance().playBgmGame();
+    }
 }
 
 std::unique_ptr<Scene> SceneManager::createScene(SceneId id) {
