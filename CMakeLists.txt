@@ -214,6 +214,15 @@ if(BUILD_TOOLS)
         target_compile_options(human_test PRIVATE /utf-8)
     endif()
 
+    # 4. Room/Round 完整对局冒烟(集成回归): 16房间全流程
+    add_executable(room_smoke_test
+        tools/room_smoke_test.cpp
+        ${TOOL_COMMON_SOURCES})
+    target_include_directories(room_smoke_test PRIVATE ${TOOL_INCLUDE_DIRS})
+    if(MSVC)
+        target_compile_options(room_smoke_test PRIVATE /utf-8)
+    endif()
+
     # 4. 素材生成(需 python3 + pillow): 牌面贴图 + UI 素材
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_FOUND)
