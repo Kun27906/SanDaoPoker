@@ -5,7 +5,7 @@
 
 | 目录 | 用途 |
 |------|------|
-| `cards/` | 扑克牌贴图：55 张（4 花色 × 13 点数 + 3 种牌背），PNG 200×280 |
+| `cards/` | 扑克牌贴图：57 张（4 花色 × 13 点数 + 3 种牌背 + 大小王），PNG 高清 338×488 |
 | `ui/` | 界面素材：`backgrounds/` 背景图、`buttons/` 按钮三态图、`chips/` 筹码、`icons/` 图标、`table/` 桌面 |
 | `fonts/` | 字体文件（思源黑体 Source Han Sans SC） |
 | `sounds/` | 音效与背景音乐（发牌/翻牌/筹码/胜负/BGM） |
@@ -16,9 +16,12 @@
 cards/<suit>/<rank>.png    花色: spades|hearts|clubs|diamonds
                            点数: A 2 3 4 5 6 7 8 9 10 J Q K
 cards/back/<color>.png     牌背: black|blue|red
+cards/joker_black.png      大王（黑色 JOKER）
+cards/joker_red.png        小王（红色 JOKER）
 ```
 
-生成脚本：`tools/gen_card_sheet.py`（改风格后重跑即可重新生成全部牌图）
+素材来源：[SVG-cards 4.0](https://github.com/htdebeer/SVG-cards)（LGPL-2.1，经典法式牌面，J/Q/K 带人物画像）。
+程序生成的旧几何牌面已替换。后续想换画风可重新渲染（Edge headless 渲染 SVG，源文件在 `C:\Users\27906\SVG-cards`）。
 
 ## UI 素材
 
