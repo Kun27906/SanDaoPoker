@@ -15,9 +15,9 @@
 ```
 cards/<suit>/<rank>.png    花色: spades|hearts|clubs|diamonds
                            点数: A 2 3 4 5 6 7 8 9 10 J Q K
-cards/back/<color>.png     牌背: black|blue|red
-cards/joker_black.png      大王（黑色 JOKER）
-cards/joker_red.png        小王（红色 JOKER）
+cards/back/<color>.png     牌背: red|blue|black
+cards/Jokers/small.png     小王（黑色 JOKER，万能黑花色）
+cards/Jokers/big.png       大王（红色 JOKER，万能红花色）
 ```
 
 素材来源：[SVG-cards 4.0](https://github.com/htdebeer/SVG-cards)（LGPL-2.1，经典法式牌面，J/Q/K 带人物画像）。
