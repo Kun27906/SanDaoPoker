@@ -1,5 +1,6 @@
 #include "render/SceneArrange.h"
 #include "render/AssetManager.h"
+#include "ai/AIPlayer.h"
 #include "core/Room.h"
 #include <algorithm>
 #include <random>
@@ -169,12 +170,12 @@ void SceneArrange::submit() {
     // 真人交牌锁定
     room->players[0].hasArranged = true;
 
-    // AI 玩家:假AI随机组牌(阶段8替换为 AIPlayer::decideOrderStyled)
-    std::mt19937 rng(std::random_device{}());
+    // AI 玩家:接入 AIPlayer 真实决策(贪心+人性化噪声;胜率表 assets/ai/winrate.bin)
     for (int p = 1; p < room->playerCount; p++) {
         int order[9];
-        for (int i = 0; i < 9; i++) order[i] = i;
-        std::shuffle(order, order + 9, rng);
+        AIPlayer::decideOrderStyled(room->players[p].hand, room->playerCount,
+                                    AIPlayer::Difficulty::Greedy,
+                                    AIPlayer::Style::Balanced, 0.3f, order);
         room->players[p].arrangeByOrder(order);
         room->players[p].hasArranged = true;
     }
