@@ -1,9 +1,0 @@
-# ninja log v6
-56	839	8101173859799193	CMakeFiles/test_hand_evaluator.dir/src/core/Player.cpp.obj	fe55f6592bb5e8d4
-30	841	8101173859539206	CMakeFiles/test_hand_evaluator.dir/src/core/Card.cpp.obj	f8403195f7d929cb
-47	871	8101173859719183	CMakeFiles/test_hand_evaluator.dir/src/core/HandEvaluator.cpp.obj	f3cd5540aa79a1c9
-73	1130	8101173859979183	CMakeFiles/test_hand_evaluator.dir/src/core/Room.cpp.obj	4c4b4a413e64a29
-65	1149	8101173859889185	CMakeFiles/test_hand_evaluator.dir/src/core/Round.cpp.obj	c2cd42bcd777dc86
-37	1174	8101173859619179	CMakeFiles/test_hand_evaluator.dir/src/core/Deck.cpp.obj	2a484adaec1675cc
-21	1189	8101173859449208	CMakeFiles/test_hand_evaluator.dir/tests/test_hand_evaluator.cpp.obj	92d8e044428fbfd7
-1190	1400	8101173871146600	test_hand_evaluator.exe	f17bb2e84e406802

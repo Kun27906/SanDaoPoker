@@ -31,3 +31,5 @@ third_party/SFML-2.6.1/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+build_tests/
