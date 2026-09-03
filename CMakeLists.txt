@@ -68,6 +68,7 @@ set(RENDER_SOURCES
     src/render/SceneArrange.cpp
     src/render/SceneBattle.cpp
     src/render/SceneResult.cpp
+    src/render/SoundManager.cpp
 )
 
 set(UI_SOURCES

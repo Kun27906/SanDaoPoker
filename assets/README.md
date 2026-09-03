@@ -41,4 +41,18 @@ cards/Jokers/big.png       大王（红色 JOKER，万能红花色）
 | `ui/table/countdown_fill_*.png` | 倒计时填充（绿/黄/红） |
 | `fonts/SourceHanSansSC-Regular.otf` | 思源黑体（开源可分发） |
 
+## 音效（assets/sounds/，CC0，Kenney casino-audio / interface-sounds）
+
+| 文件 | 用途 | 播放时机 |
+|------|------|----------|
+| `deal.ogg` | 发牌 | 进入组牌场景 |
+| `flip.ogg` | 翻牌 | 进入比牌场景 |
+| `chip.ogg` | 筹码 | 进入结算场景 |
+| `win.ogg` / `lose.ogg` | 胜负 | 结算判定（后续接入） |
+| `shuffle.ogg` | 洗牌 | 备用 |
+| `bet.ogg` | 下注 | 备用 |
+| `click.ogg` | 按钮点击 | 所有按钮通用 |
+
+接入：`SoundManager`（单例）加载与播放，`Button` 点击、`SceneManager` 场景切换已自动触发。
+
 素材来源：poker_pack（CC0，筹码/桌），Kenney UI Pack（CC0，按钮），Kenney Game Icons（CC0，标记图标），[SVG-cards](https://github.com/htdebeer/SVG-cards)（LGPL-2.1，牌面）。

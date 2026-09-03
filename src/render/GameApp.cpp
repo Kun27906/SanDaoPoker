@@ -1,5 +1,6 @@
 #include "render/GameApp.h"
 #include "render/AssetManager.h"
+#include "render/SoundManager.h"
 #include "ui/FontUtil.h"
 
 namespace {
@@ -17,6 +18,8 @@ GameApp::GameApp()
       sceneManager_(window_) {
     // 加载全部素材(牌图/牌背/背景/按钮图);失败不致命,相关位置显示占位
     AssetManager::instance().loadAll();
+    // 加载全部音效(发牌/翻牌/筹码/胜负/按钮点击;失败静默)
+    SoundManager::instance().loadAll();
     window_.setFramerateLimit(60);
 }
 

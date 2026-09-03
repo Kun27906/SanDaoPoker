@@ -1,5 +1,6 @@
 #include "ui/Button.h"
 #include "ui/FontUtil.h"
+#include "render/SoundManager.h"
 
 Button::Button(const std::string& text, const sf::Vector2f& pos, const sf::Vector2f& size) {
     setPosition(pos);
@@ -53,6 +54,7 @@ void Button::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     // 左键按下瞬间触发回调
     if (e.type == sf::Event::MouseButtonPressed &&
         e.mouseButton.button == sf::Mouse::Left && hovered_) {
+        SoundManager::instance().playClick();  // 按钮点击音
         if (callback_) {
             callback_();
         }

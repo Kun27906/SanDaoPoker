@@ -4,6 +4,7 @@
 #include "render/SceneArrange.h"
 #include "render/SceneBattle.h"
 #include "render/SceneResult.h"
+#include "render/SoundManager.h"
 
 SceneManager::SceneManager(sf::RenderWindow& window) : window_(window) {
     current_ = createScene(SceneId::Menu);
@@ -13,6 +14,13 @@ void SceneManager::changeTo(SceneId id) {
     if (id == currentId_ && current_) return;
     currentId_ = id;
     current_ = createScene(id);
+    // 场景切换音效:进组牌=发牌声,进比牌=翻牌声,进结算=筹码声
+    switch (id) {
+        case SceneId::Arrange: SoundManager::instance().playDeal(); break;
+        case SceneId::Battle:  SoundManager::instance().playFlip(); break;
+        case SceneId::Result:  SoundManager::instance().playChip(); break;
+        default: break;
+    }
 }
 
 std::unique_ptr<Scene> SceneManager::createScene(SceneId id) {
