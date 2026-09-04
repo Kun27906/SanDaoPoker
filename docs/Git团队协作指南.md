@@ -144,12 +144,25 @@ git push
 
 | 问题 | 原因 | 解决 |
 |---|---|---|
-| `Permission denied (publickey)` | SSH 公钥没加 | 重新执行"配置 SSH"步骤② |
-| `failed to push some refs` | 别人先推了，你本地落后 | `git pull` → 再 `git push` |
-| 改错文件想撤销 | — | 未提交：`git checkout -- 文件名`；已提交未推送：`git reset --soft HEAD~1` |
-| 不小心提交到 main | 手滑 | `git reset --soft HEAD~1` 撤回，切回自己分支再提交 |
-| push 提示要用户名密码 | 用的 HTTPS | 改用 SSH 方式（重新 clone 或改 remote） |
-| `git pull` 后代码没了？ | 不会，pull 只会增加/更新 | `git log` 查看历史，`git checkout <commit>` 找回 |
+| `Permission denied (publickey)` | SSH 公钥没加/加错账号 | 重新执行"配置 SSH"步骤②；确认公钥加到了**有仓库权限的账号** |
+| push 提示 `failed to push some refs` | 别人先推了，你本地落后 | `git pull` → 再 `git push` |
+| push 提示 `Permission to xxx denied` | 你的账号不是仓库协作者 | 让仓库所有者把你加为 **Collaborators(Write 权限)** |
+| `git pull` 报"本地有改动会被覆盖" | 有未提交的修改 | 先 `git commit` 存起来，或 `git stash`(暂存)再 pull |
+| 改错文件想撤销(未提交) | — | `git checkout -- 文件名` 或 `git restore 文件名` |
+| `git add` 加多了文件 | 手滑全选了 | `git reset HEAD 文件名`(从暂存区移出,改动保留) |
+| 提交信息写错了 | 手滑 | `git commit --amend` 重新编辑(仅未推送时) |
+| 不小心提交到 main | 手滑 | `git reset --soft HEAD~1` 撤回提交,切回自己分支重新提交 |
+| 想撤销最近一次提交但**保留改动** | — | `git reset --soft HEAD~1` |
+| 想彻底删除最近一次提交(改动也删) | — | `git reset --hard HEAD~1` ⚠️ 危险,改动不可恢复 |
+| 自己的分支落后 main 很多 | 别人合并了功能 | 在自己分支上:`git fetch` → `git merge origin/main`(有冲突按"四、冲突处理") |
+| 改到一半想临时放下,去处理别的 | — | `git stash` 暂存 → 忙完 `git stash pop` 恢复 |
+| 误删了文件想找回(已提交过) | — | `git checkout -- 文件名` 或从历史 `git checkout <commit> -- 文件名` |
+| 想看项目历史 | — | `git log --oneline`(带图:`--graph`) |
+| 看某个文件谁改的/改了什么 | — | `git log -- <文件名>` → `git show <commit>` |
+| 远程分支被删了,本地还在 | 别人清理了分支 | `git fetch --prune` 同步;本地分支可 `git branch -d 分支名` 删除 |
+| push 提示要用户名密码 | 用的 HTTPS | 改用 SSH(重新 clone 或 `git remote set-url origin git@github.com:...`) |
+| 编译不过(报头文件缺失) | 别人改了接口,你本地旧 | `git pull` 拉最新;改接口的成员需在群里报备(见六-5) |
+| 素材/画面是旧的 | build/assets 是旧快照 | 见 `docs/重新编译流程.md`:删 build 目录重新编译 |
 
 ---
 
