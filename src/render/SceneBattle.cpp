@@ -9,26 +9,24 @@ namespace {
 constexpr unsigned WW = 1280;
 constexpr unsigned WH = 800;
 
-// 每家的牌面布局: [玩家] 起始点 + scale + 行距
-struct Layout {
-    float x0, y0;        // 第一张牌(头道第1张)的左上角
-    float scale;         // 牌缩放
-    float dx, dy;        // 列距/行距
-    float nameX, nameY;  // 玩家名位置(居中)
+// 各玩家当前道 3 张牌的位置(左上角 x0 + pos*dx, y)
+struct SeatPos {
+    float x0, y0, dx, scale;   // 3 张横排
+    float nameX, nameY;        // 名字位置(居中)
 };
-// 上=players[1] 左=players[2] 右=players[3] 下=players[0]
-const Layout LAYOUTS[4] = {
-    { 470.f, 585.f, 0.34f, 74.f, 100.f, 640.f, 565.f },  // [0] 下: 你
-    { 520.f, 70.f,  0.24f, 56.f, 76.f,  640.f, 45.f  },  // [1] 上: AI-1
-    { 70.f,  300.f, 0.24f, 56.f, 76.f,  135.f, 278.f },  // [2] 左: AI-2
-    { 1050.f, 300.f, 0.24f, 56.f, 76.f, 1115.f, 278.f }  // [3] 右: AI-3
+// [0]=你(下,大牌) [1]=AI-1(上) [2]=AI-2(左) [3]=AI-3(右)
+const SeatPos SEATS[4] = {
+    { 470.f, 535.f, 120.f, 0.50f, 640.f, 515.f },  // 你: 100x140(与组牌一致)
+    { 535.f,  65.f,  75.f, 0.30f, 640.f,  45.f },  // 上
+    {  45.f, 305.f,  65.f, 0.30f, 150.f, 285.f },  // 左
+    { 1035.f, 305.f, 65.f, 0.30f, 1140.f, 285.f }  // 右
 };
-
 const char* LINE_NAMES[3] = {"头道", "中道", "尾道"};
+constexpr float FLIP_DELAY = 0.8f;    // 牌背展示时间
+constexpr float HOLD_TIME = 2.5f;     // 结果停留时间
 }
 
 SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
-    // 背景
     if (const sf::Texture* bg = AssetManager::instance().background()) {
         bg_.setTexture(*bg);
         float sx = static_cast<float>(WW) / bg->getSize().x;
@@ -36,100 +34,119 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
         bg_.setScale(sx, sy);
     }
 
-    title_.setText("比牌");
-    title_.setCharacterSize(36);
-    title_.setColor(sf::Color::White);
-    title_.centerOrigin();
-    title_.setPosition(sf::Vector2f(WW / 2.f, 24.f));
-
-    // 四家牌面:初始全部牌背
     Room* room = mgr_->room.get();
-    const int pc = room ? room->playerCount : 0;
-    for (int p = 0; p < 4 && p < pc; p++) {
-        const Layout& L = LAYOUTS[p];
-        for (int line = 0; line < 3; line++) {
-            for (int pos = 0; pos < 3; pos++) {
-                CardSprite& cs = cardSprites_[p][line][pos];
-                cs.setScale(L.scale);
-                cs.setPosition(sf::Vector2f(L.x0 + pos * L.dx, L.y0 + line * L.dy));
-                cs.setFaceUp(false);   // 初始牌背,逐道揭示
-            }
-        }
-        // 名字与筹码
-        const char* displayName = (p == 0) ? "你" : room->players[p].name.c_str();
-        nameTags_[p].setText(displayName);
-        nameTags_[p].setCharacterSize(20);
-        nameTags_[p].setColor(sf::Color::White);
-        nameTags_[p].centerOrigin();
-        nameTags_[p].setPosition(sf::Vector2f(L.nameX, L.nameY));
+    playerCount_ = room ? room->playerCount : 0;
 
-        char chip[32];
-        std::snprintf(chip, sizeof(chip), "筹码:%d", room->players[p].chips);
-        chipTags_[p].setText(chip);
-        chipTags_[p].setCharacterSize(16);
-        chipTags_[p].setColor(sf::Color(255, 230, 150));
-        chipTags_[p].centerOrigin();
-        chipTags_[p].setPosition(sf::Vector2f(L.nameX, L.nameY + 24.f));
+    // 标题
+    char buf[64];
+    std::snprintf(buf, sizeof(buf), "第 %d 局 · 比牌", room->currentRound);
+    title_.setText(buf);
+    title_.setCharacterSize(30);
+    title_.setColor(sf::Color(255, 215, 0));
+    title_.centerOrigin();
+    title_.setPosition(sf::Vector2f(WW / 2.f, 22.f));
+
+    // 玩家名标签
+    for (int p = 0; p < 4 && p < playerCount_; p++) {
+        const char* dn = (p == 0) ? "你" : room->players[p].name.c_str();
+        nameTags_[p].setText(dn);
+        nameTags_[p].setCharacterSize(p == 0 ? 22 : 18);
+        nameTags_[p].setColor(sf::Color(255, 235, 170));
+        nameTags_[p].centerOrigin();
+        nameTags_[p].setPosition(sf::Vector2f(SEATS[p].nameX, SEATS[p].nameY));
     }
 
-    // 中央信息
-    info_.setText("正在比牌...");
-    info_.setCharacterSize(26);
-    info_.setColor(sf::Color(255, 255, 255));
+    // 中央信息(金色大字)
+    info_.setCharacterSize(32);
+    info_.setColor(sf::Color(255, 200, 60));
     info_.centerOrigin();
-    info_.setPosition(sf::Vector2f(640.f, 380.f));
+    info_.setPosition(sf::Vector2f(640.f, 235.f));
 
-    // 查看结算按钮(动画完成后可用)
+    lineTag_.setCharacterSize(20);
+    lineTag_.setColor(sf::Color(255, 230, 150));
+    lineTag_.centerOrigin();
+    lineTag_.setPosition(sf::Vector2f(640.f, 285.f));
+
+    // 牌精灵初始化位置(内容由 loadLine 装载)
+    for (int p = 0; p < 4; p++) {
+        for (int pos = 0; pos < 3; pos++) {
+            cards_[p][pos].setScale(SEATS[p].scale);
+            cards_[p][pos].setPosition(
+                sf::Vector2f(SEATS[p].x0 + pos * SEATS[p].dx, SEATS[p].y0));
+        }
+    }
+
+    // 查看结算按钮
     btnNext_.setText("查看结算");
-    btnNext_.setPosition(sf::Vector2f(470.f, 520.f));
-    btnNext_.setSize(sf::Vector2f(340.f, 60.f));
+    btnNext_.setPosition(sf::Vector2f(490.f, 700.f));
+    btnNext_.setSize(sf::Vector2f(300.f, 55.f));
     btnNext_.setCallback([this]() { mgr_->changeTo(SceneId::Result); });
+
+    // 从头道开始:先展示牌背
+    char tag[32];
+    std::snprintf(tag, sizeof(tag), "%s · 1/3", LINE_NAMES[0]);
+    lineTag_.setText(tag);
+    info_.setText("比牌开始!");
+    loadLine(0, false);
 }
 
-void SceneBattle::revealNext() {
-    revealLine_++;
-    if (revealLine_ >= 3) {
-        // 三道全部揭示完毕
-        info_.setText("比牌完成! 点击[查看结算]");
+void SceneBattle::loadLine(int lineId, bool faceUp) {
+    Room* room = mgr_->room.get();
+    for (int p = 0; p < 4 && p < playerCount_; p++) {
+        for (int pos = 0; pos < 3; pos++) {
+            Card c = room->players[p].lines[lineId][pos];
+            cards_[p][pos].setCard(c);
+            cards_[p][pos].setFaceUp(faceUp);
+        }
+    }
+    revealed_ = faceUp;
+}
+
+void SceneBattle::flipUp() {
+    Room* room = mgr_->room.get();
+    // 翻正当前道的牌
+    for (int p = 0; p < 4 && p < playerCount_; p++) {
+        for (int pos = 0; pos < 3; pos++) {
+            cards_[p][pos].setFaceUp(true);
+        }
+    }
+    revealed_ = true;
+
+    // 计算该道赢家 + 牌型(纯展示)
+    int winners[MAX_PLAYERS];
+    int cnt = Round::findWinners(room->players, playerCount_, showLine_, winners);
+    char buf[96];
+    if (cnt == 1) {
+        int w = winners[0];
+        std::vector<Card> three = {
+            room->players[w].lines[showLine_][0],
+            room->players[w].lines[showLine_][1],
+            room->players[w].lines[showLine_][2]
+        };
+        HandResult r = HandEvaluator::evaluate(three);
+        const char* dn = (w == 0) ? "你" : room->players[w].name.c_str();
+        std::snprintf(buf, sizeof(buf), "%s: %s 赢 (%s)",
+                      LINE_NAMES[showLine_], dn, r.name().c_str());
+    } else {
+        std::snprintf(buf, sizeof(buf), "%s: %d 家打平!", LINE_NAMES[showLine_], cnt);
+    }
+    info_.setText(buf);
+}
+
+void SceneBattle::advance() {
+    showLine_++;
+    if (showLine_ >= 3) {
+        // 三道全部比完
+        info_.setText("比牌完成!");
+        lineTag_.setText("三组比完 · 查看结算");
         showNext_ = true;
         return;
     }
-
-    // 翻开当前道的所有玩家牌
-    Room* room = mgr_->room.get();
-    const int pc = room ? room->playerCount : 0;
-    for (int p = 0; p < 4 && p < pc; p++) {
-        for (int pos = 0; pos < 3; pos++) {
-            // 从 room 中读取真实牌面(Arrange 阶段已摆好)
-            Card c = room->players[p].lines[revealLine_][pos];
-            cardSprites_[p][revealLine_][pos].setCard(c);
-            cardSprites_[p][revealLine_][pos].setFaceUp(true);
-        }
-    }
-    lineRevealed_[revealLine_] = true;
-
-    // 计算该道赢家(纯展示,不结算)
-    if (room) {
-        int winners[MAX_PLAYERS];
-        int cnt = Round::findWinners(room->players, pc, revealLine_, winners);
-        char buf[96];
-        if (cnt == 1) {
-            int w = winners[0];
-            std::vector<Card> three = {
-                room->players[w].lines[revealLine_][0],
-                room->players[w].lines[revealLine_][1],
-                room->players[w].lines[revealLine_][2]
-            };
-            HandResult r = HandEvaluator::evaluate(three);
-            const char* dn = (w == 0) ? "你" : room->players[w].name.c_str();
-            std::snprintf(buf, sizeof(buf), "%s比牌: %s 赢 (%s)",
-                          LINE_NAMES[revealLine_], dn, r.name().c_str());
-        } else {
-            std::snprintf(buf, sizeof(buf), "%s比牌: %d 家打平!",
-                          LINE_NAMES[revealLine_], cnt);
-        }
-        info_.setText(buf);
-    }
+    char tag[32];
+    std::snprintf(tag, sizeof(tag), "%s · %d/3", LINE_NAMES[showLine_], showLine_ + 1);
+    lineTag_.setText(tag);
+    info_.setText("");
+    loadLine(showLine_, false);   // 下一道先牌背
 }
 
 void SceneBattle::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
@@ -137,31 +154,31 @@ void SceneBattle::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
 }
 
 void SceneBattle::update(float dt) {
-    if (!allRevealed()) {
-        animTimer_ += dt;
-        if (animTimer_ >= 1.0f) {   // 每 1 秒揭示一道
-            animTimer_ = 0.f;
-            revealNext();
-        }
+    if (showNext_) return;
+    timer_ += dt;
+    if (phase_ == 0 && timer_ >= FLIP_DELAY) {
+        timer_ = 0.f;
+        phase_ = 1;
+        flipUp();
+    } else if (phase_ == 1 && timer_ >= HOLD_TIME) {
+        timer_ = 0.f;
+        phase_ = 0;
+        advance();
     }
 }
 
 void SceneBattle::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
     title_.draw(win);
+    info_.draw(win);
+    lineTag_.draw(win);
 
-    // 四家牌面:已揭示的道显示正面,未揭示显示牌背
-    Room* room = mgr_->room.get();
-    const int pc = room ? room->playerCount : 0;
-    for (int p = 0; p < 4 && p < pc; p++) {
+    for (int p = 0; p < 4 && p < playerCount_; p++) {
         nameTags_[p].draw(win);
-        chipTags_[p].draw(win);
-        for (int line = 0; line < 3; line++) {
-            for (int pos = 0; pos < 3; pos++) {
-                cardSprites_[p][line][pos].draw(win);
-            }
+        for (int pos = 0; pos < 3; pos++) {
+            cards_[p][pos].draw(win);
         }
     }
-    info_.draw(win);
+
     if (showNext_) btnNext_.draw(win);
 }

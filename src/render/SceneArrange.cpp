@@ -52,14 +52,13 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
         bg_.setScale(sx, sy);
     }
 
-    // 标题:房间名 + 第几局
+    // 标题:第几局 + 底注(金色;房间名已在主菜单显示,这里从简)
     char title[64];
-    std::snprintf(title, sizeof(title), "%s - 第%d局(底注%d)",
-                  mgr_->room->config.name, mgr_->room->currentRound,
-                  mgr_->room->config.ante);
+    std::snprintf(title, sizeof(title), "第 %d 局 · 底注 %d",
+                  mgr_->room->currentRound, mgr_->room->config.ante);
     title_.setText(title);
-    title_.setCharacterSize(30);
-    title_.setColor(sf::Color::White);
+    title_.setCharacterSize(32);
+    title_.setColor(sf::Color(255, 215, 0));
     title_.centerOrigin();
     title_.setPosition(sf::Vector2f(WW / 2.f, 36.f));
 

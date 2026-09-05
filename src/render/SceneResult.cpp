@@ -24,13 +24,13 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
     std::snprintf(title, sizeof(title), "第 %d 局结算", mgr_->room->currentRound);
     title_.setText(title);
     title_.setCharacterSize(34);
-    title_.setColor(sf::Color::White);
+    title_.setColor(sf::Color(255, 215, 0));   // 金色(背景对比强烈)
     title_.centerOrigin();
     title_.setPosition(sf::Vector2f(WW / 2.f, 40.f));
 
     // 本局结果文字(多行,左列,左上角定位)
     resultText_.setCharacterSize(20);
-    resultText_.setColor(sf::Color(235, 235, 235));
+    resultText_.setColor(sf::Color(255, 190, 80));   // 亮橙(替代近白灰)
     resultText_.setPosition(sf::Vector2f(90.f, 110.f));
 
     // 总账排名(右列)
@@ -76,9 +76,9 @@ void SceneResult::doSettle() {
 
 void SceneResult::nextRound() {
     if (finished_) return;  // 比赛已结束,不能开新局
-    if (mgr_->room->startNewRound()) {
-        mgr_->changeTo(SceneId::Arrange);
-    }
+    // 注意:不能在这里调 startNewRound —— SceneArrange 构造函数会统一开局,
+    // 若这里也开一次,每局 currentRound 会 +2(出现 1->3->5 的奇数局 bug)
+    mgr_->changeTo(SceneId::Arrange);
 }
 
 void SceneResult::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {

@@ -8,13 +8,9 @@ namespace {
 constexpr unsigned WW = 1280;
 constexpr unsigned WH = 800;
 
-// 房间按钮文字: "4人·休闲房 (4人/注2/3局)"
+// 房间按钮文字:直接用房间名(已含人数/注金/局数,如 "4人·注500·6局")
 std::string roomLabel(int i) {
-    const RoomConfig& c = ROOM_CONFIGS[i];
-    char buf[64];
-    std::snprintf(buf, sizeof(buf), "%s (%d人/注%d/%d局)",
-                  c.name, c.players, c.ante, c.rounds);
-    return std::string(buf);
+    return std::string(ROOM_CONFIGS[i].name);
 }
 }
 
@@ -33,21 +29,21 @@ SceneMenu::SceneMenu(SceneManager* mgr) : mgr_(mgr) {
     title_.centerOrigin();
     title_.setPosition(sf::Vector2f(WW / 2.f, 50.f));
 
-    subtitle_.setText("点击房间选中, 然后点[开始游戏]");
+    subtitle_.setText("点击房间选中(默认4人·注500·6局), 然后点[开始游戏]");
     subtitle_.setCharacterSize(18);
     subtitle_.setColor(sf::Color(210, 210, 210));
     subtitle_.centerOrigin();
     subtitle_.setPosition(sf::Vector2f(WW / 2.f, 92.f));
 
-    // 16 个房间按钮: 两列 x 8 行
-    for (int i = 0; i < 16; i++) {
-        int col = i / 8;              // 0=左列 1=右列
-        int row = i % 8;              // 0..7
-        float x = 150.f + col * 540.f;
-        float y = 140.f + row * 66.f;
+    // 22 个房间按钮: 两列 x 11 行
+    for (int i = 0; i < 22; i++) {
+        int col = i / 11;              // 0=左列 1=右列
+        int row = i % 11;              // 0..10
+        float x = 110.f + col * 560.f;
+        float y = 128.f + row * 48.f;
         roomBtns_[i].setText(roomLabel(i));
         roomBtns_[i].setPosition(sf::Vector2f(x, y));
-        roomBtns_[i].setSize(sf::Vector2f(500.f, 54.f));
+        roomBtns_[i].setSize(sf::Vector2f(520.f, 40.f));
         roomBtns_[i].setCharacterSize(20);
         roomBtns_[i].setCallback([this, i]() {
             selected_ = i;
@@ -58,13 +54,13 @@ SceneMenu::SceneMenu(SceneManager* mgr) : mgr_(mgr) {
 
     // 开始游戏按钮
     btnStart_.setText("开始游戏");
-    btnStart_.setPosition(sf::Vector2f(440.f, 700.f));
+    btnStart_.setPosition(sf::Vector2f(440.f, 690.f));
     btnStart_.setSize(sf::Vector2f(400.f, 60.f));
     btnStart_.setCallback([this]() { startGame(); });
 }
 
 void SceneMenu::refreshRoomButtonColors() {
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 22; i++) {
         if (i == selected_) {
             // 选中:绿色系
             roomBtns_[i].setColors(sf::Color(46, 160, 80), sf::Color(70, 190, 100), sf::Color(30, 120, 55));
