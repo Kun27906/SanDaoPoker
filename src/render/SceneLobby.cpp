@@ -62,18 +62,19 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
     // 破产补充弹窗(样式 + 进入大厅时检测余额<100)
     overlay_.setSize(sf::Vector2f(WW, WH));
     overlay_.setFillColor(sf::Color(0, 0, 0, 160));
-    dialog_.setSize(sf::Vector2f(680.f, 220.f));
-    dialog_.setPosition(sf::Vector2f((WW - 680.f) / 2.f, (WH - 220.f) / 2.f));
+    dialog_.setSize(sf::Vector2f(720.f, 240.f));
+    dialog_.setPosition(sf::Vector2f((WW - 720.f) / 2.f, (WH - 240.f) / 2.f));
     dialog_.setFillColor(sf::Color(30, 40, 70));
     dialog_.setOutlineColor(sf::Color(255, 215, 0));
     dialog_.setOutlineThickness(3.f);
-    topUpText_.setText("您已破产！已为您注入初始资金至500筹码，祝您再接再厉！");
+    // 文案两行, 整块居中于弹窗中央偏上(下方留给按钮)
+    topUpText_.setText("您已破产！已为您注入初始资金至500筹码，\n祝您再接再厉！");
     topUpText_.setCharacterSize(24);
     topUpText_.setColor(sf::Color(255, 220, 130));
     topUpText_.centerOrigin();
-    topUpText_.setPosition(sf::Vector2f(WW / 2.f, (WH - 220.f) / 2.f + 60.f));
+    topUpText_.setPosition(sf::Vector2f(WW / 2.f, (WH - 240.f) / 2.f + 88.f));
     btnTopUpOk_.setText("确定");
-    btnTopUpOk_.setPosition(sf::Vector2f(WW / 2.f - 90.f, (WH - 220.f) / 2.f + 140.f));
+    btnTopUpOk_.setPosition(sf::Vector2f(WW / 2.f - 90.f, (WH - 240.f) / 2.f + 165.f));
     btnTopUpOk_.setSize(sf::Vector2f(180.f, 50.f));
     btnTopUpOk_.setCallback([this]() {
         Account::instance().topUp();   // 补至 500

@@ -57,24 +57,24 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
 
     chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
 
-    // 踢出弹窗样式
+    // 踢出弹窗样式(弹窗宽 680, 文案两行)
     overlay_.setSize(sf::Vector2f(WW, WH));
     overlay_.setFillColor(sf::Color(0, 0, 0, 160));
-    dialog_.setSize(sf::Vector2f(620.f, 240.f));
-    dialog_.setPosition(sf::Vector2f((WW - 620.f) / 2.f, (WH - 240.f) / 2.f));
+    dialog_.setSize(sf::Vector2f(680.f, 250.f));
+    dialog_.setPosition(sf::Vector2f((WW - 680.f) / 2.f, (WH - 250.f) / 2.f));
     dialog_.setFillColor(sf::Color(30, 40, 70));
     dialog_.setOutlineColor(C_GOLD);
     dialog_.setOutlineThickness(3.f);
     dialogText_.setCharacterSize(24);
     dialogText_.setColor(sf::Color::White);
     dialogText_.centerOrigin();
-    dialogText_.setPosition(sf::Vector2f(WW / 2.f, (WH - 240.f) / 2.f + 50.f));
+    dialogText_.setPosition(sf::Vector2f(WW / 2.f, (WH - 250.f) / 2.f + 78.f));
     dialogSub_.setCharacterSize(18);
     dialogSub_.setColor(sf::Color(230, 200, 150));
     dialogSub_.centerOrigin();
-    dialogSub_.setPosition(sf::Vector2f(WW / 2.f, (WH - 240.f) / 2.f + 95.f));
+    dialogSub_.setPosition(sf::Vector2f(WW / 2.f, (WH - 250.f) / 2.f + 128.f));
     btnDialogOk_.setText("确定");
-    btnDialogOk_.setPosition(sf::Vector2f(WW / 2.f - 100.f, (WH - 240.f) / 2.f + 155.f));
+    btnDialogOk_.setPosition(sf::Vector2f(WW / 2.f - 100.f, (WH - 250.f) / 2.f + 172.f));
     btnDialogOk_.setSize(sf::Vector2f(200.f, 52.f));
     btnDialogOk_.setCallback([this]() { confirmKickOut(); });
 
@@ -104,10 +104,10 @@ void SceneResult::settleAndSync() {
         if (room->players[0].chips < needNext) {
             kickPending_ = true;
             final_ = true;   // 本场结束(被踢出), 不显示下一局/逃跑
-            char t[96];
-            std::snprintf(t, sizeof(t), "您的筹码 (%d) 不足以支付下一局底注 (%d)，您已被踢出本场对局",
+            char t[128];
+            std::snprintf(t, sizeof(t), "您的筹码 (%d) 不足以支付下一局底注 (%d)，\n您已被踢出本场对局",
                           room->players[0].chips, needNext);
-            dialogText_.setText(t);
+            dialogText_.setText(t);   // 居中模式下 setText 自动保持居中
             dialogSub_.setText("本次不扣除逃跑费用 · 点击确定返回大厅");
         }
     }
