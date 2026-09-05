@@ -4,6 +4,7 @@
 #include "ui/Button.h"
 #include "ui/TextBox.h"
 #include "ui/CountdownBar.h"
+#include "ui/ChipBar.h"
 #include <array>
 
 // ====== 组牌界面(阶段5: 分三道) ======
@@ -44,4 +45,5 @@ private:
     int currentLine_ = 0;              // 当前选中的道(0头/1中/2尾)
     bool submitted_ = false;           // 已交牌(防重复)
     bool timeoutFired_ = false;        // 超时自动交牌只触发一次(场景实例级,非static)
+    ChipBar chipBar_;                  // 右上角账号筹码
 };

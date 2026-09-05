@@ -26,6 +26,11 @@ public:
     int pools[3] = {0, 0, 0};     // 三个小池（头道/中道/尾道）
     int currentRound = 0;         // 第几局（从 1 开始）
 
+    // ===== 每局盈亏追踪(成员C: 供结算界面显示每局盈亏/最终明细) =====
+    int roundStartChips[MAX_PLAYERS] = {0};    // 本局开始前筹码快照(startNewRound 时记)
+    int roundHistory[32][MAX_PLAYERS] = {{0}}; // 每局盈亏历史(settle 后记, 行=局序)
+    int historyCount = 0;                      // 已结算局数
+
     // 构造函数：默认选 "4人·休闲房"（底注2、3轮）
     Room();
 

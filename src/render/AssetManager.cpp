@@ -114,6 +114,17 @@ bool AssetManager::loadMiscTextures() {
             std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", path);
         }
     }
+    // 筹码图标(chip_1/5/10/50/100)
+    {
+        const int vals[5] = {1, 5, 10, 50, 100};
+        for (int i = 0; i < 5; i++) {
+            char path[128];
+            std::snprintf(path, sizeof(path), "assets/ui/chips/chip_%d.png", vals[i]);
+            if (!chipTex_[i].loadFromFile(path)) {
+                std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", path);
+            }
+        }
+    }
     return true;
 }
 
@@ -131,6 +142,11 @@ const sf::Texture* AssetManager::cardTexture(Suit s, Rank r) const {
     if (si < 0 || si > 3) return nullptr;
     const sf::Texture& t = cardTex_[si][idx];
     return t.getSize().x > 0 ? &t : nullptr;
+}
+
+const sf::Texture* AssetManager::chipTexture(int idx) const {
+    if (idx < 0 || idx > 4) return nullptr;
+    return chipTex_[idx].getSize().x > 0 ? &chipTex_[idx] : nullptr;
 }
 
 const sf::Texture* AssetManager::backTexture(int index) const {

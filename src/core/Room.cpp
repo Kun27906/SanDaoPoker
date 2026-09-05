@@ -18,6 +18,7 @@ bool Room::setRoomConfig(int configIndex) {
     config = ROOM_CONFIGS[configIndex];
     playerCount = 0;          // 人清空，重新加人
     currentRound = 0;         // 局数清零
+    historyCount = 0;         // 盈亏历史清零
     pools[0] = pools[1] = pools[2] = 0;
     for (int i = 0; i < MAX_PLAYERS; i++) {
         players[i] = Player();  // 重建玩家（筹码回到开局值）
@@ -45,6 +46,10 @@ bool Room::startNewRound() {
         return false;  // 人数没满，不能开局
     }
     currentRound++;                             // 局数 +1
+    // 快照本局开始前筹码(收底注前) = 本局盈亏的基准线
+    for (int i = 0; i < playerCount; i++) {
+        roundStartChips[i] = players[i].chips;
+    }
     Round::deal(players, playerCount, deck);    // 洗牌 + 发牌
     Round::collectAnte(players, playerCount, config.ante, pools);  // 收底注，进三小池
     return true;
@@ -57,7 +62,15 @@ std::string Room::settleRound() {
     if (!Round::allArranged(players, playerCount)) {
         return "还有人没交牌，不能比牌！请先摆好牌。\n";
     }
-    return Round::settle(players, playerCount, pools);
+    std::string text = Round::settle(players, playerCount, pools);
+    // 记录本局每玩家盈亏到历史(供最终结算明细)
+    if (historyCount < 32) {
+        for (int i = 0; i < playerCount; i++) {
+            roundHistory[historyCount][i] = players[i].chips - roundStartChips[i];
+        }
+        historyCount++;
+    }
+    return text;
 }
 
 // ====== 轮次打完了吗？ ======
@@ -100,6 +113,7 @@ std::string Room::getRanking() const {
 
 void Room::resetGame() {
     currentRound = 0;
+    historyCount = 0;
     pools[0] = pools[1] = pools[2] = 0;
     for (int i = 0; i < playerCount; i++) {
         players[i] = Player(players[i].name, players[i].isAI);  // 筹码重置

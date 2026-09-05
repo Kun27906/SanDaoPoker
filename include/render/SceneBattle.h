@@ -33,11 +33,9 @@ private:
     TextBox lineTag_;      // 当前道 "头道 1/3"
     std::array<std::array<CardSprite, 3>, 4> cards_;   // [玩家][位置] 当前道 3 张
     std::array<TextBox, 4> nameTags_;                  // 玩家名
-    Button btnNext_;       // 查看结算
     int playerCount_ = 0;
     int showLine_ = 0;     // 当前比牌道 0..2
-    int phase_ = 0;        // 0=等翻正 1=展示结果
+    int phase_ = 0;        // 0=等翻正 1=展示结果 2=比完等3秒自动进结算
     float timer_ = 0.f;
-    bool showNext_ = false;    // 三道比完,显示按钮
-    bool revealed_ = false;    // 当前道已翻正
+    bool showNext_ = false;    // 三道比完,3 秒后自动进结算
 };

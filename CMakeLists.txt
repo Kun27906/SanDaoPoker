@@ -60,11 +60,14 @@ set(AI_SOURCES
 )
 
 set(RENDER_SOURCES
+    src/render/Account.cpp
     src/render/AssetManager.cpp
     src/render/CardSprite.cpp
     src/render/GameApp.cpp
     src/render/SceneManager.cpp
-    src/render/SceneMenu.cpp
+    src/render/SceneTitle.cpp
+    src/render/SceneLobby.cpp
+    src/render/SceneRoomSelect.cpp
     src/render/SceneArrange.cpp
     src/render/SceneBattle.cpp
     src/render/SceneResult.cpp
@@ -75,11 +78,15 @@ set(UI_SOURCES
     src/ui/Button.cpp
     src/ui/TextBox.cpp
     src/ui/CountdownBar.cpp
+    src/ui/ChipBar.cpp
 )
 
 # ------------------------------------------------------------
 # 可执行目标
 # ------------------------------------------------------------
+# exe 直接生成在项目根目录(用户双击根目录 SanDaoPoker.exe 即可启动;
+# 运行目录=项目根, assets/ 与 game_data/ 都按根目录相对路径访问)
+set(SDP_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(SanDaoPoker
     src/main.cpp
     ${CORE_SOURCES}
@@ -87,6 +94,8 @@ add_executable(SanDaoPoker
     ${RENDER_SOURCES}
     ${UI_SOURCES}
 )
+set_target_properties(SanDaoPoker PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${SDP_OUTPUT_DIR})
 
 target_include_directories(SanDaoPoker PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include      # 公共头文件(include/<模块>/)
@@ -122,14 +131,16 @@ endif()
 
 # ------------------------------------------------------------
 # 资源拷贝:构建后自动将 assets/ 复制到可执行文件所在目录
-# (保证 exe 在任意目录运行都能找到素材)
+# (exe 在项目根时 assets 已在根目录, 跳过自拷贝; 其他输出目录才拷贝)
 # ------------------------------------------------------------
-add_custom_command(TARGET SanDaoPoker POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_CURRENT_SOURCE_DIR}/assets"
-            "$<TARGET_FILE_DIR:SanDaoPoker>/assets"
-    COMMENT "Copying assets to output directory"
-)
+if(NOT "${SDP_OUTPUT_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_custom_command(TARGET SanDaoPoker POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+                "$<TARGET_FILE_DIR:SanDaoPoker>/assets"
+        COMMENT "Copying assets to output directory"
+    )
+endif()
 
 # ------------------------------------------------------------
 # 编译器警告
