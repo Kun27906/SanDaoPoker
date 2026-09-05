@@ -24,7 +24,7 @@ private:
     sf::Sprite bg_;
     TextBox title_;
     TextBox subtitle_;
-    std::array<Button, 16> roomBtns_;  // 16 个房间按钮(两列)
+    std::array<Button, 22> roomBtns_;  // 22 个房间按钮(两列)
     Button btnStart_;                  // 开始游戏
-    int selected_ = 7;                 // 默认选中"4人·休闲房"(下标7)
+    int selected_ = 7;                 // 默认选中"4人·注500·6局"(下标7)
 };
