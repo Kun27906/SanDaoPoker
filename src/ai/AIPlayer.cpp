@@ -194,7 +194,7 @@ float AIPlayer::groupScore(const Card* hand, int idx0, int idx1, int idx2, int o
 // ====== 枚举 9 张牌的全部 1680 种分组 ======
 // 手牌下标 0..8, 头道=前3个, 中道=中间3个, 尾道=最后3个
 template <typename Fn>
-void AIPlayer::forEachSplit(const Card* hand, Fn fn) {
+void AIPlayer::forEachSplit(const Card* /*hand*/, Fn fn) {   // hand 未使用(枚举只依赖下标)
     int order[9];
     // 枚举头道 (C(9,3)=84)
     for (int a = 0; a < 9; a++) {
@@ -282,7 +282,6 @@ void AIPlayer::monteCarloChoose(const Card* hand, int opponents, int order[9], i
         for (int i = 0; i < 54; i++) if (!used[i]) deckIds[n++] = i;
         // 洗牌取前 opponents*9
         std::shuffle(deckIds, deckIds + n, rng);
-        int total = opponents * 9;
         std::vector<Card> oppHands[6];   // 最多 6 个对手? opponents<=5
         for (int o = 0; o < opponents; o++) {
             for (int k = 0; k < 9; k++) {
