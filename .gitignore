@@ -36,3 +36,6 @@ build_tests/
 
 # ===== 本地玩家存档(账号数据,不入库) =====
 game_data/
+
+# ===== 发布目录(根目录 bin/: exe+DLL+assets 拷贝产物) =====
+/bin/

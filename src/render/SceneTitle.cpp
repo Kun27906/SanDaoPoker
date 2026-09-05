@@ -22,7 +22,7 @@ SceneTitle::SceneTitle(SceneManager* mgr) : mgr_(mgr) {
 
     subtitle_.setText("经典比牌 · 2~6人 · 本地账号");
     subtitle_.setCharacterSize(22);
-    subtitle_.setColor(sf::Color(230, 230, 230));
+    subtitle_.setColor(sf::Color(255, 170, 60));   // 亮橙(与背景高对比)
     subtitle_.centerOrigin();
     subtitle_.setPosition(sf::Vector2f(WW / 2.f, 310.f));
 
