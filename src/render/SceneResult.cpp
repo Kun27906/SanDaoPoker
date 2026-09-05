@@ -57,28 +57,31 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
 
     chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
 
-    // 弹窗样式
+    // 踢出弹窗样式
     overlay_.setSize(sf::Vector2f(WW, WH));
     overlay_.setFillColor(sf::Color(0, 0, 0, 160));
-    dialog_.setSize(sf::Vector2f(560.f, 220.f));
-    dialog_.setPosition(sf::Vector2f((WW - 560.f) / 2.f, (WH - 220.f) / 2.f));
+    dialog_.setSize(sf::Vector2f(620.f, 240.f));
+    dialog_.setPosition(sf::Vector2f((WW - 620.f) / 2.f, (WH - 240.f) / 2.f));
     dialog_.setFillColor(sf::Color(30, 40, 70));
     dialog_.setOutlineColor(C_GOLD);
     dialog_.setOutlineThickness(3.f);
-    topUpText_.setText("资金不足 100，已自动补充至 500");
-    topUpText_.setCharacterSize(24);
-    topUpText_.setColor(sf::Color::White);
-    topUpText_.centerOrigin();
-    topUpText_.setPosition(sf::Vector2f(WW / 2.f, (WH - 220.f) / 2.f + 60.f));
-    btnTopUpOk_.setText("确定");
-    btnTopUpOk_.setPosition(sf::Vector2f(WW / 2.f - 90.f, (WH - 220.f) / 2.f + 140.f));
-    btnTopUpOk_.setSize(sf::Vector2f(180.f, 50.f));
-    btnTopUpOk_.setCallback([this]() { applyTopUp(); });
+    dialogText_.setCharacterSize(24);
+    dialogText_.setColor(sf::Color::White);
+    dialogText_.centerOrigin();
+    dialogText_.setPosition(sf::Vector2f(WW / 2.f, (WH - 240.f) / 2.f + 50.f));
+    dialogSub_.setCharacterSize(18);
+    dialogSub_.setColor(sf::Color(230, 200, 150));
+    dialogSub_.centerOrigin();
+    dialogSub_.setPosition(sf::Vector2f(WW / 2.f, (WH - 240.f) / 2.f + 95.f));
+    btnDialogOk_.setText("确定");
+    btnDialogOk_.setPosition(sf::Vector2f(WW / 2.f - 100.f, (WH - 240.f) / 2.f + 155.f));
+    btnDialogOk_.setSize(sf::Vector2f(200.f, 52.f));
+    btnDialogOk_.setCallback([this]() { confirmKickOut(); });
 
-    // 结算 + 账号同步 + 判定最终模式
+    // 结算 + 账号同步 + 踢出判定 + 最终模式判定
     settleAndSync();
     final_ = mgr_->room->isFinished();
-    refreshRows();
+    if (!final_ && !kickPending_) refreshRows();
     if (final_) rebuildFinalText();
 }
 
@@ -88,12 +91,24 @@ void SceneResult::settleAndSync() {
     Room* room = mgr_->room.get();
     room->settleRound();   // 内部记录本局盈亏到 roundHistory
 
-    // 账号同步: 真人(下标0)本局盈亏 = 历史末行
+    // 账号同步: 真人(下标0)本局盈亏 = 历史末行(真实记录, 不在此补充)
     if (room->historyCount > 0) {
         int d0 = room->roundHistory[room->historyCount - 1][0];
         Account::instance().add(d0);
-        if (Account::instance().needsTopUp()) {
-            topUpPending_ = true;   // 弹窗等用户确认后补至 500
+    }
+
+    // 踢出判定: 本局结算后, 若真人牌桌筹码不足以支付下一局底注(3×底注),
+    // 直接踢出本场(不扣逃跑费); 破产补充统一回到大厅再检测
+    if (!room->isFinished()) {
+        int needNext = 3 * room->config.ante;   // 下一局需 3 份底注
+        if (room->players[0].chips < needNext) {
+            kickPending_ = true;
+            final_ = true;   // 本场结束(被踢出), 不显示下一局/逃跑
+            char t[96];
+            std::snprintf(t, sizeof(t), "您的筹码 (%d) 不足以支付下一局底注 (%d)，您已被踢出本场对局",
+                          room->players[0].chips, needNext);
+            dialogText_.setText(t);
+            dialogSub_.setText("本次不扣除逃跑费用 · 点击确定返回大厅");
         }
     }
 }
@@ -152,29 +167,18 @@ void SceneResult::rebuildFinalText() {
     tipText_.setText("点击下方 [返回大厅] 回到人数选择");
 }
 
+void SceneResult::confirmKickOut() {
+    kickPending_ = false;
+    mgr_->changeTo(SceneId::Lobby);   // 回大厅(破产补充在大厅检测)
+}
+
 void SceneResult::escape() {
     if (final_) return;
     final_ = true;
     escapePenalty_ = 100;
     // 罚 100 记入账号
     Account::instance().add(-100);
-    if (Account::instance().needsTopUp()) {
-        topUpPending_ = true;
-    }
     rebuildFinalText();
-}
-
-void SceneResult::applyTopUp() {
-    Account& acct = Account::instance();
-    acct.topUp();                      // 补至 500
-    topUpPending_ = false;
-    // 若仍在牌桌中(非最终), 真人牌桌筹码同步为 500
-    if (!final_ && mgr_->room) {
-        mgr_->room->players[0].chips = acct.balance();
-        refreshRows();
-    } else if (final_) {
-        rebuildFinalText();
-    }
 }
 
 void SceneResult::nextRound() {
@@ -183,8 +187,8 @@ void SceneResult::nextRound() {
 }
 
 void SceneResult::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
-    if (topUpPending_) {
-        btnTopUpOk_.handleEvent(e, win);   // 弹窗期间只响应确定
+    if (kickPending_) {
+        btnDialogOk_.handleEvent(e, win);   // 踢出弹窗只响应确定
         return;
     }
     if (final_) {
@@ -201,8 +205,11 @@ void SceneResult::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
     title_.draw(win);
     if (final_) {
-        detailText_.draw(win);
-        btnLobby_.draw(win);
+        // 被踢出时只显示弹窗, 不画结算明细
+        if (!kickPending_) {
+            detailText_.draw(win);
+            btnLobby_.draw(win);
+        }
     } else {
         for (int i = 0; i < mgr_->room->playerCount; i++) {
             playerRows_[i].draw(win);
@@ -213,10 +220,11 @@ void SceneResult::draw(sf::RenderWindow& win) {
     tipText_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
 
-    if (topUpPending_) {
+    if (kickPending_) {
         win.draw(overlay_);
         win.draw(dialog_);
-        topUpText_.draw(win);
-        btnTopUpOk_.draw(win);
+        dialogText_.draw(win);
+        dialogSub_.draw(win);
+        btnDialogOk_.draw(win);
     }
 }

@@ -9,18 +9,52 @@ namespace {
 constexpr unsigned WW = 1280;
 constexpr unsigned WH = 800;
 
-// 各玩家当前道 3 张牌的位置(左上角 x0 + pos*dx, y)
-struct SeatPos {
-    float x0, y0, dx, scale;   // 3 张横排
-    float nameX, nameY;        // 名字位置(居中)
+// 各玩家座位参数: cx,cy=牌组中心; 3 张横排间距 dx; s=缩放
+// 支持 2~6 人: 下标0=你(players[0], 底部大牌), 其余按 p 顺序落座
+struct Seat {
+    float cx, cy, dx, s;
 };
-// [0]=你(下,大牌) [1]=AI-1(上) [2]=AI-2(左) [3]=AI-3(右)
-const SeatPos SEATS[4] = {
-    { 470.f, 535.f, 120.f, 0.50f, 640.f, 515.f },  // 你: 100x140(与组牌一致)
-    { 535.f,  65.f,  75.f, 0.30f, 640.f,  45.f },  // 上
-    {  45.f, 305.f,  65.f, 0.30f, 150.f, 285.f },  // 左
-    { 1035.f, 305.f, 65.f, 0.30f, 1140.f, 285.f }  // 右
-};
+const Seat* seatFor(int pc, int p) {
+    static const Seat s2[2] = {
+        { 640.f, 620.f, 128.f, 0.68f },  // 你
+        { 640.f, 110.f, 112.f, 0.58f }   // 上
+    };
+    static const Seat s3[3] = {
+        { 640.f, 625.f, 122.f, 0.64f },  // 你
+        { 330.f, 120.f, 104.f, 0.52f },  // 左上
+        { 950.f, 120.f, 104.f, 0.52f }   // 右上
+    };
+    static const Seat s4[4] = {
+        { 640.f, 630.f, 120.f, 0.62f },  // 你
+        { 640.f, 100.f, 96.f, 0.48f },   // 上
+        { 195.f, 335.f, 96.f, 0.48f },   // 左
+        { 1085.f, 335.f, 96.f, 0.48f }   // 右
+    };
+    static const Seat s5[5] = {
+        { 640.f, 640.f, 104.f, 0.52f },  // 你
+        { 640.f, 100.f, 80.f, 0.40f },   // 上中
+        { 245.f, 170.f, 80.f, 0.40f },   // 左上
+        { 1035.f, 170.f, 80.f, 0.40f },  // 右上
+        { 155.f, 480.f, 80.f, 0.40f }    // 左下
+    };
+    static const Seat s6[6] = {
+        { 640.f, 645.f, 96.f, 0.48f },   // 你
+        { 640.f, 95.f, 72.f, 0.36f },    // 上中
+        { 275.f, 160.f, 72.f, 0.36f },   // 左上
+        { 1005.f, 160.f, 72.f, 0.36f },  // 右上
+        { 155.f, 490.f, 72.f, 0.36f },   // 左下
+        { 1125.f, 490.f, 72.f, 0.36f }   // 右下
+    };
+    if (p < 0) return nullptr;
+    switch (pc) {
+        case 2: return (p < 2) ? &s2[p] : nullptr;
+        case 3: return (p < 3) ? &s3[p] : nullptr;
+        case 4: return (p < 4) ? &s4[p] : nullptr;
+        case 5: return (p < 5) ? &s5[p] : nullptr;
+        case 6: return (p < 6) ? &s6[p] : nullptr;
+    }
+    return nullptr;
+}
 const char* LINE_NAMES[3] = {"头道", "中道", "尾道"};
 constexpr float FLIP_DELAY = 0.8f;    // 牌背展示时间
 constexpr float HOLD_TIME = 2.5f;     // 结果停留时间
@@ -46,14 +80,16 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
     title_.centerOrigin();
     title_.setPosition(sf::Vector2f(WW / 2.f, 22.f));
 
-    // 玩家名标签
-    for (int p = 0; p < 4 && p < playerCount_; p++) {
+    // 玩家名标签(2~6 人全部落座)
+    for (int p = 0; p < playerCount_; p++) {
+        const Seat* st = seatFor(playerCount_, p);
+        if (!st) continue;
         const char* dn = (p == 0) ? "你" : room->players[p].name.c_str();
         nameTags_[p].setText(dn);
-        nameTags_[p].setCharacterSize(p == 0 ? 22 : 18);
+        nameTags_[p].setCharacterSize(p == 0 ? 22 : 16);
         nameTags_[p].setColor(sf::Color(255, 235, 170));
         nameTags_[p].centerOrigin();
-        nameTags_[p].setPosition(sf::Vector2f(SEATS[p].nameX, SEATS[p].nameY));
+        nameTags_[p].setPosition(sf::Vector2f(st->cx, st->cy - 140.f * st->s - 24.f));
     }
 
     // 中央信息(金色大字)
@@ -68,11 +104,13 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
     lineTag_.setPosition(sf::Vector2f(640.f, 285.f));
 
     // 牌精灵初始化位置(内容由 loadLine 装载)
-    for (int p = 0; p < 4; p++) {
+    for (int p = 0; p < playerCount_; p++) {
+        const Seat* st = seatFor(playerCount_, p);
+        if (!st) continue;
         for (int pos = 0; pos < 3; pos++) {
-            cards_[p][pos].setScale(SEATS[p].scale);
+            cards_[p][pos].setScale(st->s);
             cards_[p][pos].setPosition(
-                sf::Vector2f(SEATS[p].x0 + pos * SEATS[p].dx, SEATS[p].y0));
+                sf::Vector2f(st->cx - st->dx + pos * st->dx, st->cy - 140.f * st->s));
         }
     }
 
@@ -86,7 +124,9 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
 
 void SceneBattle::loadLine(int lineId, bool faceUp) {
     Room* room = mgr_->room.get();
-    for (int p = 0; p < 4 && p < playerCount_; p++) {
+    for (int p = 0; p < playerCount_; p++) {
+        const Seat* st = seatFor(playerCount_, p);
+        if (!st) continue;
         for (int pos = 0; pos < 3; pos++) {
             Card c = room->players[p].lines[lineId][pos];
             cards_[p][pos].setCard(c);
@@ -98,7 +138,9 @@ void SceneBattle::loadLine(int lineId, bool faceUp) {
 void SceneBattle::flipUp() {
     Room* room = mgr_->room.get();
     // 翻正当前道的牌
-    for (int p = 0; p < 4 && p < playerCount_; p++) {
+    for (int p = 0; p < playerCount_; p++) {
+        const Seat* st = seatFor(playerCount_, p);
+        if (!st) continue;
         for (int pos = 0; pos < 3; pos++) {
             cards_[p][pos].setFaceUp(true);
         }
