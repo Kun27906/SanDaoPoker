@@ -35,7 +35,7 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
             roomIndex_[roomCount_++] = i;
         }
     }
-    hint_.setText("选择房间(注金为每道注, 每局每人下 3 份)");
+    hint_.setText("选择房间(注金为每人每局下注额, 总池均分三道)");
     hint_.setCharacterSize(17);
     hint_.setColor(sf::Color(215, 215, 215));
     hint_.centerOrigin();
@@ -78,10 +78,9 @@ void SceneRoomSelect::refreshColors() {
 
 void SceneRoomSelect::startGame() {
     if (roomCount_ <= 0) return;
-    // 入场前确保账号资金 >=100(不足自动补足, 与结算后规则一致)
+    // 入场筹码 = 账号余额(进入本界面必经大厅, 大厅已保证余额>=100 且破产已弹窗补充)
     Account& acct = Account::instance();
-    if (acct.needsTopUp()) acct.topUp();
-    const int entryChips = acct.balance();   // 本场入场筹码 = 账号余额(人人同起点)
+    const int entryChips = acct.balance();
 
     mgr_->room = std::make_unique<Room>();
     if (!mgr_->room->setRoomConfig(roomIndex_[selected_])) return;

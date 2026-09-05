@@ -50,8 +50,8 @@ int main() {
         bool allOk = true;
         for (int r = 0; r < cfg.rounds; r++) {
             if (!room.startNewRound()) { allOk = false; break; }  // 发牌+收底注
-            // 检查底注扣了(3份×ante)且进了池
-            if (room.pools[0] + room.pools[1] + room.pools[2] != 3 * cfg.ante * cfg.players) allOk = false;
+            // 检查注金扣了(每人1份×ante)且进了池(总池=人数×ante)
+            if (room.pools[0] + room.pools[1] + room.pools[2] != cfg.ante * cfg.players) allOk = false;
             // 全员交牌
             randomArrange(room, r);
             if (!Round::allArranged(room.players, room.playerCount)) { allOk = false; }

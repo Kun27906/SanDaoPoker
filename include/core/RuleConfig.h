@@ -20,16 +20,16 @@ constexpr int START_CHIPS = 100;
 
 // ====== 房间配置 ======
 // 一种房间 = 人数 + 底注 + 轮次
-// 底注：每道 1 份，三小池 = 每局每人下 3 份底注
+// 注金：每人每局下注金 1 份(总池=人数×注金, 均分三小池, 余数归尾道)
 struct RoomConfig {
     const char* name;   // 房间名字（给界面显示用）
     int players;        // 人数（2~6）
-    int ante;           // 底注（筹码数，每道 1 份）
+    int ante;           // 注金（筹码数，每人每局下注 1 份）
     int rounds;         // 总轮次（打几局比总筹码）
 };
 
 // ====== 22 种预置房间(正式版,与《项目游戏规则.docx》一致) ======
-// 房间 = 人数 × (原始注金, 轮次); 注金为每道 1 份, 每局每人下 3 份
+// 房间 = 人数 × (原始注金, 轮次); 注金为每人每局下注额, 总池均分三小池
 constexpr int ROOM_CONFIG_COUNT = 22;
 
 constexpr RoomConfig ROOM_CONFIGS[ROOM_CONFIG_COUNT] = {

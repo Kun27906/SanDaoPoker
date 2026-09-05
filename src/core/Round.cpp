@@ -25,14 +25,17 @@ void Round::collectAnte(Player* players, int playerCount, int ante, int pools[3]
     // 三个池子清零
     pools[0] = pools[1] = pools[2] = 0;
 
+    // 每人每局下注金 1 份(ante), 总池 = 人数×ante
+    int total = 0;
     for (int p = 0; p < playerCount; p++) {
-        // 每人下 3 份底注
-        players[p].chips -= ante * 3;
-        // 分别放进三个池
-        pools[0] += ante;
-        pools[1] += ante;
-        pools[2] += ante;
+        players[p].chips -= ante;
+        total += ante;
     }
+    // 总注金均分三小池(头/中/尾各一份;除不尽的余数归尾道,保持整数)
+    int base = total / 3;
+    pools[0] = base;
+    pools[1] = base;
+    pools[2] = base + (total % 3);
 }
 
 // ====== 交牌锁定检查 ======

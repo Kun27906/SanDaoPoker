@@ -58,9 +58,42 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
             btnReset_.setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
         }
     });
+
+    // 破产补充弹窗(样式 + 进入大厅时检测余额<100)
+    overlay_.setSize(sf::Vector2f(WW, WH));
+    overlay_.setFillColor(sf::Color(0, 0, 0, 160));
+    dialog_.setSize(sf::Vector2f(720.f, 240.f));
+    dialog_.setPosition(sf::Vector2f((WW - 720.f) / 2.f, (WH - 240.f) / 2.f));
+    dialog_.setFillColor(sf::Color(30, 40, 70));
+    dialog_.setOutlineColor(sf::Color(255, 215, 0));
+    dialog_.setOutlineThickness(3.f);
+    // 文案两行, 整块居中于弹窗中央偏上(下方留给按钮)
+    topUpText_.setText("您已破产！已为您注入初始资金至500筹码，\n祝您再接再厉！");
+    topUpText_.setCharacterSize(24);
+    topUpText_.setColor(sf::Color(255, 220, 130));
+    topUpText_.centerOrigin();
+    topUpText_.setPosition(sf::Vector2f(WW / 2.f, (WH - 240.f) / 2.f + 88.f));
+    btnTopUpOk_.setText("确定");
+    btnTopUpOk_.setPosition(sf::Vector2f(WW / 2.f - 90.f, (WH - 240.f) / 2.f + 165.f));
+    btnTopUpOk_.setSize(sf::Vector2f(180.f, 50.f));
+    btnTopUpOk_.setCallback([this]() {
+        Account::instance().topUp();   // 补至 500
+        pendingTopUp_ = false;
+    });
+
+    // 进入大厅: 检测余额是否 <100(破产边界), 不足则弹窗补充
+    Account& acct = Account::instance();
+    if (acct.needsTopUp()) {
+        pendingTopUp_ = true;
+        acct.topUp();   // 先补(弹窗仅作告知, 确定后关闭)
+    }
 }
 
 void SceneLobby::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
+    if (pendingTopUp_) {
+        btnTopUpOk_.handleEvent(e, win);   // 破产弹窗只响应确定
+        return;
+    }
     for (auto& b : btnSeats_) b.handleEvent(e, win);
     btnReset_.handleEvent(e, win);
 }
@@ -84,4 +117,11 @@ void SceneLobby::draw(sf::RenderWindow& win) {
     for (auto& b : btnSeats_) b.draw(win);
     btnReset_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
+
+    if (pendingTopUp_) {
+        win.draw(overlay_);
+        win.draw(dialog_);
+        topUpText_.draw(win);
+        btnTopUpOk_.draw(win);
+    }
 }

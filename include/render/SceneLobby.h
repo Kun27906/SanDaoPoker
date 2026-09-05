@@ -24,4 +24,11 @@ private:
     bool resetArmed_ = false;         // 已进入"再点一次确认"状态
     float resetArmTimer_ = 0.f;       // 确认状态超时(5秒)自动复原
     ChipBar chipBar_;
+
+    // 破产补充弹窗(余额<100 时进入大厅弹出)
+    bool pendingTopUp_ = false;
+    sf::RectangleShape overlay_;
+    sf::RectangleShape dialog_;
+    TextBox topUpText_;
+    Button btnTopUpOk_;
 };
