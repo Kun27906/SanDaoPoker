@@ -20,5 +20,8 @@ private:
     TextBox title_;
     TextBox hint_;
     std::array<Button, 5> btnSeats_;  // 2~6人
+    Button btnReset_;                 // 重置账号(右下角,两段确认)
+    bool resetArmed_ = false;         // 已进入"再点一次确认"状态
+    float resetArmTimer_ = 0.f;       // 确认状态超时(5秒)自动复原
     ChipBar chipBar_;
 };

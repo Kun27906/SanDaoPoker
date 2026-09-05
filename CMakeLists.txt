@@ -84,9 +84,10 @@ set(UI_SOURCES
 # ------------------------------------------------------------
 # 可执行目标
 # ------------------------------------------------------------
-# exe 直接生成在项目根目录(用户双击根目录 SanDaoPoker.exe 即可启动;
-# 运行目录=项目根, assets/ 与 game_data/ 都按根目录相对路径访问)
-set(SDP_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+# exe + SFML DLL + assets 统一输出到根目录 bin/ 文件夹
+# (保持根目录整洁; 用户双击 bin/SanDaoPoker.exe 即可运行,
+#  程序相对 bin/ 目录访问 assets/ 与 game_data/)
+set(SDP_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 add_executable(SanDaoPoker
     src/main.cpp
     ${CORE_SOURCES}
