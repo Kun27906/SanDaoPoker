@@ -35,7 +35,7 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
             roomIndex_[roomCount_++] = i;
         }
     }
-    hint_.setText("选择房间(注金为每道注, 每局每人下 3 份)");
+    hint_.setText("选择房间(注金为每人每局下注额, 总池均分三道)");
     hint_.setCharacterSize(17);
     hint_.setColor(sf::Color(215, 215, 215));
     hint_.centerOrigin();

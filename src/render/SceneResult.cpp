@@ -97,10 +97,10 @@ void SceneResult::settleAndSync() {
         Account::instance().add(d0);
     }
 
-    // 踢出判定: 本局结算后, 若真人牌桌筹码不足以支付下一局底注(3×底注),
+    // 踢出判定: 本局结算后, 若真人牌桌筹码不足以支付下一局个人注金(1 份底注),
     // 直接踢出本场(不扣逃跑费); 破产补充统一回到大厅再检测
     if (!room->isFinished()) {
-        int needNext = 3 * room->config.ante;   // 下一局需 3 份底注
+        int needNext = room->config.ante;   // 下一局个人需下注金 1 份
         if (room->players[0].chips < needNext) {
             kickPending_ = true;
             final_ = true;   // 本场结束(被踢出), 不显示下一局/逃跑
