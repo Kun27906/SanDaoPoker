@@ -1,9 +1,11 @@
-// SanDaoPoker 程序入口(成员C,阶段2/3:素材加载 + 场景状态机)
+// SanDaoPoker 程序入口(成员C)
+// 流程:加载本地存档(账号) -> 加载素材 -> 启动窗口与场景
+#include "render/Account.h"
 #include "render/AssetManager.h"
 #include "render/GameApp.h"
 
 int main() {
-    // 先加载素材,再启动窗口
+    Account::instance().load();      // 读取/初始化玩家账号存档(game_data/save.dat)
     AssetManager::instance().loadAll();
     GameApp app;
     app.run();

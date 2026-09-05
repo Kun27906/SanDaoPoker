@@ -12,6 +12,7 @@
 //   - 牌背 3 张:         assets/cards/back/{red,blue,black}.png
 //   - 桌面背景:          assets/ui/backgrounds/table_bg.png
 //   - 按钮四态图:        assets/ui/buttons/btn_{normal,hover,pressed,disabled}.png
+//   - 筹码图标 5 枚:     assets/ui/chips/chip_{1,5,10,50,100}.png
 // 用法:
 //   AssetManager::instance().loadAll();        // 程序启动时调用一次
 //   const sf::Texture* t = AssetManager::instance().cardTexture(suit, rank);
@@ -33,6 +34,8 @@ public:
     const sf::Texture* menuBackground() const;
     // 按钮图:0=normal 1=hover 2=pressed 3=disabled
     const sf::Texture* buttonTexture(int state) const;
+    // 筹码图标:0..4 = chip_1/5/10/50/100
+    const sf::Texture* chipTexture(int idx) const;
 
     bool isLoaded() const { return loaded_; }
 
@@ -45,8 +48,9 @@ private:
     sf::Texture cardTex_[4][13];
     sf::Texture jokerTex_[2];          // 大小王: [0]=small [1]=big
     std::vector<sf::Texture> backTex_;   // 3 张牌背
-    sf::Texture bgTex_;                  // 桌面背景(游戏场景)
+    sf::Texture bgTex_;                  // 桌面背景
     sf::Texture menuTex_;                // 主菜单背景
     sf::Texture btnTex_[4];              // 按钮四态
+    sf::Texture chipTex_[5];             // 筹码图标 chip_1/5/10/50/100
     bool loaded_ = false;
 };

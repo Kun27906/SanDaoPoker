@@ -1,5 +1,6 @@
 #include "render/SceneArrange.h"
 #include "render/AssetManager.h"
+#include "render/Account.h"
 #include "ai/AIPlayer.h"
 #include "core/Room.h"
 #include <algorithm>
@@ -123,6 +124,8 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     // 倒计时
     countdown_ = CountdownBar(COUNTDOWN_SECONDS, sf::Vector2f(390.f, 100.f), sf::Vector2f(500.f, 28.f));
     countdown_.start();
+
+    chipBar_.setPosition(sf::Vector2f(1280.f - 250.f - 20.f, 16.f));
 }
 
 void SceneArrange::placeCard(int handIdx) {
@@ -258,4 +261,5 @@ void SceneArrange::draw(sf::RenderWindow& win) {
     btnReset_.draw(win);
     btnSubmit_.draw(win);
     countdown_.draw(win);
+    chipBar_.draw(win, Account::instance().balance());
 }

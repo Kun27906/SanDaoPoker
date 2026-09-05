@@ -76,16 +76,10 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
         }
     }
 
-    // 查看结算按钮
-    btnNext_.setText("查看结算");
-    btnNext_.setPosition(sf::Vector2f(490.f, 700.f));
-    btnNext_.setSize(sf::Vector2f(300.f, 55.f));
-    btnNext_.setCallback([this]() { mgr_->changeTo(SceneId::Result); });
-
-    // 从头道开始:先展示牌背
-    char tag[32];
-    std::snprintf(tag, sizeof(tag), "%s · 1/3", LINE_NAMES[0]);
-    lineTag_.setText(tag);
+    // 从头道开始:先展示牌背(三道比完自动 3 秒进入结算, 无按钮)
+    char tag0[32];
+    std::snprintf(tag0, sizeof(tag0), "%s · 1/3", LINE_NAMES[0]);
+    lineTag_.setText(tag0);
     info_.setText("比牌开始!");
     loadLine(0, false);
 }
@@ -99,7 +93,6 @@ void SceneBattle::loadLine(int lineId, bool faceUp) {
             cards_[p][pos].setFaceUp(faceUp);
         }
     }
-    revealed_ = faceUp;
 }
 
 void SceneBattle::flipUp() {
@@ -110,7 +103,6 @@ void SceneBattle::flipUp() {
             cards_[p][pos].setFaceUp(true);
         }
     }
-    revealed_ = true;
 
     // 计算该道赢家 + 牌型(纯展示)
     int winners[MAX_PLAYERS];
@@ -136,10 +128,12 @@ void SceneBattle::flipUp() {
 void SceneBattle::advance() {
     showLine_++;
     if (showLine_ >= 3) {
-        // 三道全部比完
-        info_.setText("比牌完成!");
-        lineTag_.setText("三组比完 · 查看结算");
+        // 三道全部比完: 等待 3 秒后自动进入结算
+        info_.setText("比牌完成, 即将进入结算...");
+        lineTag_.setText("三组比完");
         showNext_ = true;
+        phase_ = 2;
+        timer_ = 0.f;
         return;
     }
     char tag[32];
@@ -149,12 +143,19 @@ void SceneBattle::advance() {
     loadLine(showLine_, false);   // 下一道先牌背
 }
 
-void SceneBattle::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
-    if (showNext_) btnNext_.handleEvent(e, win);
+void SceneBattle::handleEvent(const sf::Event&, const sf::RenderWindow&) {
+    // 自动流程, 无交互按钮
 }
 
 void SceneBattle::update(float dt) {
-    if (showNext_) return;
+    if (phase_ == 2) {
+        // 比完等待 3 秒自动进结算
+        timer_ += dt;
+        if (timer_ >= 3.f) {
+            mgr_->changeTo(SceneId::Result);
+        }
+        return;
+    }
     timer_ += dt;
     if (phase_ == 0 && timer_ >= FLIP_DELAY) {
         timer_ = 0.f;
@@ -180,5 +181,7 @@ void SceneBattle::draw(sf::RenderWindow& win) {
         }
     }
 
-    if (showNext_) btnNext_.draw(win);
+    if (showNext_) {
+        // 比完提示文字持续显示(无需额外按钮)
+    }
 }

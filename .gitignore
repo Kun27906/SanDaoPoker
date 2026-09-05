@@ -33,3 +33,6 @@ Thumbs.db
 Desktop.ini
 
 build_tests/
+
+# ===== 本地玩家存档(账号数据,不入库) =====
+game_data/
