@@ -1,5 +1,7 @@
 #include "render/SceneResult.h"
 #include "render/AssetManager.h"
+#include "core/Room.h"
+#include <cstdio>
 
 namespace {
 constexpr unsigned WW = 1280;
@@ -14,26 +16,74 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
         bg_.setScale(sx, sy);
     }
 
-    title_.setText("结算界面(阶段3骨架)");
-    title_.setCharacterSize(44);
+    // 结算本局(一次性)
+    doSettle();
+
+    // 标题
+    char title[64];
+    std::snprintf(title, sizeof(title), "第 %d 局结算", mgr_->room->currentRound);
+    title_.setText(title);
+    title_.setCharacterSize(34);
     title_.setColor(sf::Color::White);
     title_.centerOrigin();
-    title_.setPosition(sf::Vector2f(WW / 2.f, 200.f));
+    title_.setPosition(sf::Vector2f(WW / 2.f, 40.f));
 
-    hint_.setText("阶段7将实现: 筹码变化 + 总账排名");
-    hint_.setCharacterSize(20);
-    hint_.setColor(sf::Color(210, 210, 210));
-    hint_.centerOrigin();
-    hint_.setPosition(sf::Vector2f(WW / 2.f, 260.f));
+    // 本局结果文字(多行,左列,左上角定位)
+    resultText_.setCharacterSize(20);
+    resultText_.setColor(sf::Color(235, 235, 235));
+    resultText_.setPosition(sf::Vector2f(90.f, 110.f));
 
-    btnBack_.setText("返回主菜单");
-    btnBack_.setPosition(sf::Vector2f(440.f, 420.f));
-    btnBack_.setSize(sf::Vector2f(400.f, 56.f));
-    btnBack_.setCallback([this]() { mgr_->changeTo(SceneId::Menu); });
+    // 总账排名(右列)
+    rankText_.setCharacterSize(20);
+    rankText_.setColor(sf::Color(255, 225, 140));
+    rankText_.setPosition(sf::Vector2f(760.f, 110.f));
+
+    // 按钮
+    btnNext_.setText("下一局");
+    btnNext_.setPosition(sf::Vector2f(300.f, 690.f));
+    btnNext_.setSize(sf::Vector2f(300.f, 60.f));
+    btnNext_.setCallback([this]() { nextRound(); });
+
+    btnMenu_.setText("返回主菜单");
+    btnMenu_.setPosition(sf::Vector2f(680.f, 690.f));
+    btnMenu_.setSize(sf::Vector2f(300.f, 60.f));
+    btnMenu_.setCallback([this]() { mgr_->changeTo(SceneId::Menu); });
+
+    // 比赛打完:下一局禁用,显示最终排名
+    if (finished_) {
+        finalText_.setText("本场全部轮次已打完! 右侧为最终总账, 可返回主菜单重新选房");
+        finalText_.setCharacterSize(20);
+        finalText_.setColor(sf::Color(255, 120, 120));
+        finalText_.setPosition(sf::Vector2f(300.f, 650.f));
+    }
+}
+
+void SceneResult::doSettle() {
+    if (settled_ || !mgr_->room) return;
+    settled_ = true;
+
+    // 结算本局(检查所有人交牌 -> 逐道比牌 -> 筹码变动,返回文字)
+    std::string settleText = mgr_->room->settleRound();
+    resultText_.setText(settleText);
+
+    // 总账(按筹码排序)
+    std::string rankText = mgr_->room->getRanking();
+    rankText_.setText(rankText);
+
+    // 比赛是否打完
+    finished_ = mgr_->room->isFinished();
+}
+
+void SceneResult::nextRound() {
+    if (finished_) return;  // 比赛已结束,不能开新局
+    if (mgr_->room->startNewRound()) {
+        mgr_->changeTo(SceneId::Arrange);
+    }
 }
 
 void SceneResult::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
-    btnBack_.handleEvent(e, win);
+    btnMenu_.handleEvent(e, win);
+    if (!finished_) btnNext_.handleEvent(e, win);
 }
 
 void SceneResult::update(float) {}
@@ -41,6 +91,9 @@ void SceneResult::update(float) {}
 void SceneResult::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
     title_.draw(win);
-    hint_.draw(win);
-    btnBack_.draw(win);
+    resultText_.draw(win);
+    rankText_.draw(win);
+    if (finished_) finalText_.draw(win);
+    btnNext_.draw(win);
+    btnMenu_.draw(win);
 }
