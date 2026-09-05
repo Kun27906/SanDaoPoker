@@ -216,7 +216,9 @@ void SceneBattle::draw(sf::RenderWindow& win) {
     info_.draw(win);
     lineTag_.draw(win);
 
-    for (int p = 0; p < 4 && p < playerCount_; p++) {
+    for (int p = 0; p < playerCount_; p++) {
+        const Seat* st = seatFor(playerCount_, p);
+        if (!st) continue;
         nameTags_[p].draw(win);
         for (int pos = 0; pos < 3; pos++) {
             cards_[p][pos].draw(win);
