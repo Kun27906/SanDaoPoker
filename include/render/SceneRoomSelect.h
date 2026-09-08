@@ -30,4 +30,12 @@ private:
     int selected_ = 0;
     Button btnStart_;
     ChipBar chipBar_;
+
+    // 入场资格提示弹窗(余额 < 该房间第一局注金 ante 时点击房间弹出)
+    bool notEnough_ = false;
+    sf::RectangleShape overlay_;
+    sf::RectangleShape dialog_;
+    TextBox denyTitle_;
+    TextBox denyText_;
+    Button btnDenyOk_;
 };

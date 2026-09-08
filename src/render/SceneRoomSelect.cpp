@@ -47,11 +47,45 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
         roomBtns_[i].setPosition(sf::Vector2f(340.f, 160.f + i * 78.f));
         roomBtns_[i].setSize(sf::Vector2f(600.f, 62.f));
         roomBtns_[i].setCallback([this, i]() {
+            // 入场资格: 余额不足该房间第一局注金(ante)则弹窗提醒,不允许选中
+            const RoomConfig& cfg = ROOM_CONFIGS[roomIndex_[i]];
+            const int bal = Account::instance().balance();
+            if (bal < cfg.ante) {
+                char t[160];
+                std::snprintf(t, sizeof(t),
+                              "该房间第一局注金为 %d 筹码，\n您的余额只有 %d 筹码，无法进入。",
+                              cfg.ante, bal);
+                denyText_.setText(t);
+                notEnough_ = true;
+                return;
+            }
             selected_ = i;
             refreshColors();
         });
     }
     refreshColors();
+
+    // 入场资格弹窗样式
+    overlay_.setSize(sf::Vector2f(WW, WH));
+    overlay_.setFillColor(sf::Color(0, 0, 0, 160));
+    dialog_.setSize(sf::Vector2f(560.f, 230.f));
+    dialog_.setPosition(sf::Vector2f((WW - 560.f) / 2.f, (WH - 230.f) / 2.f));
+    dialog_.setFillColor(sf::Color(30, 40, 70));
+    dialog_.setOutlineColor(sf::Color(255, 170, 60));
+    dialog_.setOutlineThickness(3.f);
+    denyTitle_.setText("无法进入该房间");
+    denyTitle_.setCharacterSize(26);
+    denyTitle_.setColor(sf::Color(255, 170, 60));
+    denyTitle_.centerOrigin();
+    denyTitle_.setPosition(sf::Vector2f(WW / 2.f, (WH - 230.f) / 2.f + 58.f));
+    denyText_.setCharacterSize(20);
+    denyText_.setColor(sf::Color(235, 235, 235));
+    denyText_.centerOrigin();
+    denyText_.setPosition(sf::Vector2f(WW / 2.f, (WH - 230.f) / 2.f + 100.f));
+    btnDenyOk_.setText("知道了");
+    btnDenyOk_.setPosition(sf::Vector2f(WW / 2.f - 80.f, (WH - 230.f) / 2.f + 158.f));
+    btnDenyOk_.setSize(sf::Vector2f(160.f, 48.f));
+    btnDenyOk_.setCallback([this]() { notEnough_ = false; });
 
     btnStart_.setText("开始游戏");
     btnStart_.setPosition(sf::Vector2f(495.f, 590.f));   // 居中(返回大厅改由左上角 home 键)
@@ -73,6 +107,18 @@ void SceneRoomSelect::refreshColors() {
 
 void SceneRoomSelect::startGame() {
     if (roomCount_ <= 0) return;
+    // 入场资格防御: 余额不足第一局注金则弹窗(正常点击房间时已拦截,双保险)
+    const RoomConfig& cfg = ROOM_CONFIGS[roomIndex_[selected_]];
+    const int bal = Account::instance().balance();
+    if (bal < cfg.ante) {
+        char t[160];
+        std::snprintf(t, sizeof(t),
+                      "该房间第一局注金为 %d 筹码，\n您的余额只有 %d 筹码，无法进入。",
+                      cfg.ante, bal);
+        denyText_.setText(t);
+        notEnough_ = true;
+        return;
+    }
     // 入场筹码 = 账号余额(进入本界面必经大厅, 大厅已保证余额>=100 且破产已弹窗补充)
     Account& acct = Account::instance();
     const int entryChips = acct.balance();
@@ -94,6 +140,10 @@ void SceneRoomSelect::startGame() {
 }
 
 void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
+    if (notEnough_) {                  // 入场资格弹窗:只响应确定
+        btnDenyOk_.handleEvent(e, win);
+        return;
+    }
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].handleEvent(e, win);
     btnStart_.handleEvent(e, win);
 }
@@ -111,4 +161,11 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].draw(win);
     btnStart_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
+    if (notEnough_) {                  // 入场资格弹窗
+        win.draw(overlay_);
+        win.draw(dialog_);
+        denyTitle_.draw(win);
+        denyText_.draw(win);
+        btnDenyOk_.draw(win);
+    }
 }
