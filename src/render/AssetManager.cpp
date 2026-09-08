@@ -153,6 +153,26 @@ bool AssetManager::loadMiscTextures() {
             }
         }
     }
+    // 界面图标(自动扫描 assets/ui/icons/*.png, 文件名即查询名)
+    {
+        icons_.clear();
+        namespace fs = std::filesystem;
+        std::error_code ec;
+        if (fs::exists("assets/ui/icons", ec)) {
+            for (auto& entry : fs::directory_iterator("assets/ui/icons", ec)) {
+                if (!entry.is_regular_file(ec)) continue;
+                if (entry.path().extension() != ".png") continue;
+                std::string stem = entry.path().stem().string();
+                sf::Texture t;
+                if (t.loadFromFile(entry.path().string())) {
+                    icons_[stem] = std::move(t);
+                } else {
+                    std::fprintf(stderr, "[AssetManager] 加载失败: %s\n",
+                                 entry.path().string().c_str());
+                }
+            }
+        }
+    }
     return true;
 }
 
@@ -190,6 +210,12 @@ void AssetManager::rollBack() {
     static std::mt19937 rng(std::random_device{}());
     std::uniform_int_distribution<int> dist(0, 2);
     backRoll_ = dist(rng);
+}
+
+const sf::Texture* AssetManager::icon(const std::string& name) const {
+    auto it = icons_.find(name);
+    if (it == icons_.end()) return nullptr;
+    return it->second.getSize().x > 0 ? &it->second : nullptr;
 }
 
 const sf::Texture* AssetManager::backTexture(int index) const {

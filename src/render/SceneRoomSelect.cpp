@@ -54,14 +54,9 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     refreshColors();
 
     btnStart_.setText("开始游戏");
-    btnStart_.setPosition(sf::Vector2f(340.f, 590.f));
+    btnStart_.setPosition(sf::Vector2f(495.f, 590.f));   // 居中(返回大厅改由左上角 home 键)
     btnStart_.setSize(sf::Vector2f(290.f, 58.f));
     btnStart_.setCallback([this]() { startGame(); });
-
-    btnBack_.setText("返回大厅");
-    btnBack_.setPosition(sf::Vector2f(650.f, 590.f));
-    btnBack_.setSize(sf::Vector2f(290.f, 58.f));
-    btnBack_.setCallback([this]() { mgr_->changeTo(SceneId::Lobby); });
 
     chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
 }
@@ -101,7 +96,10 @@ void SceneRoomSelect::startGame() {
 void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].handleEvent(e, win);
     btnStart_.handleEvent(e, win);
-    btnBack_.handleEvent(e, win);
+}
+
+void SceneRoomSelect::onHomePressed() {
+    mgr_->changeTo(SceneId::Lobby);   // home 键返回大厅
 }
 
 void SceneRoomSelect::update(float) {}
@@ -112,6 +110,5 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     hint_.draw(win);
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].draw(win);
     btnStart_.draw(win);
-    btnBack_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
 }

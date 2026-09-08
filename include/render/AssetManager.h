@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <map>
 #include <string>
 #include <vector>
 #include "core/Card.h"
@@ -39,6 +40,8 @@ public:
     // 牌背:当前局随机颜色(0=红 1=蓝 2=黑)
     void rollBack();                 // 每局开局调用:随机选一种牌背颜色
     int currentBack() const { return backRoll_; }
+    // 界面图标(assets/ui/icons/*.png 自动扫描):按文件名取,如 "menuList"/"musicOn"/"slider"
+    const sf::Texture* icon(const std::string& name) const;
 
     bool isLoaded() const { return loaded_; }
 
@@ -57,6 +60,8 @@ private:
     // 筹码素材:区间命名 chip_<min>-<max> / chip_-<max>(无下界) / chip_<min>-(无上界)
     struct ChipDef { int lo; int hi; sf::Texture tex; };
     std::vector<ChipDef> chipDefs_;
+    // 界面图标:文件名 -> 纹理(自动扫描 assets/ui/icons/*.png)
+    std::map<std::string, sf::Texture> icons_;
     int backRoll_ = 0;                   // 当前局牌背颜色(0红 1蓝 2黑)
     bool loaded_ = false;
 };

@@ -47,7 +47,12 @@ void SoundManager::playBet()     { play(BET); }
 
 // ---- BGM ----
 void SoundManager::playBgm(int idx) {
+    curBgm_ = idx;
+    if (!bgmOn_) return;               // 音乐总开关关闭时不播
     if (bufs_[idx].getSampleCount() == 0) return;  // 未加载成功
+    if (bgm_.getBuffer() == &bufs_[idx] && bgm_.getStatus() == sf::Sound::Playing) {
+        return;                        // 同一曲已在播,不重播
+    }
     bgm_.stop();
     bgm_.setBuffer(bufs_[idx]);
     bgm_.setLoop(true);   // 循环播放
@@ -57,3 +62,19 @@ void SoundManager::playBgm(int idx) {
 void SoundManager::playBgmMenu() { playBgm(BGM_MENU); }
 void SoundManager::playBgmGame() { playBgm(BGM_GAME); }
 void SoundManager::stopBgm()     { bgm_.stop(); }
+
+void SoundManager::toggleBgm() {
+    bgmOn_ = !bgmOn_;
+    if (bgmOn_) {
+        playBgm(curBgm_);            // 恢复当前曲目
+    } else {
+        bgm_.stop();
+    }
+}
+
+void SoundManager::setVolume(int v) {
+    if (v < 0) v = 0;
+    if (v > 100) v = 100;
+    volume_ = v;
+    sf::Listener::setGlobalVolume(static_cast<float>(v));
+}

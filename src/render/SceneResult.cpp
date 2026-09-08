@@ -172,6 +172,15 @@ void SceneResult::confirmKickOut() {
     mgr_->changeTo(SceneId::Lobby);   // 回大厅(破产补充在大厅检测)
 }
 
+void SceneResult::onHomePressed() {
+    if (kickPending_) return;              // 踢出弹窗期间不响应(等弹窗确定)
+    if (final_) {
+        mgr_->changeTo(SceneId::Lobby);    // 一整场结束: home = 返回大厅
+    } else {
+        escape();                          // 一局结束后: home = 逃跑(罚100提前结束)
+    }
+}
+
 void SceneResult::escape() {
     if (final_) return;
     final_ = true;

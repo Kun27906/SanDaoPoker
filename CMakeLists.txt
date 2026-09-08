@@ -72,6 +72,7 @@ set(RENDER_SOURCES
     src/render/SceneBattle.cpp
     src/render/SceneResult.cpp
     src/render/SoundManager.cpp
+    src/render/GlobalHud.cpp
 )
 
 set(UI_SOURCES
@@ -79,6 +80,7 @@ set(UI_SOURCES
     src/ui/TextBox.cpp
     src/ui/CountdownBar.cpp
     src/ui/ChipBar.cpp
+    src/ui/IconButton.cpp
 )
 
 # ------------------------------------------------------------

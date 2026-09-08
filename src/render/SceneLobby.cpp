@@ -98,6 +98,10 @@ void SceneLobby::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     btnReset_.handleEvent(e, win);
 }
 
+void SceneLobby::onHomePressed() {
+    mgr_->changeTo(SceneId::Title);   // home 键回启动页
+}
+
 void SceneLobby::update(float dt) {
     // 确认态 5 秒未二次点击则复原
     if (resetArmed_) {

@@ -13,6 +13,7 @@ public:
     void handleEvent(const sf::Event& e, const sf::RenderWindow& win) override;
     void update(float dt) override;
     void draw(sf::RenderWindow& win) override;
+    void onHomePressed() override;   // home 键 = 回启动页
 
 private:
     SceneManager* mgr_;
