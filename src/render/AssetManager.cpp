@@ -146,8 +146,6 @@ bool AssetManager::loadMiscTextures() {
                 def.hi = hi;
                 if (def.tex.loadFromFile(entry.path().string())) {
                     chipDefs_.push_back(def);
-                    std::fprintf(stderr, "[AssetManager] 筹码 %s: [%d, %d)\n",
-                                 stem.c_str(), lo, hi);
                 } else {
                     std::fprintf(stderr, "[AssetManager] 加载失败: %s\n",
                                  entry.path().string().c_str());
