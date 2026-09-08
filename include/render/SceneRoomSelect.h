@@ -14,6 +14,7 @@ public:
     void handleEvent(const sf::Event& e, const sf::RenderWindow& win) override;
     void update(float dt) override;
     void draw(sf::RenderWindow& win) override;
+    void onHomePressed() override;   // home 键 = 返回大厅
 
 private:
     void refreshColors();
@@ -28,6 +29,5 @@ private:
     int roomCount_ = 0;
     int selected_ = 0;
     Button btnStart_;
-    Button btnBack_;
     ChipBar chipBar_;
 };

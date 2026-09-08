@@ -30,6 +30,14 @@ public:
     void playBgmMenu();   // 主菜单循环
     void playBgmGame();   // 对局循环
     void stopBgm();
+    void toggleBgm();     // 背景音乐开关(不影响音效 click 等)
+    bool bgmOn() const { return bgmOn_; }
+
+    // ---- 全局音量(0~100,与系统音量刻度一致) ----
+    // 用 sf::Listener::setGlobalVolume:对所有 Sound/Music 生效(音效+BGM),
+    // 可移植(不依赖具体系统音量 API)
+    void setVolume(int v);
+    int volume() const { return volume_; }
 
 private:
     SoundManager() = default;
@@ -43,4 +51,7 @@ private:
     sf::Sound sound_;      // 单声道播放器(短音效串行足够)
     sf::Sound bgm_;        // BGM 循环播放器
     bool loaded_ = false;
+    bool bgmOn_ = true;             // 背景音乐总开关
+    int curBgm_ = BGM_MENU;         // 当前应播放的 BGM 曲目
+    int volume_ = 100;              // 全局音量 0~100
 };

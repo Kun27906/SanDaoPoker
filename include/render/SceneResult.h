@@ -20,6 +20,7 @@ public:
     void handleEvent(const sf::Event& e, const sf::RenderWindow& win) override;
     void update(float dt) override;
     void draw(sf::RenderWindow& win) override;
+    void onHomePressed() override;   // home: 非最终局=逃跑, 最终局=返回大厅
 
 private:
     void settleAndSync();          // 结算本局 + 账号同步 + 踢出判定
