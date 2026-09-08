@@ -34,8 +34,11 @@ public:
     const sf::Texture* menuBackground() const;
     // 按钮图:0=normal 1=hover 2=pressed 3=disabled
     const sf::Texture* buttonTexture(int state) const;
-    // 筹码图标:0..4 = chip_1/5/10/50/100
-    const sf::Texture* chipTexture(int idx) const;
+    // 筹码图标:按金额所在档位区间取对应素材(区间命名 chip_<min>-<max>)
+    const sf::Texture* chipForAmount(int amount) const;
+    // 牌背:当前局随机颜色(0=红 1=蓝 2=黑)
+    void rollBack();                 // 每局开局调用:随机选一种牌背颜色
+    int currentBack() const { return backRoll_; }
 
     bool isLoaded() const { return loaded_; }
 
@@ -51,6 +54,9 @@ private:
     sf::Texture bgTex_;                  // 桌面背景
     sf::Texture menuTex_;                // 主菜单背景
     sf::Texture btnTex_[4];              // 按钮四态
-    sf::Texture chipTex_[5];             // 筹码图标 chip_1/5/10/50/100
+    // 筹码素材:区间命名 chip_<min>-<max> / chip_-<max>(无下界) / chip_<min>-(无上界)
+    struct ChipDef { int lo; int hi; sf::Texture tex; };
+    std::vector<ChipDef> chipDefs_;
+    int backRoll_ = 0;                   // 当前局牌背颜色(0红 1蓝 2黑)
     bool loaded_ = false;
 };

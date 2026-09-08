@@ -30,10 +30,11 @@ sf::FloatRect CardSprite::getBounds() const {
 bool CardSprite::hasTexture() const {
     const AssetManager& am = AssetManager::instance();
     const sf::Texture* t = nullptr;
+    int bi = backIndex_ >= 0 ? backIndex_ : am.currentBack();
     if (faceUp_) {
         t = joker_ ? nullptr : am.cardTexture(card_.getSuit(), card_.getRank());
     } else {
-        t = am.backTexture(backIndex_);
+        t = am.backTexture(bi);
     }
     return t != nullptr;
 }
@@ -41,12 +42,13 @@ bool CardSprite::hasTexture() const {
 void CardSprite::updateTexture() {
     const AssetManager& am = AssetManager::instance();
     const sf::Texture* t = nullptr;
+    int bi = backIndex_ >= 0 ? backIndex_ : am.currentBack();
     if (faceUp_) {
         // 大小王走 Jokers 贴图(cardTexture 已支持);加载失败时用牌背兜底
         t = am.cardTexture(card_.getSuit(), card_.getRank());
-        if (!t) t = am.backTexture(backIndex_);
+        if (!t) t = am.backTexture(bi);
     } else {
-        t = am.backTexture(backIndex_);
+        t = am.backTexture(bi);
     }
     if (t) {
         sprite_.setTexture(*t, true);

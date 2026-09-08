@@ -53,6 +53,9 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
         bg_.setScale(sx, sy);
     }
 
+    // 每局开局:随机掷一种牌背颜色(本局所有牌背统一,三种素材轮流使用)
+    AssetManager::instance().rollBack();
+
     // 标题:第几局 + 底注(金色;房间名已在主菜单显示,这里从简)
     char title[64];
     std::snprintf(title, sizeof(title), "第 %d 局 · 底注 %d",
