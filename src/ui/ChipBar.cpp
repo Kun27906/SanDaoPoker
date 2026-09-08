@@ -21,15 +21,6 @@ void ChipBar::setPosition(const sf::Vector2f& pos) {
     pos_ = pos;
 }
 
-int ChipBar::pickChipIdx(int balance) const {
-    int a = balance < 0 ? -balance : balance;
-    if (a >= 100) return 4;
-    if (a >= 50) return 3;
-    if (a >= 10) return 2;
-    if (a >= 5) return 1;
-    return 0;
-}
-
 void ChipBar::draw(sf::RenderWindow& win, int balance) {
     sf::FloatRect box(pos_, sf::Vector2f(W, H));
 
@@ -53,9 +44,8 @@ void ChipBar::draw(sf::RenderWindow& win, int balance) {
     border.setOutlineThickness(2.f);
     win.draw(border);
 
-    // 3. 左端筹码图标(约 36x36, 居中于左端)
-    int idx = pickChipIdx(balance);
-    if (const sf::Texture* t = AssetManager::instance().chipTexture(idx)) {
+    // 3. 左端筹码图标(按余额所在区间档位取素材)
+    if (const sf::Texture* t = AssetManager::instance().chipForAmount(balance)) {
         sf::Sprite chip(*t);
         float scale = 36.f / t->getSize().x;
         chip.setScale(scale, scale);

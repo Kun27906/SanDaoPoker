@@ -23,7 +23,7 @@ public:
     // 正面/牌背
     void setFaceUp(bool up) { faceUp_ = up; }
     bool isFaceUp() const { return faceUp_; }
-    // 牌背颜色:0=红 1=蓝 2=黑(仅牌背时有效)
+    // 牌背颜色:0=红 1=蓝 2=黑; 默认 -1 = 跟随 AssetManager 当前局随机色
     void setBackIndex(int idx) { backIndex_ = idx; }
 
     void setPosition(const sf::Vector2f& p);
@@ -42,7 +42,7 @@ private:
     Card card_{};              // A 成员的牌对象
     bool joker_ = false;
     bool faceUp_ = true;
-    int backIndex_ = 0;
+    int backIndex_ = -1;   // -1 = 跟随 AssetManager 当前局随机牌背色
     float scale_ = 1.f;
     sf::Sprite sprite_;
     sf::RectangleShape placeholder_;  // 无贴图时的占位块

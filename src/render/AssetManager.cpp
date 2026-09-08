@@ -1,5 +1,9 @@
 #include "render/AssetManager.h"
 #include <cstdio>
+#include <cstdlib>
+#include <climits>
+#include <filesystem>
+#include <random>
 
 AssetManager& AssetManager::instance() {
     static AssetManager inst;
@@ -114,14 +118,38 @@ bool AssetManager::loadMiscTextures() {
             std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", path);
         }
     }
-    // 筹码图标(chip_1/5/10/50/100)
+    // 筹码图标(区间命名,自动扫描 assets/ui/chips/chip_*.png)
+    //   格式: chip_<min>-<max>.png | chip_-<max>.png(无下界) | chip_<min>-.png(无上界)
     {
-        const int vals[5] = {1, 5, 10, 50, 100};
-        for (int i = 0; i < 5; i++) {
-            char path[128];
-            std::snprintf(path, sizeof(path), "assets/ui/chips/chip_%d.png", vals[i]);
-            if (!chipTex_[i].loadFromFile(path)) {
-                std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", path);
+        chipDefs_.clear();
+        namespace fs = std::filesystem;
+        std::error_code ec;
+        if (fs::exists("assets/ui/chips", ec)) {
+            for (auto& entry : fs::directory_iterator("assets/ui/chips", ec)) {
+                if (!entry.is_regular_file(ec)) continue;
+                if (entry.path().extension() != ".png") continue;
+                std::string stem = entry.path().stem().string();   // "chip_-1000"
+                if (stem.rfind("chip_", 0) != 0) continue;
+                std::string range = stem.substr(5);                // "-1000" / "1000-2000" / "15000-"
+                int lo = INT_MIN, hi = INT_MAX;
+                std::size_t dash = range.find('-');
+                if (dash == std::string::npos) {
+                    lo = hi = std::atoi(range.c_str());
+                } else {
+                    std::string a = range.substr(0, dash);   // 空=无下界
+                    std::string b = range.substr(dash + 1);  // 空=无上界
+                    if (!a.empty()) lo = std::atoi(a.c_str());
+                    if (!b.empty()) hi = std::atoi(b.c_str());
+                }
+                ChipDef def;
+                def.lo = lo;
+                def.hi = hi;
+                if (def.tex.loadFromFile(entry.path().string())) {
+                    chipDefs_.push_back(def);
+                } else {
+                    std::fprintf(stderr, "[AssetManager] 加载失败: %s\n",
+                                 entry.path().string().c_str());
+                }
             }
         }
     }
@@ -144,9 +172,24 @@ const sf::Texture* AssetManager::cardTexture(Suit s, Rank r) const {
     return t.getSize().x > 0 ? &t : nullptr;
 }
 
-const sf::Texture* AssetManager::chipTexture(int idx) const {
-    if (idx < 0 || idx > 4) return nullptr;
-    return chipTex_[idx].getSize().x > 0 ? &chipTex_[idx] : nullptr;
+const sf::Texture* AssetManager::chipForAmount(int amount) const {
+    // 区间规则: lo <= amount < hi (下含上不含); 找到第一个命中区间
+    for (const ChipDef& d : chipDefs_) {
+        if (amount >= d.lo && amount < d.hi) {
+            return d.tex.getSize().x > 0 ? &d.tex : nullptr;
+        }
+    }
+    // 兜底:返回第一张(理论不可达,区间应覆盖全值域)
+    if (!chipDefs_.empty()) {
+        return chipDefs_.front().tex.getSize().x > 0 ? &chipDefs_.front().tex : nullptr;
+    }
+    return nullptr;
+}
+
+void AssetManager::rollBack() {
+    static std::mt19937 rng(std::random_device{}());
+    std::uniform_int_distribution<int> dist(0, 2);
+    backRoll_ = dist(rng);
 }
 
 const sf::Texture* AssetManager::backTexture(int index) const {
