@@ -2,7 +2,6 @@
 #include "render/AssetManager.h"
 #include "render/SoundManager.h"
 #include "render/SceneManager.h"
-#include "ui/FontUtil.h"
 
 namespace {
 constexpr float WW = 1280.f;
@@ -10,18 +9,32 @@ constexpr float WH = 800.f;
 constexpr float BTN = 40.f;          // 左上角键尺寸
 constexpr float PAD = 48.f;          // 键间距
 
-// 弹窗几何
+// 弹窗几何(加高: 440 -> 560, 容纳规则按钮/规则正文)
 constexpr float PW = 680.f;
-constexpr float PH = 440.f;
+constexpr float PH = 560.f;
 constexpr float PL = (WW - PW) / 2.f;   // 300
-constexpr float PT = (WH - PH) / 2.f;   // 180
+constexpr float PT = (WH - PH) / 2.f;   // 120
 
-// 音量行几何(弹窗内)
-constexpr float ROW_Y = PT + 150.f;          // 音量行中心 y
+// 主菜单页布局
+constexpr float ROW_Y = PT + 200.f;          // 音量行中心 y
 constexpr float VOL_X = PL + 64.f;           // soundSetting 图标中心 x
 constexpr float TRACK_L = PL + 150.f;        // 滑轨左端
 constexpr float TRACK_W = 410.f;             // 滑轨长度
 constexpr float KNOB = 34.f;                 // slider 显示尺寸
+
+// 游戏规则速览(干练,按《项目游戏规则.docx》+ 现行机制总结; 每行 <= 30 字)
+const char* RULES_TEXT =
+    "【游戏目标】9 张手牌分成头/中/尾三道，逐道比大小，赢得越多越好。\n"
+    "【牌型大小】豹子>同花顺>金花>顺子>对子>散牌。\n"
+    "【特殊牌型】异色 2-3-5 可赢豹子；大王可变任意红牌，小王可变任意黑牌。\n"
+    "【下注】每局每人下注金 1 份，总池=人数x注金，均分三小池。\n"
+    "【对局流程】下注->发 9 张->限时 25 秒分三道并交牌。\n"
+    "【比牌结算】三道依次比牌，胜者取对应小池，打满轮次结算本场。\n"
+    "【入场资格】余额不足房间第一局注金时，不可进入该房间。\n"
+    "【筹码显示】右上角筹码条图标随余额档位变化；每局牌背三色随机。\n"
+    "【逃跑】一局结算后可逃跑提前结束本场，罚 100 筹码。\n"
+    "【踢出】每局后余额不足下一局注金将被踢出本场（不扣费）。\n"
+    "【破产】余额低于 100 判定破产，返回大厅时自动补足至 500。";
 }
 
 GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
@@ -67,10 +80,11 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnClose_.setPosition(sf::Vector2f(PL + PW - 60.f, PT + 20.f));
     btnClose_.setCallback([this]() { closePopup(); });
 
-    // 音量行
+    // ---- 主菜单页: 音量行 ----
     btnVolIcon_.setTexture(am.icon("soundSetting"));
     btnVolIcon_.setSize(46.f);
     btnVolIcon_.setPosition(sf::Vector2f(VOL_X - 23.f, ROW_Y - 23.f));
+    btnVolIcon_.setCallback([this]() { toggleMute(); });   // 点击图标 = 静音切换
 
     trackRect_ = sf::FloatRect(TRACK_L, ROW_Y - 5.f, TRACK_W, 10.f);
     track_.setSize(sf::Vector2f(TRACK_W, 10.f));
@@ -85,8 +99,32 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     knob_.setTexture(am.icon("slider"));
     knob_.setSize(KNOB);
 
+    // ---- 主菜单页: 游戏规则按钮 ----
+    btnRules_.setText("游戏规则");
+    btnRules_.setPosition(sf::Vector2f(PL + 100.f, PT + PH - 130.f));
+    btnRules_.setSize(sf::Vector2f(PW - 200.f, 56.f));
+    btnRules_.setCallback([this]() { showRulesPage(); });
+
+    // ---- 规则页: 标题/正文/返回 ----
+    rulesTitle_.setText("游戏规则");
+    rulesTitle_.setCharacterSize(30);
+    rulesTitle_.setColor(sf::Color(255, 220, 130));
+    rulesTitle_.centerOrigin();
+    rulesTitle_.setPosition(sf::Vector2f(WW / 2.f, PT + 52.f));
+
+    rulesText_.setText(RULES_TEXT);
+    rulesText_.setCharacterSize(19);
+    rulesText_.setColor(sf::Color(230, 230, 230));
+    rulesText_.setPosition(sf::Vector2f(PL + 44.f, PT + 110.f));
+
+    btnRulesBack_.setText("返回");
+    btnRulesBack_.setPosition(sf::Vector2f(WW / 2.f - 80.f, PT + PH - 96.f));
+    btnRulesBack_.setSize(sf::Vector2f(160.f, 48.f));
+    btnRulesBack_.setCallback([this]() { showMainPage(); });
+
     // 初始音量(默认 100,与系统音量 0~100 刻度一致)
     vol_ = static_cast<float>(SoundManager::instance().volume());
+    savedVol_ = vol_;
     updateKnob();
 }
 
@@ -109,26 +147,34 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
         // 事件坐标 -> 渲染逻辑坐标(高 DPI 下必须映射,否则点击错位)
         sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseButton.x,
                                                             e.mouseButton.y));
-        // 点击滑轨/滑块 -> 开始拖动(并跳转到该位置)
-        float hw = KNOB / 2.f + 8.f;
-        sf::FloatRect hit(trackRect_.left - hw, ROW_Y - hw, trackRect_.width + hw * 2.f, hw * 2.f);
-        if (hit.contains(mp)) {
-            dragging_ = true;
-            setVolumeFromMouse(mp.x);
+        if (showRules_) {
+            // 规则页: 点击不作用于滑轨(轨道只属于主菜单页)
+        } else {
+            // 主菜单页: 点击滑轨/滑块 -> 开始拖动(并跳转到该位置)
+            float hw = KNOB / 2.f + 8.f;
+            sf::FloatRect hit(trackRect_.left - hw, ROW_Y - hw,
+                              trackRect_.width + hw * 2.f, hw * 2.f);
+            if (hit.contains(mp)) {
+                dragging_ = true;
+                setVolumeFromMouse(mp.x);
+            }
         }
     } else if (e.type == sf::Event::MouseButtonReleased &&
                e.mouseButton.button == sf::Mouse::Left) {
         dragging_ = false;
-    } else if (e.type == sf::Event::MouseMoved && dragging_) {
+    } else if (e.type == sf::Event::MouseMoved && dragging_ && !showRules_) {
         sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseMove.x,
                                                             e.mouseMove.y));
         setVolumeFromMouse(mp.x);
     }
-    // 音量图标视觉随音量切换(0 -> soundOff)
-    AssetManager& am = AssetManager::instance();
-    btnVolIcon_.setTexture(am.icon(vol_ <= 0.f ? "soundOff" : "soundSetting"));
 
     btnClose_.handleEvent(e, win);
+    if (showRules_) {
+        btnRulesBack_.handleEvent(e, win);
+    } else {
+        btnVolIcon_.handleEvent(e, win);   // 点音量图标 = 静音切换
+        btnRules_.handleEvent(e, win);
+    }
     return true;   // 事件已消耗
 }
 
@@ -154,8 +200,16 @@ void GlobalHud::draw(sf::RenderWindow& win) {
     win.draw(ring);
     btnClose_.draw(win);
 
-    // 标题
-    TextBox ttl("菜单", sf::Vector2f(WW / 2.f, PT + 42.f), 28);
+    if (showRules_) {
+        // ---- 规则页 ----
+        rulesTitle_.draw(win);
+        rulesText_.draw(win);
+        btnRulesBack_.draw(win);
+        return;
+    }
+
+    // ---- 主菜单页 ----
+    TextBox ttl("菜单", sf::Vector2f(WW / 2.f, PT + 52.f), 28);
     ttl.setColor(sf::Color(255, 220, 130));
     ttl.centerOrigin();
     ttl.draw(win);
@@ -169,32 +223,55 @@ void GlobalHud::draw(sf::RenderWindow& win) {
     win.draw(trackFill_);
     knob_.draw(win);
 
-    // 说明文字
-    TextBox tip("拖动滑块调节所有声音大小", sf::Vector2f(TRACK_L + TRACK_W / 2.f, ROW_Y + 70.f), 18);
-    tip.setColor(sf::Color(215, 215, 215));
+    TextBox tip("拖动滑块或点击左侧图标调节所有声音大小",
+                sf::Vector2f(TRACK_L + TRACK_W / 2.f, ROW_Y + 62.f), 17);
+    tip.setColor(sf::Color(190, 190, 190));
     tip.centerOrigin();
     tip.draw(win);
+
+    btnRules_.draw(win);
 }
 
 void GlobalHud::openPopup() {
     popupOpen_ = true;
+    showRules_ = false;   // 每次打开回到主菜单页
 }
 
 void GlobalHud::closePopup() {
     popupOpen_ = false;
+    showRules_ = false;
     dragging_ = false;
 }
+
+void GlobalHud::showRulesPage() { showRules_ = true; dragging_ = false; }
+void GlobalHud::showMainPage()  { showRules_ = false; }
 
 void GlobalHud::updateKnob() {
     float x = TRACK_L + vol_ / 100.f * TRACK_W - KNOB / 2.f;
     knob_.setPosition(sf::Vector2f(x, ROW_Y - KNOB / 2.f));
 }
 
+void GlobalHud::setVolume(int v) {
+    if (v < 0) v = 0;
+    if (v > 100) v = 100;
+    vol_ = static_cast<float>(v);
+    SoundManager::instance().setVolume(v);
+    updateKnob();
+}
+
 void GlobalHud::setVolumeFromMouse(float mx) {
     float t = (mx - TRACK_L) / TRACK_W;
     if (t < 0.f) t = 0.f;
     if (t > 1.f) t = 1.f;
-    vol_ = t * 100.f;
-    SoundManager::instance().setVolume(static_cast<int>(vol_));
-    updateKnob();
+    setVolume(static_cast<int>(t * 100.f));
+}
+
+void GlobalHud::toggleMute() {
+    if (vol_ > 0.f) {
+        savedVol_ = vol_;        // 记住当前音量
+        setVolume(0);            // 静音:滑块滑到最左,图标自动变 soundOff
+    } else {
+        int restore = static_cast<int>(savedVol_ > 0.f ? savedVol_ : 100.f);
+        setVolume(restore);      // 恢复
+    }
 }
