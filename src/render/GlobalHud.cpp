@@ -106,8 +106,9 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     // ---- 弹窗打开: 拦截一切,只处理弹窗 ----
     if (e.type == sf::Event::MouseButtonPressed &&
         e.mouseButton.button == sf::Mouse::Left) {
-        sf::Vector2f mp(static_cast<float>(e.mouseButton.x),
-                        static_cast<float>(e.mouseButton.y));
+        // 事件坐标 -> 渲染逻辑坐标(高 DPI 下必须映射,否则点击错位)
+        sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseButton.x,
+                                                            e.mouseButton.y));
         // 点击滑轨/滑块 -> 开始拖动(并跳转到该位置)
         float hw = KNOB / 2.f + 8.f;
         sf::FloatRect hit(trackRect_.left - hw, ROW_Y - hw, trackRect_.width + hw * 2.f, hw * 2.f);
@@ -119,7 +120,9 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
                e.mouseButton.button == sf::Mouse::Left) {
         dragging_ = false;
     } else if (e.type == sf::Event::MouseMoved && dragging_) {
-        setVolumeFromMouse(static_cast<float>(e.mouseMove.x));
+        sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseMove.x,
+                                                            e.mouseMove.y));
+        setVolumeFromMouse(mp.x);
     }
     // 音量图标视觉随音量切换(0 -> soundOff)
     AssetManager& am = AssetManager::instance();

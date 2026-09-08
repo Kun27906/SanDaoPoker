@@ -1,25 +1,24 @@
 #include "ui/IconButton.h"
 #include "render/SoundManager.h"
 
+// 窗口物理像素 -> 渲染逻辑坐标(与 Button 一致;高 DPI/缩放下不失真)
+static sf::Vector2f mousePos(const sf::RenderWindow& win) {
+    return win.mapPixelToCoords(sf::Mouse::getPosition(win));
+}
+
 void IconButton::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     if (!visible_ || !tex_) return;
     if (e.type == sf::Event::MouseMoved) {
-        sf::Vector2i mp = sf::Mouse::getPosition(win);
-        hovered_ = contains(sf::Vector2f(static_cast<float>(mp.x),
-                                         static_cast<float>(mp.y)));
+        hovered_ = contains(mousePos(win));
     } else if (e.type == sf::Event::MouseButtonPressed &&
                e.mouseButton.button == sf::Mouse::Left) {
-        sf::Vector2i mp = sf::Mouse::getPosition(win);
-        if (contains(sf::Vector2f(static_cast<float>(mp.x),
-                                  static_cast<float>(mp.y)))) {
+        if (contains(mousePos(win))) {
             pressed_ = true;
         }
     } else if (e.type == sf::Event::MouseButtonReleased &&
                e.mouseButton.button == sf::Mouse::Left) {
         if (pressed_) {
-            sf::Vector2i mp = sf::Mouse::getPosition(win);
-            if (contains(sf::Vector2f(static_cast<float>(mp.x),
-                                      static_cast<float>(mp.y)))) {
+            if (contains(mousePos(win))) {
                 SoundManager::instance().playClick();
                 if (callback_) callback_();
             }
