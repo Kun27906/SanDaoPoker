@@ -36,6 +36,7 @@ void SceneManager::handleEvent(const sf::Event& e, const sf::RenderWindow& win) 
 }
 
 void SceneManager::update(float dt) {
+    if (hud_) hud_->update(dt);   // 全局 UI(两段确认计时等)
     if (current_) current_->update(dt);
 }
 
