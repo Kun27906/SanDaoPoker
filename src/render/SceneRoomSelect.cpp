@@ -96,8 +96,13 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
 }
 
 void SceneRoomSelect::refreshColors() {
+    const int bal = Account::instance().balance();
     for (int i = 0; i < roomCount_; i++) {
-        if (i == selected_) {
+        const RoomConfig& cfg = ROOM_CONFIGS[roomIndex_[i]];
+        if (bal < cfg.ante) {
+            // 余额不足该房间第一局注金: 灰色(不可进入,点击仍弹提示)
+            roomBtns_[i].setColors(sf::Color(88, 92, 104), sf::Color(104, 108, 122), sf::Color(66, 70, 82));
+        } else if (i == selected_) {
             roomBtns_[i].setColors(sf::Color(46, 160, 80), sf::Color(70, 190, 100), sf::Color(30, 120, 55));
         } else {
             roomBtns_[i].setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
