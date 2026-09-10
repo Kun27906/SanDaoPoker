@@ -16,6 +16,8 @@ public:
     void setRadius(float r) { r_ = r; updateText(); }        // 圆半径(控制整体大小)
     // 名牌最小宽度(0=仅随昵称自适应); 本人头像可设较大值以预留更长昵称空间
     void setMinPlateWidth(float w) { minPlateW_ = w; }
+    // 本人样式: 名牌与圆心共线且昵称居中于可见区; 他人(false): 名牌置于圆环右下角
+    void setSelfStyle(bool s) { selfStyle_ = s; }
     float radius() const { return r_; }
     float charSize() const { return cs_; }
     sf::FloatRect getBounds() const;                          // 圆环+名牌整体范围(布局用)
@@ -29,6 +31,7 @@ private:
     float r_ = 26.f;
     float cs_ = 14.f;
     float minPlateW_ = 0.f;    // 名牌最小宽度(0=纯自适应)
+    bool  selfStyle_ = false;  // true=本人(名牌与圆心共线, 昵称居中于可见区)
     sf::Text text_;
     bool fontReady_ = false;
 };
