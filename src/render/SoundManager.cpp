@@ -23,7 +23,6 @@ void SoundManager::loadAll() {
     loadBuffer(CHIP,    "assets/sounds/chip.ogg");
     loadBuffer(WIN,     "assets/sounds/win.ogg");
     loadBuffer(LOSE,    "assets/sounds/lose.ogg");
-    loadBuffer(SHUFFLE, "assets/sounds/shuffle.ogg");
     loadBuffer(BET,     "assets/sounds/bet.ogg");
     // BGM(MP3 整曲,SoundBuffer 整曲载入后循环)
     loadBuffer(BGM_MENU, "assets/sounds/bgm_menu.mp3");
@@ -42,7 +41,6 @@ void SoundManager::playFlip()    { play(FLIP); }
 void SoundManager::playChip()    { play(CHIP); }
 void SoundManager::playWin()     { play(WIN); }
 void SoundManager::playLose()    { play(LOSE); }
-void SoundManager::playShuffle() { play(SHUFFLE); }
 void SoundManager::playBet()     { play(BET); }
 
 // ---- BGM ----

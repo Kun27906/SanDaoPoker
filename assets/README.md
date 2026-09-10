@@ -45,15 +45,15 @@ cards/Jokers/big.png       大王（红色 JOKER，万能红花色）
 
 | 文件 | 用途 | 播放时机 |
 |------|------|----------|
-| `deal.ogg` | 发牌 | 进入组牌场景 |
-| `flip.ogg` | 翻牌 | 进入比牌场景 |
+| `deal.ogg` | 发牌 | 发牌动画(逐张) |
+| `flip.ogg` | 翻牌 | 比牌翻牌 / 发牌后手牌统一翻转 |
 | `chip.ogg` | 筹码 | 进入结算场景 |
 | `win.ogg` / `lose.ogg` | 胜负 | 结算判定（后续接入） |
-| `shuffle.ogg` | 洗牌 | 备用 |
 | `bet.ogg` | 下注 | 备用 |
 | `click.ogg` | 按钮点击 | 所有按钮通用 |
 
 接入：`SoundManager`（单例）加载与播放，`Button` 点击、`SceneManager` 场景切换已自动触发。
+（注：洗牌音效 `shuffle.ogg` 已按设计决定移除——舍弃洗牌动画。）
 
 素材来源：poker_pack（CC0，筹码/桌），Kenney UI Pack（CC0，按钮），Kenney Game Icons（CC0，标记图标），[SVG-cards](https://github.com/htdebeer/SVG-cards)（LGPL-2.1，牌面）。
 
