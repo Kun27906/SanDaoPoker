@@ -25,8 +25,9 @@ constexpr float TRACK_W = 410.f;             // 滑轨长度
 constexpr float KNOB = 34.f;                 // slider 显示尺寸
 
 // 开发者模式弹窗布局(与主菜单同尺寸)
-constexpr float DEV_BTN_Y = PT + 250.f;           // 启用/关闭按钮 y(中心)
-constexpr float DEV_INPUT_Y = PT + 150.f;         // 输入框中心 y
+constexpr float DEV_BTN_Y = PT + 250.f;           // 未启用: [启用开发者模式] 按钮中心 y
+constexpr float DEV_BTN_Y_ON = PT + PH - 74.f;    // 已启用: [关闭开发者模式] 按钮下移居中(不压滑条)
+constexpr float DEV_INPUT_Y = PT + 165.f;         // 输入框中心 y
 constexpr float DEV_INPUT_W = 380.f;
 constexpr float DEV_INPUT_H = 54.f;
 constexpr float DEV_ROW_Y = PT + 280.f;           // dev 滑条行中心 y
@@ -142,6 +143,7 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
             devInputFocus_ = false;
             btnDevToggle_.setText("启用开发者模式");
             btnDevToggle_.setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
+            btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f, DEV_BTN_Y - 30.f));
         } else {
             // 两段确认: 第一次进入确认态, 5 秒内再点一次才真正启用
             if (!devArm_) {
@@ -156,6 +158,7 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
                 devInputFocus_ = false;
                 btnDevToggle_.setText("关闭开发者模式");
                 btnDevToggle_.setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
+                btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f, DEV_BTN_Y_ON - 30.f));   // 下移居中
             }
         }
     });
@@ -369,7 +372,7 @@ void GlobalHud::drawDevPopup(sf::RenderWindow& win) {
 
     // 输入框(聚焦显示编辑串; 未聚焦显示当前余额)
     win.draw(devInputBox_);
-    TextBox label("直接输入筹码数（0 ~ 100000）", sf::Vector2f(WW / 2.f, DEV_INPUT_Y - DEV_INPUT_H / 2.f - 20.f), 16);
+    TextBox label("直接输入筹码数（0 ~ 100000）", sf::Vector2f(WW / 2.f, DEV_INPUT_Y - DEV_INPUT_H / 2.f - 18.f), 16);
     label.setColor(sf::Color(180, 190, 220));
     label.centerOrigin();
     label.draw(win);
@@ -416,6 +419,10 @@ void GlobalHud::openDevPopup() {
     devArmTimer_ = 0.f;
     devInputFocus_ = false;
     devInputStr_.clear();
+    // 按当前启用状态同步按钮文字/位置(启用态按钮在下方居中)
+    btnDevToggle_.setText(devOn_ ? "关闭开发者模式" : "启用开发者模式");
+    btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f,
+                                           (devOn_ ? DEV_BTN_Y_ON : DEV_BTN_Y) - 30.f));
 }
 
 void GlobalHud::closePopup() {
