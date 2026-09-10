@@ -53,6 +53,7 @@ set(CORE_SOURCES
     src/core/Player.cpp
     src/core/Round.cpp
     src/core/Room.cpp
+    src/core/NameGen.cpp
 )
 
 set(AI_SOURCES

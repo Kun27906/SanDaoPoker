@@ -2,6 +2,7 @@
 #include "render/AssetManager.h"
 #include "render/Account.h"
 #include "render/SoundManager.h"
+#include "core/NameGen.h"
 #include "ai/AIPlayer.h"
 #include "core/Room.h"
 #include <algorithm>
@@ -45,11 +46,15 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     if (!mgr_->room) {
         mgr_->room = std::make_unique<Room>();
         mgr_->room->setRoomConfig(7);
-        mgr_->room->addPlayer("你", false);
+        std::string used[MAX_PLAYERS];
+        int uc = 0;
+        std::string meName = Account::instance().ensureNickname();
+        used[uc++] = meName;
+        mgr_->room->addPlayer(meName, false);
         for (int i = 1; i < mgr_->room->config.players; i++) {
-            char name[16];
-            std::snprintf(name, sizeof(name), "AI-%d", i);
-            mgr_->room->addPlayer(name, true);
+            std::string nm = makeUniqueNickname(used, uc);
+            used[uc++] = nm;
+            mgr_->room->addPlayer(nm, true);
         }
     }
     // 开局:发牌 + 收底注
