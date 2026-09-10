@@ -1,12 +1,12 @@
 # assets — 游戏资源目录
 
 构建时由 CMake 自动复制到可执行文件所在目录（见根 `CMakeLists.txt`）。
-空目录以 `.gitkeep` 占位，保证克隆后目录结构完整。
 
 | 目录 | 用途 |
 |------|------|
 | `cards/` | 扑克牌贴图：57 张（4 花色 × 13 点数 + 3 种牌背 + 大小王），PNG 高清 338×488 |
-| `ui/` | 界面素材：`backgrounds/` 背景图、`buttons/` 按钮三态图、`chips/` 筹码、`icons/` 图标、`table/` 桌面 |
+| `cards/back/deck_pile_*` | 牌堆堆叠图（红/蓝/黑，689×292，54 层右侧露边）——发牌动画用 |
+| `ui/` | 界面素材：`backgrounds/` 背景图、`buttons/` 按钮三态图、`chips/` 筹码、`icons/` 图标、`table/` 桌面、`avatars/` 头像 |
 | `fonts/` | 字体文件（思源黑体 Source Han Sans SC） |
 | `sounds/` | 音效与背景音乐（发牌/翻牌/筹码/胜负/BGM） |
 
@@ -18,6 +18,8 @@ cards/<suit>/<rank>.png    花色: spades|hearts|clubs|diamonds
 cards/back/<color>.png     牌背: red|blue|black
 cards/Jokers/small.png     小王（黑色 JOKER，万能黑花色）
 cards/Jokers/big.png       大王（红色 JOKER，万能红花色）
+ui/avatars/<任意名>.png    头像图（100×100 方形；加载时自动按内切圆做圆形裁剪，
+                           文件名排序后按序分配给各玩家；无需手动裁圆）
 ```
 
 素材来源：[SVG-cards 4.0](https://github.com/htdebeer/SVG-cards)（LGPL-2.1，经典法式牌面，J/Q/K 带人物画像）。
