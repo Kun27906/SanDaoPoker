@@ -3,6 +3,7 @@
 #include "ui/Button.h"
 #include "ui/TextBox.h"
 #include "ui/ChipBar.h"
+#include "ui/Avatar.h"
 #include <array>
 
 // ====== 第三界面: 选房间(成员C, 原 SceneMenu 重构) ======
@@ -30,6 +31,7 @@ private:
     int selected_ = 0;
     Button btnStart_;
     ChipBar chipBar_;
+    Avatar  selfAvatar_;              // 局外: 本人头像(筹码条左侧)
 
     // 入场资格提示弹窗(余额 < 该房间第一局注金 ante 时点击房间弹出)
     bool notEnough_ = false;

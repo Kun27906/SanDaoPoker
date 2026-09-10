@@ -2,6 +2,7 @@
 #include "render/AssetManager.h"
 #include "render/Account.h"
 #include "render/SoundManager.h"
+#include "core/NameGen.h"
 #include "ai/AIPlayer.h"
 #include "core/Room.h"
 #include <algorithm>
@@ -45,15 +46,22 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     if (!mgr_->room) {
         mgr_->room = std::make_unique<Room>();
         mgr_->room->setRoomConfig(7);
-        mgr_->room->addPlayer("你", false);
+        std::string used[MAX_PLAYERS];
+        int uc = 0;
+        std::string meName = Account::instance().ensureNickname();
+        used[uc++] = meName;
+        mgr_->room->addPlayer(meName, false);
         for (int i = 1; i < mgr_->room->config.players; i++) {
-            char name[16];
-            std::snprintf(name, sizeof(name), "AI-%d", i);
-            mgr_->room->addPlayer(name, true);
+            std::string nm = makeUniqueNickname(used, uc);
+            used[uc++] = nm;
+            mgr_->room->addPlayer(nm, true);
         }
     }
-    // 开局:发牌 + 收底注
-    mgr_->room->startNewRound();
+    // 发牌(洗牌+发牌+收底注)已由 SceneDeal 完成; 此处仅防御: 若未经发牌场景直接进入则补做
+    if (mgr_->room->currentRound == 0) {
+        mgr_->room->startNewRound();
+        AssetManager::instance().rollBack();   // 本局牌背颜色
+    }
 
     // 背景
     if (const sf::Texture* bg = AssetManager::instance().background()) {
@@ -63,8 +71,7 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
         bg_.setScale(sx, sy);
     }
 
-    // 每局开局:随机掷一种牌背颜色
-    AssetManager::instance().rollBack();
+    // 牌背颜色已由 SceneDeal 掷定(本场景不再重置)
 
     // 标题
     char title[64];
@@ -139,6 +146,26 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     countdown_.start();
 
     chipBar_.setPosition(sf::Vector2f(1280.f - 250.f - 20.f, 16.f));
+
+    // 局内头像: 本人左下角, 他人右侧居中(较小)
+    {
+        int pc = mgr_->room->playerCount;
+        int na = pc - 1;
+        if (na < 1) na = 1;
+        const float aiX = 1185.f, aiCY = 470.f, aiGap = 78.f, aiR = 20.f;
+        float totalH = (na - 1) * aiGap;
+        for (int i = 0; i < pc && i < MAX_PLAYERS; i++) {
+            avatars_[i].setNickname(mgr_->room->players[i].name);
+            if (i == 0) {
+                avatars_[i].setRadius(28.f);
+                avatars_[i].setCenter(sf::Vector2f(78.f, 548.f));
+            } else {
+                avatars_[i].setRadius(aiR);
+                avatars_[i].setCenter(sf::Vector2f(
+                    aiX, aiCY - totalH / 2.f + (i - 1) * aiGap));
+            }
+        }
+    }
 }
 
 // ---- 槽位/几何辅助 ----
@@ -482,4 +509,7 @@ void SceneArrange::draw(sf::RenderWindow& win) {
     btnSubmit_.draw(win);
     countdown_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
+    for (int i = 0; i < mgr_->room->playerCount && i < MAX_PLAYERS; i++) {
+        avatars_[i].draw(win);   // 局内头像: 本人左下 / 他人右中
+    }
 }

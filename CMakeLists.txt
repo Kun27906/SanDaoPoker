@@ -53,6 +53,7 @@ set(CORE_SOURCES
     src/core/Player.cpp
     src/core/Round.cpp
     src/core/Room.cpp
+    src/core/NameGen.cpp
 )
 
 set(AI_SOURCES
@@ -68,6 +69,7 @@ set(RENDER_SOURCES
     src/render/SceneTitle.cpp
     src/render/SceneLobby.cpp
     src/render/SceneRoomSelect.cpp
+    src/render/SceneDeal.cpp
     src/render/SceneArrange.cpp
     src/render/SceneBattle.cpp
     src/render/SceneResult.cpp
@@ -81,6 +83,7 @@ set(UI_SOURCES
     src/ui/CountdownBar.cpp
     src/ui/ChipBar.cpp
     src/ui/IconButton.cpp
+    src/ui/Avatar.cpp
 )
 
 # ------------------------------------------------------------

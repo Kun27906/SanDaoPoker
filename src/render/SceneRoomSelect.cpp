@@ -1,6 +1,7 @@
 #include "render/SceneRoomSelect.h"
 #include "render/AssetManager.h"
 #include "render/Account.h"
+#include "core/NameGen.h"
 #include "core/Room.h"
 #include "core/RuleConfig.h"
 #include "ai/AIPlayer.h"
@@ -158,6 +159,10 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     refreshDiffColors();
 
     chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
+    // 局外: 本人头像(筹码条左侧)
+    selfAvatar_.setRadius(26.f);
+    selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 80.f, 40.f));
+    selfAvatar_.setNickname(Account::instance().ensureNickname());
 }
 
 // ---- 难度选择(成员B) ----
@@ -221,17 +226,22 @@ void SceneRoomSelect::startGame() {
     mgr_->room = std::make_unique<Room>();
     if (!mgr_->room->setRoomConfig(roomIndex_[selected_])) return;
 
-    mgr_->room->addPlayer("你", false);
+    // 昵称: 真人取账号存档昵称(无则生成并保存); AI 随机且同场不重名
+    std::string used[MAX_PLAYERS];
+    int uc = 0;
+    std::string meName = Account::instance().ensureNickname();
+    used[uc++] = meName;
+    mgr_->room->addPlayer(meName, false);
     for (int i = 1; i < mgr_->room->config.players; i++) {
-        char name[16];
-        std::snprintf(name, sizeof(name), "AI-%d", i);
-        mgr_->room->addPlayer(name, true);
+        std::string nm = makeUniqueNickname(used, uc);
+        used[uc++] = nm;
+        mgr_->room->addPlayer(nm, true);
     }
     // 入场筹码: 真人与 AI 同起点 = 账号余额
     for (int i = 0; i < mgr_->room->playerCount; i++) {
         mgr_->room->players[i].chips = entryChips;
     }
-    mgr_->changeTo(SceneId::Arrange);
+    mgr_->changeTo(SceneId::Deal);   // 进入发牌动画(之后自动进组牌)
 }
 
 void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
@@ -264,6 +274,7 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     btnDiffOpen_.draw(win);
     btnStart_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
+    selfAvatar_.draw(win);   // 局外本人头像(筹码条左侧)
     if (notEnough_) {                  // 入场资格弹窗
         win.draw(overlay_);
         win.draw(dialog_);
