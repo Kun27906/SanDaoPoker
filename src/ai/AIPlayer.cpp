@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdint>
+#include <cstdlib>
 #include <random>
 #include <thread>
 #include <unordered_map>
@@ -13,6 +14,12 @@
 // ====== 静态成员 ======
 std::vector<float> AIPlayer::s_winrate;
 bool AIPlayer::s_loaded = false;
+
+// ====== 当前难度/风格配置 (未设置时 = 历史默认: Greedy + Balanced + 0.3f) ======
+AIPlayer::Difficulty AIPlayer::s_difficulty = AIPlayer::Difficulty::Greedy;
+AIPlayer::Style AIPlayer::s_style = AIPlayer::Style::Balanced;
+float AIPlayer::s_noise = 0.3f;
+bool AIPlayer::s_profileSet = false;
 
 static const int NUM_COMBO = 24804;     // C(54,3) 全部三张牌组合
 static const int NUM_OPPONENT = 20825;  // C(51,3) 对手组合数(去掉自己的3张)
@@ -333,6 +340,8 @@ void AIPlayer::monteCarloChoose(const Card* hand, int opponents, int order[9], i
 
 // ====== 对外: 决策入口 ======
 void AIPlayer::decideOrder(const Card* hand, int playerCount, Difficulty diff, int order[9]) {
+    // 环境变量覆盖: 仅当设置了 SDQ_AI_DIFFICULTY 时生效
+    if (userProfileSet()) diff = s_difficulty;
     int opponents = playerCount - 1;
     if (opponents < 1) opponents = 1;
 
@@ -473,6 +482,12 @@ void AIPlayer::monteCarloStyled(const Card* hand, int opponents, int order[9],
 void AIPlayer::decideOrderStyled(const Card* hand, int playerCount,
                                  Difficulty diff, Style style, float noise,
                                  int order[9]) {
+    // 环境变量覆盖: 仅当设置了 SDQ_AI_* 时生效(界面接入前验证三档用), 不设则行为与历史完全一致
+    if (userProfileSet()) {
+        diff  = s_difficulty;
+        style = s_style;
+        noise = s_noise;
+    }
     int opponents = playerCount - 1;
     if (opponents < 1) opponents = 1;
     if (diff == Difficulty::Random) {
@@ -508,4 +523,101 @@ int AIPlayer::diversityOf(const Card* hand, int playerCount,
         if (!dup) seen.push_back(key);
     }
     return (int)seen.size();
+}
+
+
+// ====== 难度/风格配置 (界面层接入点: 声明见 include/ai/AIPlayer.h) ======
+void AIPlayer::setProfile(Difficulty d, Style s, float noise) {
+    s_difficulty = d;
+    s_style = s;
+    setNoise(noise);
+    s_profileSet = true;
+}
+
+void AIPlayer::setDifficulty(Difficulty d) { s_difficulty = d; s_profileSet = true; }
+void AIPlayer::setStyle(Style s) { s_style = s; s_profileSet = true; }
+
+void AIPlayer::setNoise(float n) {
+    if (n < 0.0f) n = 0.0f;
+    if (n > 1.0f) n = 1.0f;
+    s_noise = n;
+    s_profileSet = true;
+}
+
+AIPlayer::Difficulty AIPlayer::difficulty() { return s_difficulty; }
+AIPlayer::Style AIPlayer::style() { return s_style; }
+float AIPlayer::noise() { return s_noise; }
+
+int AIPlayer::difficultyCount() { return 3; }
+
+const char* AIPlayer::difficultyKey(Difficulty d) {
+    switch (d) {
+        case Difficulty::Random:     return "random";
+        case Difficulty::MonteCarlo: return "montecarlo";
+        default:                     return "greedy";
+    }
+}
+
+const char* AIPlayer::difficultyName(Difficulty d) {
+    switch (d) {
+        case Difficulty::Random:     return "简单";
+        case Difficulty::MonteCarlo: return "困难";
+        default:                     return "中等";
+    }
+}
+
+// 键名 -> 难度 (英文键, 大小写不敏感; 兼容 0/1/2)
+bool AIPlayer::difficultyFromKey(const std::string& key, Difficulty& out) {
+    std::string k;
+    for (size_t i = 0; i < key.size(); i++) {
+        char c = key[i];
+        if (c >= 'A' && c <= 'Z') c = (char)(c - 'A' + 'a');
+        k.push_back(c);
+    }
+    if (k == "random" || k == "easy" || k == "0") { out = Difficulty::Random; return true; }
+    if (k == "greedy" || k == "normal" || k == "1") { out = Difficulty::Greedy; return true; }
+    if (k == "montecarlo" || k == "mc" || k == "hard" || k == "2") { out = Difficulty::MonteCarlo; return true; }
+    return false;
+}
+
+// 用当前配置决策: 界面层把 decideOrderStyled(...) 换成这一个即可
+void AIPlayer::decideOrderAuto(const Card* hand, int playerCount, int order[9]) {
+    decideOrderStyled(hand, playerCount, s_difficulty, s_style, s_noise, order);
+}
+
+// 环境变量 (SDQ_AI_DIFFICULTY / SDQ_AI_STYLE / SDQ_AI_NOISE) 只在首次调用时读一次
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4996)   // std::getenv: 仅用于可选的调试开关, 非生产路径
+#endif
+bool AIPlayer::applyEnvConfigOnce() {
+    const char* d  = std::getenv("SDQ_AI_DIFFICULTY");
+    const char* st = std::getenv("SDQ_AI_STYLE");
+    const char* nz = std::getenv("SDQ_AI_NOISE");
+    if (!d && !st && !nz) return false;
+    if (d) {
+        Difficulty tmp;
+        if (difficultyFromKey(d, tmp)) s_difficulty = tmp;
+    }
+    if (st) {
+        std::string k(st);
+        for (size_t i = 0; i < k.size(); i++) {
+            if (k[i] >= 'A' && k[i] <= 'Z') k[i] = (char)(k[i] - 'A' + 'a');
+        }
+        if (k == "aggressive") s_style = Style::Aggressive;
+        else if (k == "conservative") s_style = Style::Conservative;
+        else s_style = Style::Balanced;
+    }
+    if (nz) setNoise((float)std::atof(nz));
+    s_profileSet = true;
+    return true;
+}
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+bool AIPlayer::userProfileSet() {
+    static const bool s_envApplied = applyEnvConfigOnce();  // 首次调用时落地环境变量
+    (void)s_envApplied;
+    return s_profileSet;
 }

@@ -38,4 +38,16 @@ private:
     TextBox denyTitle_;
     TextBox denyText_;
     Button btnDenyOk_;
+
+    // ---- 难度选择(成员B 接入: 简单/中等/困难) ----
+    bool diffOpen_ = false;
+    sf::RectangleShape diffDialog_;
+    TextBox diffTitle_;
+    TextBox diffDesc_;
+    std::array<Button, 3> diffBtns_;
+    Button btnDiffOpen_;
+    Button btnDiffClose_;
+    void openDiffPopup();
+    void applyDifficulty(int idx);
+    void refreshDiffColors();
 };

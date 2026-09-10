@@ -3,10 +3,36 @@
 #include "render/Account.h"
 #include "core/Room.h"
 #include "core/RuleConfig.h"
+#include "ai/AIPlayer.h"
 
 namespace {
 constexpr unsigned WW = 1280;
 constexpr unsigned WH = 800;
+
+// ---- 难度选择(成员B): 索引 0/1/2 <-> AIPlayer::Difficulty ----
+AIPlayer::Difficulty diffOf(int idx) {
+    switch (idx) {
+        case 0:  return AIPlayer::Difficulty::Random;
+        case 2:  return AIPlayer::Difficulty::MonteCarlo;
+        default: return AIPlayer::Difficulty::Greedy;
+    }
+}
+
+int indexOfDiff(AIPlayer::Difficulty d) {
+    switch (d) {
+        case AIPlayer::Difficulty::Random:     return 0;
+        case AIPlayer::Difficulty::MonteCarlo: return 2;
+        default:                               return 1;
+    }
+}
+
+const char* diffDescOf(int idx) {
+    switch (idx) {
+        case 0:  return "AI 随机分牌, 基本不算牌 -- 适合熟悉规则/练手";
+        case 2:  return "AI 蒙特卡洛模拟对手后决策, 精算赢池 -- 硬碰硬";
+        default: return "AI 按胜率表贪心分组, 带轻微失误 -- 默认难度";
+    }
+}
 }
 
 SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
@@ -92,7 +118,71 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     btnStart_.setSize(sf::Vector2f(290.f, 58.f));
     btnStart_.setCallback([this]() { startGame(); });
 
+    // ---- 难度选择(成员B): 入口按钮 + 居中弹窗 ----
+    btnDiffOpen_.setPosition(sf::Vector2f(330.f, 590.f));
+    btnDiffOpen_.setSize(sf::Vector2f(150.f, 58.f));
+    btnDiffOpen_.setColors(sf::Color(96, 84, 160), sf::Color(126, 112, 200), sf::Color(70, 60, 122));
+    btnDiffOpen_.setCallback([this]() { openDiffPopup(); });
+
+    const float DW = 620.f, DH = 340.f;
+    const float DX = (WW - DW) / 2.f, DY = (WH - DH) / 2.f;
+    diffDialog_.setSize(sf::Vector2f(DW, DH));
+    diffDialog_.setPosition(sf::Vector2f(DX, DY));
+    diffDialog_.setFillColor(sf::Color(30, 40, 70));
+    diffDialog_.setOutlineColor(sf::Color(150, 130, 255));
+    diffDialog_.setOutlineThickness(3.f);
+
+    diffTitle_.setText("选择 AI 难度");
+    diffTitle_.setCharacterSize(28);
+    diffTitle_.setColor(sf::Color(255, 215, 0));
+    diffTitle_.centerOrigin();
+    diffTitle_.setPosition(sf::Vector2f(WW / 2.f, DY + 46.f));
+
+    for (int i = 0; i < 3; i++) {
+        diffBtns_[i].setText(AIPlayer::difficultyName(diffOf(i)));
+        diffBtns_[i].setPosition(sf::Vector2f(WW / 2.f - 272.5f + i * 190.f, DY + 92.f));
+        diffBtns_[i].setSize(sf::Vector2f(165.f, 60.f));
+        diffBtns_[i].setCallback([this, i]() { applyDifficulty(i); });
+    }
+
+    diffDesc_.setCharacterSize(19);
+    diffDesc_.setColor(sf::Color(232, 232, 232));
+    diffDesc_.centerOrigin();
+    diffDesc_.setPosition(sf::Vector2f(WW / 2.f, DY + 196.f));
+
+    btnDiffClose_.setText("完成");
+    btnDiffClose_.setPosition(sf::Vector2f(WW / 2.f - 80.f, DY + DH - 62.f));
+    btnDiffClose_.setSize(sf::Vector2f(160.f, 46.f));
+    btnDiffClose_.setCallback([this]() { diffOpen_ = false; });
+
+    refreshDiffColors();
+
     chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
+}
+
+// ---- 难度选择(成员B) ----
+void SceneRoomSelect::openDiffPopup() {
+    diffOpen_ = true;
+    refreshDiffColors();
+}
+
+void SceneRoomSelect::applyDifficulty(int idx) {
+    // 三档难度立刻写入 AI 模块(均衡风格 + 0.3 失误率, 保留人味)
+    AIPlayer::setProfile(diffOf(idx), AIPlayer::Style::Balanced, 0.3f);
+    refreshDiffColors();
+}
+
+void SceneRoomSelect::refreshDiffColors() {
+    const int cur = indexOfDiff(AIPlayer::difficulty());
+    for (int i = 0; i < 3; i++) {
+        if (i == cur) {
+            diffBtns_[i].setColors(sf::Color(46, 160, 80), sf::Color(70, 190, 100), sf::Color(30, 120, 55));
+        } else {
+            diffBtns_[i].setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
+        }
+    }
+    diffDesc_.setText(diffDescOf(cur));
+    btnDiffOpen_.setText(std::string("难度: ") + AIPlayer::difficultyName(AIPlayer::difficulty()));
 }
 
 void SceneRoomSelect::refreshColors() {
@@ -145,15 +235,22 @@ void SceneRoomSelect::startGame() {
 }
 
 void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
+    if (diffOpen_) {                   // 难度选择弹窗:只响应弹窗内按钮
+        for (int i = 0; i < 3; i++) diffBtns_[i].handleEvent(e, win);
+        btnDiffClose_.handleEvent(e, win);
+        return;
+    }
     if (notEnough_) {                  // 入场资格弹窗:只响应确定
         btnDenyOk_.handleEvent(e, win);
         return;
     }
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].handleEvent(e, win);
+    btnDiffOpen_.handleEvent(e, win);
     btnStart_.handleEvent(e, win);
 }
 
 void SceneRoomSelect::onHomePressed() {
+    if (diffOpen_) { diffOpen_ = false; return; }   // 难度弹窗打开时先关弹窗
     mgr_->changeTo(SceneId::Lobby);   // home 键返回大厅
 }
 
@@ -164,6 +261,7 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     title_.draw(win);
     hint_.draw(win);
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].draw(win);
+    btnDiffOpen_.draw(win);
     btnStart_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
     if (notEnough_) {                  // 入场资格弹窗
@@ -172,5 +270,13 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
         denyTitle_.draw(win);
         denyText_.draw(win);
         btnDenyOk_.draw(win);
+    }
+    if (diffOpen_) {                   // 难度选择弹窗
+        win.draw(overlay_);
+        win.draw(diffDialog_);
+        diffTitle_.draw(win);
+        for (int i = 0; i < 3; i++) diffBtns_[i].draw(win);
+        diffDesc_.draw(win);
+        btnDiffClose_.draw(win);
     }
 }

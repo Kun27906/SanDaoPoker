@@ -44,6 +44,29 @@ public:
                                   Difficulty diff, Style style, float noise,
                                   int order[9]);
 
+    // ====== 难度/风格配置 (供界面层调用; 界面按钮由成员C接入) ======
+    // 未设置时默认: Greedy + Balanced + 0.3f (与历史行为完全一致)
+    static void setProfile(Difficulty d, Style s, float noise);  // 一键设置(难度按钮直接调这个)
+    static void setDifficulty(Difficulty d);
+    static void setStyle(Style s);
+    static void setNoise(float n);          // 自动夹到 [0,1]
+    static Difficulty difficulty();         // 当前难度
+    static Style style();                   // 当前风格
+    static float noise();                   // 当前失误率
+
+    // 三档难度枚举 (界面层建按钮用)
+    static int difficultyCount();                            // 3
+    static const char* difficultyKey(Difficulty d);          // "random"/"greedy"/"montecarlo"
+    static const char* difficultyName(Difficulty d);         // "随机"/"普通"/"困难"
+    static bool difficultyFromKey(const std::string& key, Difficulty& out);
+
+    // 用"当前配置"决策: 界面层把 decideOrderStyled(...) 换成这一个即可
+    static void decideOrderAuto(const Card* hand, int playerCount, int order[9]);
+
+    // 是否已有"生效配置": 界面调过 setProfile/setDifficulty... 或设了环境变量
+    // 为 true 时 decideOrder/decideOrderStyled 以配置为准(忽略传入的 diff/style/noise)
+    static bool userProfileSet();
+
     // 人性化检验: 同一手牌决策 N 次, 返回出现过的不同分组方案数
     // 理性AI -> 接近 1; 随机AI -> 接近 1680; 人性化AI -> 中间值
     static int diversityOf(const Card* hand, int playerCount,
@@ -63,6 +86,13 @@ public:
 private:
     static std::vector<float> s_winrate;  // 24804 个组合的胜率
     static bool s_loaded;
+
+    // 当前配置 (decideOrderAuto 与环境变量覆盖使用)
+    static Difficulty s_difficulty;
+    static Style s_style;
+    static float s_noise;
+    static bool s_profileSet;             // 是否被界面/环境变量显式设置过
+    static bool applyEnvConfigOnce();     // 首次调用时读一次环境变量
 
     // 牌 -> 全局编号 0~53 (与 Deck 生成顺序一致: 花色x点数, 王=52/53)
     static int cardId(const Card& c);
