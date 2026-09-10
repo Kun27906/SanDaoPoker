@@ -56,3 +56,14 @@ cards/Jokers/big.png       大王（红色 JOKER，万能红花色）
 接入：`SoundManager`（单例）加载与播放，`Button` 点击、`SceneManager` 场景切换已自动触发。
 
 素材来源：poker_pack（CC0，筹码/桌），Kenney UI Pack（CC0，按钮），Kenney Game Icons（CC0，标记图标），[SVG-cards](https://github.com/htdebeer/SVG-cards)（LGPL-2.1，牌面）。
+
+## 牌堆素材(发牌环节)
+
+| 文件 | 说明 |
+|------|------|
+| `ui/table/deck_pile_red.png` | 红背牌堆(54层,右侧逐层露边,每层牌=200×280 原尺寸,689×292) |
+| `ui/table/deck_pile_blue.png` | 蓝背牌堆(同上) |
+| `ui/table/deck_pile_black.png` | 黑背牌堆(同上) |
+
+生成脚本:`tools/gen_deck_pile.py`(改层数/错开量/纸边宽度后重跑即可)
+用途:发牌环节展示牌堆;动画可按"剩余张数"裁剪右侧宽度,或逐帧切换层数。
