@@ -2,8 +2,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <climits>
+#include <cmath>
 #include <filesystem>
 #include <random>
+#include <algorithm>
 
 AssetManager& AssetManager::instance() {
     static AssetManager inst;
@@ -184,6 +186,54 @@ bool AssetManager::loadMiscTextures() {
             }
         }
     }
+    // 头像素材: 自动扫描 assets/ui/avatars/*.png, 加载后按"内切圆"做 alpha 圆形裁剪
+    //   → 得到真正的圆形头像(与 GitHub 头像一致), 方形图四角被切除(非遮挡)
+    {
+        avatarTex_.clear();
+        namespace fs = std::filesystem;
+        std::error_code ec;
+        std::vector<std::string> paths;
+        if (fs::exists("assets/ui/avatars", ec)) {
+            for (auto& entry : fs::directory_iterator("assets/ui/avatars", ec)) {
+                if (!entry.is_regular_file(ec)) continue;
+                if (entry.path().extension() != ".png") continue;
+                paths.push_back(entry.path().string());
+            }
+        }
+        std::sort(paths.begin(), paths.end());
+        for (const std::string& p : paths) {
+            sf::Image img;
+            if (!img.loadFromFile(p)) {
+                std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", p.c_str());
+                continue;
+            }
+            // ---- 圆形裁剪: 距中心 > 半径的像素 alpha 置 0(边缘 1px 羽化抗锯齿) ----
+            const unsigned w = img.getSize().x, h = img.getSize().y;
+            const float ccx = (w - 1) * 0.5f, ccy = (h - 1) * 0.5f;
+            const float rad = std::min(w, h) * 0.5f;
+            for (unsigned y = 0; y < h; y++) {
+                for (unsigned x = 0; x < w; x++) {
+                    float dx = static_cast<float>(x) - ccx;
+                    float dy = static_cast<float>(y) - ccy;
+                    float d = std::sqrt(dx * dx + dy * dy);
+                    float inside = rad - d;             // >0 = 圆内
+                    if (inside <= 0.f) {
+                        sf::Color col = img.getPixel(x, y);
+                        col.a = 0;
+                        img.setPixel(x, y, col);
+                    } else if (inside < 1.f) {
+                        sf::Color col = img.getPixel(x, y);
+                        col.a = static_cast<sf::Uint8>(col.a * inside);
+                        img.setPixel(x, y, col);
+                    }
+                }
+            }
+            sf::Texture t;
+            if (t.loadFromImage(img)) {
+                avatarTex_.push_back(std::move(t));
+            }
+        }
+    }
     return true;
 }
 
@@ -232,6 +282,13 @@ const sf::Texture* AssetManager::icon(const std::string& name) const {
 const sf::Texture* AssetManager::deckPile(int backIndex) const {
     if (backIndex < 0 || backIndex > 2) backIndex = 0;
     return pileTex_[backIndex].getSize().x > 0 ? &pileTex_[backIndex] : nullptr;
+}
+
+const sf::Texture* AssetManager::avatarTexture(int idx) const {
+    if (avatarTex_.empty()) return nullptr;
+    int n = static_cast<int>(avatarTex_.size());
+    int i = ((idx % n) + n) % n;                  // 取模循环
+    return avatarTex_[i].getSize().x > 0 ? &avatarTex_[i] : nullptr;
 }
 
 const sf::Texture* AssetManager::backTexture(int index) const {

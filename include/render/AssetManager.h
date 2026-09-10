@@ -44,6 +44,8 @@ public:
     const sf::Texture* icon(const std::string& name) const;
     // 牌堆素材(发牌动画): 按牌背色 0=红 1=蓝 2=黑 取 689x292 堆叠图(54层右侧露边)
     const sf::Texture* deckPile(int backIndex) const;
+    // 头像素材(assets/ui/avatars/*.png 自动扫描, 100x100): 按序号取(取模循环)
+    const sf::Texture* avatarTexture(int idx) const;
 
     bool isLoaded() const { return loaded_; }
 
@@ -65,6 +67,7 @@ private:
     // 界面图标:文件名 -> 纹理(自动扫描 assets/ui/icons/*.png)
     std::map<std::string, sf::Texture> icons_;
     sf::Texture pileTex_[3];             // 牌堆堆叠图(发牌动画, 红/蓝/黑)
+    std::vector<sf::Texture> avatarTex_; // 头像图(自动扫描 assets/ui/avatars/*.png)
     int backRoll_ = 0;                   // 当前局牌背颜色(0红 1蓝 2黑)
     bool loaded_ = false;
 };

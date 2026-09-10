@@ -85,6 +85,7 @@ SceneDeal::SceneDeal(SceneManager* mgr) : mgr_(mgr) {
     int pc = mgr_->room->playerCount;
     for (int i = 0; i < pc && i < MAX_PLAYERS; i++) {
         avatars_[i].setNickname(mgr_->room->players[i].name);
+        avatars_[i].setTexture(AssetManager::instance().avatarTexture(i));   // 头像素材(占位色块)
         if (i == 0) {
             avatars_[i].setRadius(SELF_R);
             avatars_[i].setMinPlateWidth(150.f);   // 本人: 预留更长昵称空间

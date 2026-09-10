@@ -44,6 +44,7 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
     selfAvatar_.setRadius(26.f);
     selfAvatar_.setMinPlateWidth(150.f);   // 预留更长昵称空间
     selfAvatar_.setSelfStyle(true);        // 名牌与圆心共线, 昵称居中
+    selfAvatar_.setTexture(AssetManager::instance().avatarTexture(0));   // 本人头像素材
     selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 190.f, 40.f));
     selfAvatar_.setNickname(Account::instance().ensureNickname());
 
