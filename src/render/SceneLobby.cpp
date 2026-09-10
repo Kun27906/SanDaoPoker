@@ -42,7 +42,8 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
     chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
     // 局外: 本人头像(筹码条左侧)
     selfAvatar_.setRadius(26.f);
-    selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 80.f, 40.f));
+    selfAvatar_.setMinPlateWidth(150.f);   // 预留更长昵称空间
+    selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 190.f, 40.f));
     selfAvatar_.setNickname(Account::instance().ensureNickname());
 
     // 重置账号(右下角; 两段确认: 第一次点击进入确认态, 再点一次执行)

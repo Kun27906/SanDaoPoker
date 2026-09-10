@@ -105,6 +105,7 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
 
     // 局内: 本人头像(左下角; 他人由各自座位体现)
     selfAvatar_.setRadius(26.f);
+    selfAvatar_.setMinPlateWidth(150.f);   // 本人: 预留更长昵称空间
     selfAvatar_.setCenter(sf::Vector2f(70.f, 690.f));
     if (room) selfAvatar_.setNickname(room->players[0].name);
 
