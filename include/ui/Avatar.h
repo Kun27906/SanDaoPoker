@@ -14,6 +14,8 @@ public:
     void setTexture(const sf::Texture* t) { tex_ = t; }
     void setCenter(const sf::Vector2f& c) { c_ = c; }        // 圆心
     void setRadius(float r) { r_ = r; updateText(); }        // 圆半径(控制整体大小)
+    // 名牌最小宽度(0=仅随昵称自适应); 本人头像可设较大值以预留更长昵称空间
+    void setMinPlateWidth(float w) { minPlateW_ = w; }
     float radius() const { return r_; }
     float charSize() const { return cs_; }
     sf::FloatRect getBounds() const;                          // 圆环+名牌整体范围(布局用)
@@ -26,6 +28,7 @@ private:
     sf::Vector2f c_{0.f, 0.f};
     float r_ = 26.f;
     float cs_ = 14.f;
+    float minPlateW_ = 0.f;    // 名牌最小宽度(0=纯自适应)
     sf::Text text_;
     bool fontReady_ = false;
 };

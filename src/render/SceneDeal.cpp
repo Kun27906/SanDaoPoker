@@ -87,6 +87,7 @@ SceneDeal::SceneDeal(SceneManager* mgr) : mgr_(mgr) {
         avatars_[i].setNickname(mgr_->room->players[i].name);
         if (i == 0) {
             avatars_[i].setRadius(SELF_R);
+            avatars_[i].setMinPlateWidth(150.f);   // 本人: 预留更长昵称空间
             avatars_[i].setCenter(sf::Vector2f(SELF_CX, SELF_CY));
         } else {
             avatars_[i].setRadius(AI_R);
@@ -124,28 +125,28 @@ void SceneDeal::spawnNextCard() {
     int round = dealt_ / pc;
     int who = dealt_ % pc;
 
-    // 牌堆当前前沿(左端)与剩余宽度
+    // 发牌前: 牌堆剩余宽度 → 前沿完整牌背(最左那张)的位置与大小(与素材等大)
     int remaining = LAYERS - dealt_;
     float w = (remaining <= 0) ? 0.f : (200.f + (remaining - 1) * EDGE);
-    float frontX = PILE_RIGHT - w;
+    float frontCx = PILE_RIGHT - w + CARDW / 2.f;   // 前沿完整牌背中心
+    float frontCy = PILE_TOP + CARDH / 2.f;
 
     Fly f;
     f.active = true;
-    f.from = sf::Vector2f(frontX, PILE_TOP);
+    f.from = sf::Vector2f(frontCx, frontCy);
+    f.fromS = 1.0f;                                 // 起点 = 堆叠素材中完整牌背等大
     f.t = 0.f;
     f.dur = FLIGHT_DUR;
     if (who == 0) {
         f.toPlayer = true;
         f.slot = round;
-        f.to = sf::Vector2f(HAND_X[round], HAND_Y);
-        f.fromS = CARD_SCALE;
-        f.toS = CARD_SCALE;
+        f.to = sf::Vector2f(HAND_X[round] + CARDW / 2.f, HAND_Y + CARDH / 2.f);
+        f.toS = CARD_SCALE;                         // 到手牌尺寸 0.5
     } else {
         f.toPlayer = false;
         f.who = who;
         f.to = aiAvatarCenter(who);
-        f.fromS = CARD_SCALE;
-        f.toS = CARD_SCALE * 0.3f;          // 迅速变小
+        f.toS = 0.18f;                              // 迅速变小飞入头像
     }
     flies_.push_back(f);
 
@@ -218,15 +219,13 @@ void SceneDeal::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
     hint_.draw(win);
 
-    // ---- 牌堆(左端随发牌被取走, 右端固定) ----
+    // ---- 牌堆(从右边逐层切除一个白边并整体右移, 始终保留一张完整牌背) ----
     int remaining = LAYERS - dealt_;
     if (remaining > 0) {
-        float w = 200.f + (remaining - 1) * EDGE;
-        float left = PILE_TEX_W - w;
-        pile_.setTextureRect(sf::IntRect(static_cast<int>(left), 0,
-                                         static_cast<int>(w),
+        float w = 200.f + (remaining - 1) * EDGE;      // 剩余宽度(>=200, 留完整牌背)
+        pile_.setTextureRect(sf::IntRect(0, 0, static_cast<int>(w),
                                          static_cast<int>(PILE_TEX_H)));
-        pile_.setPosition(sf::Vector2f(PILE_RIGHT - w, PILE_TOP));
+        pile_.setPosition(sf::Vector2f(PILE_RIGHT - w, PILE_TOP));   // 右端固定
         int alpha = 255;
         if (phase_ == Phase::Fading || phase_ == Phase::Flipping) {
             alpha = static_cast<int>(255.f * (1.f - fadeT_));
