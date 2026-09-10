@@ -47,8 +47,7 @@ private:
 
     // 高亮面板(弹窗同色: 底 30,40,70 + 金边)
     sf::RectangleShape panelRows_;    // 非最终局: 各家筹码块
-    sf::RectangleShape panelRounds_;  // 最终局: 每局结算块
-    sf::RectangleShape panelTotal_;   // 最终局: 总盈亏结算块
+    sf::RectangleShape panelRounds_;  // 最终局: 单一面板(每局明细 + 总盈亏, 边框随行数变化)
 
     Button btnNext_;       // 下一局
     Button btnEscape_;     // 逃跑

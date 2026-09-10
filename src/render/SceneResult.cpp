@@ -47,7 +47,7 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
     tipText_.centerOrigin();
 
     // 高亮面板(与弹窗同色: 深蓝底 + 金边)
-    for (sf::RectangleShape* p : {&panelRows_, &panelRounds_, &panelTotal_}) {
+    for (sf::RectangleShape* p : {&panelRows_, &panelRounds_}) {
         p->setFillColor(C_PANEL_BG);
         p->setOutlineColor(C_GOLD);
         p->setOutlineThickness(3.f);
@@ -219,7 +219,8 @@ void SceneResult::layoutRows() {
     btnEscape_.setSize(sf::Vector2f(bw, btnH));
 }
 
-// 最终局: 居中排布(标题 + 每局结算面板 + 总盈亏结算面板 + 亮红提示 + 返回大厅)
+// 最终局: 居中排布(标题 + 单一面板[每局明细+总盈亏] + 亮红提示 + 返回大厅)
+// 面板高度随明细行数动态增长, 保证文本永不越界。
 void SceneResult::layoutFinal() {
     const float cx = WW / 2.f;
     float lineH = (roundLineCount_ > 8) ? 24.f : 32.f;
@@ -230,35 +231,34 @@ void SceneResult::layoutFinal() {
     totalLine_.setCharacterSize(fs + 2);
     chipsLine_.setCharacterSize(fs);
 
-    const float gap = 20.f;
-    float roundsH = PANEL_PAD * 2 + roundLineCount_ * lineH;
-    float totalH = PANEL_PAD * 2 + 2 * lineH;
-    float blockH = roundsH + gap + totalH;
+    const float sectionGap = 16.f;                 // 明细与总盈亏之间的分隔留白
+    float roundsH = roundLineCount_ * lineH;       // 明细区高度(随行数变化)
+    float contentH = roundsH + sectionGap + 2 * lineH;
+    float panelH = PANEL_PAD * 2 + contentH;       // 面板高度 = 内边距*2 + 内容
 
     const float titleH = 44.f, tGap = 20.f, tipGap = 28.f, tipH = 26.f, bGap = 22.f, btnH = 60.f;
-    float assemblyH = titleH + tGap + blockH + tipGap + tipH + bGap + btnH;
+    float assemblyH = titleH + tGap + panelH + tipGap + tipH + bGap + btnH;
     float top = (WH - assemblyH) / 2.f;
     if (top < 12.f) top = 12.f;
 
     title_.setPosition(sf::Vector2f(cx, top + titleH / 2.f));
-    float blockTop = top + titleH + tGap;
+    float panelTop = top + titleH + tGap;
 
-    // 每局结算面板
-    panelRounds_.setSize(sf::Vector2f(PANEL_W, roundsH));
-    panelRounds_.setPosition(sf::Vector2f(cx - PANEL_W / 2.f, blockTop));
+    // 单一面板: 每局明细 + 总盈亏(边框跟随行数)
+    panelRounds_.setSize(sf::Vector2f(PANEL_W, panelH));
+    panelRounds_.setPosition(sf::Vector2f(cx - PANEL_W / 2.f, panelTop));
+    float y = panelTop + PANEL_PAD + lineH / 2.f;
     for (int i = 0; i < roundLineCount_; i++) {
-        roundLines_[i].setPosition(sf::Vector2f(cx, blockTop + PANEL_PAD + i * lineH + lineH / 2.f));
+        roundLines_[i].setPosition(sf::Vector2f(cx, y));
+        y += lineH;
     }
+    y += sectionGap;
+    totalLine_.setPosition(sf::Vector2f(cx, y));
+    y += lineH;
+    chipsLine_.setPosition(sf::Vector2f(cx, y));
 
-    // 总盈亏结算面板
-    float p2Top = blockTop + roundsH + gap;
-    panelTotal_.setSize(sf::Vector2f(PANEL_W, totalH));
-    panelTotal_.setPosition(sf::Vector2f(cx - PANEL_W / 2.f, p2Top));
-    totalLine_.setPosition(sf::Vector2f(cx, p2Top + PANEL_PAD + lineH / 2.f));
-    chipsLine_.setPosition(sf::Vector2f(cx, p2Top + PANEL_PAD + lineH + lineH / 2.f));
-
-    tipText_.setPosition(sf::Vector2f(cx, blockTop + blockH + tipGap + tipH / 2.f));
-    float btnY = blockTop + blockH + tipGap + tipH + bGap;
+    tipText_.setPosition(sf::Vector2f(cx, panelTop + panelH + tipGap + tipH / 2.f));
+    float btnY = panelTop + panelH + tipGap + tipH + bGap;
     btnLobby_.setPosition(sf::Vector2f(cx - 210.f, btnY));
     btnLobby_.setSize(sf::Vector2f(420.f, btnH));
 }
@@ -311,13 +311,11 @@ void SceneResult::draw(sf::RenderWindow& win) {
 
     if (final_) {
         if (!kickPending_) {
-            // 每局结算块
+            // 单一面板: 每局明细 + 总盈亏
             win.draw(panelRounds_);
             for (int i = 0; i < roundLineCount_; i++) {
                 roundLines_[i].draw(win);
             }
-            // 总盈亏结算块
-            win.draw(panelTotal_);
             totalLine_.draw(win);
             chipsLine_.draw(win);
             tipText_.draw(win);
