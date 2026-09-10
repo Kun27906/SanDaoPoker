@@ -469,8 +469,11 @@ void SceneArrange::draw(sf::RenderWindow& win) {
         }
     }
 
-    // 拖动中的牌(最上层)
-    if (dragging_) dragSprite_.draw(win);
+    // 拖动中的牌(最上层; 位置随鼠标实时更新, 含吸附)
+    if (dragging_) {
+        dragSprite_.setPosition(dragPos_);
+        dragSprite_.draw(win);
+    }
     // 飞回中的牌
     if (flying_) flySprite_.draw(win);
 
