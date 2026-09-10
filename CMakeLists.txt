@@ -82,6 +82,7 @@ set(UI_SOURCES
     src/ui/CountdownBar.cpp
     src/ui/ChipBar.cpp
     src/ui/IconButton.cpp
+    src/ui/Avatar.cpp
 )
 
 # ------------------------------------------------------------

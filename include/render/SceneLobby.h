@@ -3,6 +3,7 @@
 #include "ui/Button.h"
 #include "ui/TextBox.h"
 #include "ui/ChipBar.h"
+#include "ui/Avatar.h"
 #include <array>
 
 // ====== 第二界面: 真大厅(成员C) ======
@@ -25,6 +26,7 @@ private:
     bool resetArmed_ = false;         // 已进入"再点一次确认"状态
     float resetArmTimer_ = 0.f;       // 确认状态超时(5秒)自动复原
     ChipBar chipBar_;
+    Avatar  selfAvatar_;              // 局外: 本人头像(筹码条左侧)
 
     // 破产补充弹窗(余额<100 时进入大厅弹出)
     bool pendingTopUp_ = false;

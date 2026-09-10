@@ -159,6 +159,10 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     refreshDiffColors();
 
     chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
+    // 局外: 本人头像(筹码条左侧)
+    selfAvatar_.setRadius(26.f);
+    selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 80.f, 40.f));
+    selfAvatar_.setNickname(Account::instance().ensureNickname());
 }
 
 // ---- 难度选择(成员B) ----
@@ -270,6 +274,7 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     btnDiffOpen_.draw(win);
     btnStart_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
+    selfAvatar_.draw(win);   // 局外本人头像(筹码条左侧)
     if (notEnough_) {                  // 入场资格弹窗
         win.draw(overlay_);
         win.draw(dialog_);

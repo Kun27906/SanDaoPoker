@@ -40,6 +40,10 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
     }
 
     chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
+    // 局外: 本人头像(筹码条左侧)
+    selfAvatar_.setRadius(26.f);
+    selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 80.f, 40.f));
+    selfAvatar_.setNickname(Account::instance().ensureNickname());
 
     // 重置账号(右下角; 两段确认: 第一次点击进入确认态, 再点一次执行)
     btnReset_.setText("重置账号");
@@ -121,6 +125,7 @@ void SceneLobby::draw(sf::RenderWindow& win) {
     for (auto& b : btnSeats_) b.draw(win);
     btnReset_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
+    selfAvatar_.draw(win);   // 局外本人头像(筹码条左侧)
 
     if (pendingTopUp_) {
         win.draw(overlay_);
