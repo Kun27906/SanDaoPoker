@@ -79,6 +79,7 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
             if (i == 0) {
                 avatars_[i].setRadius(28.f);
                 avatars_[i].setMinPlateWidth(150.f);   // 本人: 预留更长昵称空间
+                avatars_[i].setSelfStyle(true);        // 名牌与圆心共线, 昵称居中
                 avatars_[i].setCenter(sf::Vector2f(78.f, 700.f));
             } else {
                 avatars_[i].setRadius(aiR);
