@@ -69,6 +69,7 @@ set(RENDER_SOURCES
     src/render/SceneTitle.cpp
     src/render/SceneLobby.cpp
     src/render/SceneRoomSelect.cpp
+    src/render/SceneDeal.cpp
     src/render/SceneArrange.cpp
     src/render/SceneBattle.cpp
     src/render/SceneResult.cpp

@@ -57,8 +57,11 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
             mgr_->room->addPlayer(nm, true);
         }
     }
-    // 开局:发牌 + 收底注
-    mgr_->room->startNewRound();
+    // 发牌(洗牌+发牌+收底注)已由 SceneDeal 完成; 此处仅防御: 若未经发牌场景直接进入则补做
+    if (mgr_->room->currentRound == 0) {
+        mgr_->room->startNewRound();
+        AssetManager::instance().rollBack();   // 本局牌背颜色
+    }
 
     // 背景
     if (const sf::Texture* bg = AssetManager::instance().background()) {
@@ -68,8 +71,7 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
         bg_.setScale(sx, sy);
     }
 
-    // 每局开局:随机掷一种牌背颜色
-    AssetManager::instance().rollBack();
+    // 牌背颜色已由 SceneDeal 掷定(本场景不再重置)
 
     // 标题
     char title[64];

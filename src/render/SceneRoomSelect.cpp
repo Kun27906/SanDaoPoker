@@ -241,7 +241,7 @@ void SceneRoomSelect::startGame() {
     for (int i = 0; i < mgr_->room->playerCount; i++) {
         mgr_->room->players[i].chips = entryChips;
     }
-    mgr_->changeTo(SceneId::Arrange);
+    mgr_->changeTo(SceneId::Deal);   // 进入发牌动画(之后自动进组牌)
 }
 
 void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {

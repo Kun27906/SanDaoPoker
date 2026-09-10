@@ -173,6 +173,17 @@ bool AssetManager::loadMiscTextures() {
             }
         }
     }
+    // 牌堆素材(发牌动画, 三色 689x292 堆叠图)
+    {
+        const char* piles[3] = {"red", "blue", "black"};
+        for (int i = 0; i < 3; i++) {
+            char path[128];
+            std::snprintf(path, sizeof(path), "assets/cards/back/deck_pile_%s.png", piles[i]);
+            if (!pileTex_[i].loadFromFile(path)) {
+                std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", path);
+            }
+        }
+    }
     return true;
 }
 
@@ -216,6 +227,11 @@ const sf::Texture* AssetManager::icon(const std::string& name) const {
     auto it = icons_.find(name);
     if (it == icons_.end()) return nullptr;
     return it->second.getSize().x > 0 ? &it->second : nullptr;
+}
+
+const sf::Texture* AssetManager::deckPile(int backIndex) const {
+    if (backIndex < 0 || backIndex > 2) backIndex = 0;
+    return pileTex_[backIndex].getSize().x > 0 ? &pileTex_[backIndex] : nullptr;
 }
 
 const sf::Texture* AssetManager::backTexture(int index) const {

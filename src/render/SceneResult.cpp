@@ -287,7 +287,7 @@ void SceneResult::escape() {
 
 void SceneResult::nextRound() {
     if (final_) return;
-    mgr_->changeTo(SceneId::Arrange);
+    mgr_->changeTo(SceneId::Deal);   // 下一局: 先播发牌动画
 }
 
 void SceneResult::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {

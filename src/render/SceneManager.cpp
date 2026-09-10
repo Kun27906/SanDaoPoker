@@ -4,6 +4,7 @@
 #include "render/SceneTitle.h"
 #include "render/SceneLobby.h"
 #include "render/SceneRoomSelect.h"
+#include "render/SceneDeal.h"
 #include "render/SceneArrange.h"
 #include "render/SceneBattle.h"
 #include "render/SceneResult.h"
@@ -18,6 +19,7 @@ void SceneManager::changeTo(SceneId id) {
     currentId_ = id;
     // 背景音乐随场景切换(仅 bgmOn 时播放;同一曲不重播)
     switch (id) {
+        case SceneId::Deal:
         case SceneId::Arrange:
         case SceneId::Battle:
         case SceneId::Result:
@@ -46,8 +48,9 @@ void SceneManager::draw(sf::RenderWindow& win) {
 }
 
 bool SceneManager::homeVisible() const {
-    // 启动页/组牌/比牌隐藏 home; 大厅/选房/结算显示
+    // 启动页/组牌/比牌/发牌隐藏 home; 大厅/选房/结算显示
     return currentId_ != SceneId::Title &&
+           currentId_ != SceneId::Deal &&
            currentId_ != SceneId::Arrange &&
            currentId_ != SceneId::Battle;
 }
@@ -61,6 +64,7 @@ std::unique_ptr<Scene> SceneManager::createScene(SceneId id) {
         case SceneId::Title:      return std::make_unique<SceneTitle>(this);
         case SceneId::Lobby:      return std::make_unique<SceneLobby>(this);
         case SceneId::RoomSelect: return std::make_unique<SceneRoomSelect>(this);
+        case SceneId::Deal:       return std::make_unique<SceneDeal>(this);
         case SceneId::Arrange:    return std::make_unique<SceneArrange>(this);
         case SceneId::Battle:     return std::make_unique<SceneBattle>(this);
         case SceneId::Result:     return std::make_unique<SceneResult>(this);
