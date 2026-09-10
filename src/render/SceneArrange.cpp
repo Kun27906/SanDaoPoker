@@ -146,6 +146,26 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     countdown_.start();
 
     chipBar_.setPosition(sf::Vector2f(1280.f - 250.f - 20.f, 16.f));
+
+    // 局内头像: 本人左下角, 他人右侧居中(较小)
+    {
+        int pc = mgr_->room->playerCount;
+        int na = pc - 1;
+        if (na < 1) na = 1;
+        const float aiX = 1185.f, aiCY = 470.f, aiGap = 78.f, aiR = 20.f;
+        float totalH = (na - 1) * aiGap;
+        for (int i = 0; i < pc && i < MAX_PLAYERS; i++) {
+            avatars_[i].setNickname(mgr_->room->players[i].name);
+            if (i == 0) {
+                avatars_[i].setRadius(28.f);
+                avatars_[i].setCenter(sf::Vector2f(78.f, 548.f));
+            } else {
+                avatars_[i].setRadius(aiR);
+                avatars_[i].setCenter(sf::Vector2f(
+                    aiX, aiCY - totalH / 2.f + (i - 1) * aiGap));
+            }
+        }
+    }
 }
 
 // ---- 槽位/几何辅助 ----
@@ -489,4 +509,7 @@ void SceneArrange::draw(sf::RenderWindow& win) {
     btnSubmit_.draw(win);
     countdown_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
+    for (int i = 0; i < mgr_->room->playerCount && i < MAX_PLAYERS; i++) {
+        avatars_[i].draw(win);   // 局内头像: 本人左下 / 他人右中
+    }
 }

@@ -3,6 +3,7 @@
 #include "ui/Button.h"
 #include "ui/TextBox.h"
 #include "ui/ChipBar.h"
+#include "ui/Avatar.h"
 #include <array>
 
 // ====== 结算界面(成员C) ======
@@ -53,6 +54,7 @@ private:
     Button btnEscape_;     // 逃跑
     Button btnLobby_;      // 返回大厅(最终结算用, 居中)
     ChipBar chipBar_;
+    std::array<Avatar, MAX_PLAYERS> avatars_;  // 局内头像: [0]本人左下, [1..]他人右侧居中
 
     // 踢出弹窗
     bool kickPending_ = false;

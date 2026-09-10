@@ -103,6 +103,11 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
     lineTag_.centerOrigin();
     lineTag_.setPosition(sf::Vector2f(640.f, 285.f));
 
+    // 局内: 本人头像(左下角; 他人由各自座位体现)
+    selfAvatar_.setRadius(26.f);
+    selfAvatar_.setCenter(sf::Vector2f(70.f, 690.f));
+    if (room) selfAvatar_.setNickname(room->players[0].name);
+
     // 牌精灵初始化位置(内容由 loadLine 装载)
     for (int p = 0; p < playerCount_; p++) {
         const Seat* st = seatFor(playerCount_, p);
@@ -224,6 +229,7 @@ void SceneBattle::draw(sf::RenderWindow& win) {
             cards_[p][pos].draw(win);
         }
     }
+    selfAvatar_.draw(win);   // 局内本人头像(左下角)
 
     if (showNext_) {
         // 比完提示文字持续显示(无需额外按钮)

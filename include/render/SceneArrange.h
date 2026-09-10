@@ -5,6 +5,7 @@
 #include "ui/TextBox.h"
 #include "ui/CountdownBar.h"
 #include "ui/ChipBar.h"
+#include "ui/Avatar.h"
 #include <array>
 
 // ====== 组牌界面(阶段5: 分三道) ======
@@ -58,6 +59,7 @@ private:
     bool submitted_ = false;           // 已交牌(防重复)
     bool timeoutFired_ = false;        // 超时自动交牌只触发一次
     ChipBar chipBar_;                  // 右上角账号筹码
+    std::array<Avatar, MAX_PLAYERS> avatars_;  // 局内头像: [0]本人左下, [1..]他人右侧居中
 
     // ---- 拖拽状态 ----
     CardSprite dragSprite_;            // 拖动中的牌

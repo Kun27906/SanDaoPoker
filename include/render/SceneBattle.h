@@ -1,8 +1,8 @@
 #pragma once
 #include "render/SceneManager.h"
 #include "render/CardSprite.h"
-#include "ui/Button.h"
 #include "ui/TextBox.h"
+#include "ui/Avatar.h"
 #include <array>
 
 // ====== 比牌界面场景(阶段6) ======
@@ -33,6 +33,7 @@ private:
     std::array<std::array<CardSprite, 3>, 6> cards_;   // [玩家0..5][位置] 当前道 3 张
     std::array<TextBox, 6> nameTags_;                  // 玩家名
     int playerCount_ = 0;
+    Avatar  selfAvatar_;                               // 局内: 本人头像(左下角)
     int showLine_ = 0;     // 当前比牌道 0..2
     int phase_ = 0;        // 0=等翻正 1=展示结果 2=比完等3秒自动进结算
     float timer_ = 0.f;
