@@ -6,13 +6,12 @@
 #include <array>
 
 // ====== 结算界面(成员C) ======
-// 非最终局: 显示每家"目前筹码 (本局盈亏)", 盈利鲜绿/亏损鲜红, 居中;
-//           按钮 [下一局] + [逃跑](罚 100 提前结束本场)。
-// 最终局(打完全部轮次 或 逃跑): 只显示玩家个人筹码与每局盈亏明细+总盈亏,
-//           无"下一局", 下方居中 [返回大厅]。
-// 踢出机制: 每局结算后检测真人牌桌筹码是否够付下一局底注(3×底注),
-//           不够 -> 弹窗告知被踢出本场(不扣逃跑费), 确定后回大厅;
-//           破产补充(余额<100)统一在大厅检测弹出。
+// 非最终局: 每家"目前筹码 (本局盈亏)"独立着色(盈利鲜绿/亏损鲜红), 整块居中;
+//           块外加弹窗同色边框+底色面板突出; 按钮 [下一局] + [逃跑]。
+// 最终局: 每局盈亏逐行独立着色 + 总盈亏(红/绿) + 当前筹码,
+//         每局结算块 与 总盈亏结算块 各自带边框+底色面板, 整块居中; [返回大厅]。
+// 提示行(逃跑/下一局提示 与 返回大厅提示)统一亮红色。
+// 踢出机制: 每局结算后筹码不足下一局注金 -> 弹窗告知被踢出(不扣逃跑费)。
 
 class SceneResult : public Scene {
 public:
@@ -24,18 +23,33 @@ public:
 
 private:
     void settleAndSync();          // 结算本局 + 账号同步 + 踢出判定
-    void refreshRows();            // 刷新各家筹码/盈亏行
-    void rebuildFinalText();       // 组装最终结算明细文字
+    void refreshRows();            // 刷新各家筹码/盈亏行(非最终局)
+    void rebuildFinalText();       // 组装最终结算明细(逐行着色)
+    void layoutRows();             // 非最终局: 居中排布面板/提示/按钮
+    void layoutFinal();            // 最终局: 居中排布两个面板/提示/按钮
     void escape();                 // 逃跑: 罚100 -> 立即最终结算
     void confirmKickOut();         // 踢出弹窗确定 -> 回大厅
     void nextRound();
+
+    static constexpr int MAX_ROUND_LINES = 18;   // 最多 16 局 + 逃跑罚 行
 
     SceneManager* mgr_;
     sf::Sprite bg_;
     TextBox title_;
     std::array<TextBox, MAX_PLAYERS> playerRows_;  // 非最终局: 各家行
-    TextBox detailText_;   // 最终结算明细(每局盈亏+总盈亏)
-    TextBox tipText_;      // 提示文字
+    TextBox tipText_;                              // 提示文字(亮红)
+
+    // 最终局: 每局盈亏逐行(独立着色)
+    std::array<TextBox, MAX_ROUND_LINES> roundLines_;
+    int  roundLineCount_ = 0;
+    TextBox totalLine_;     // 总盈亏(红/绿)
+    TextBox chipsLine_;     // 当前筹码
+
+    // 高亮面板(弹窗同色: 底 30,40,70 + 金边)
+    sf::RectangleShape panelRows_;    // 非最终局: 各家筹码块
+    sf::RectangleShape panelRounds_;  // 最终局: 每局结算块
+    sf::RectangleShape panelTotal_;   // 最终局: 总盈亏结算块
+
     Button btnNext_;       // 下一局
     Button btnEscape_;     // 逃跑
     Button btnLobby_;      // 返回大厅(最终结算用, 居中)
