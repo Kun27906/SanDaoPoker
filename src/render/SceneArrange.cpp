@@ -175,12 +175,11 @@ void SceneArrange::submit() {
     // 真人交牌锁定
     room->players[0].hasArranged = true;
 
-    // AI 玩家:接入 AIPlayer 真实决策(贪心+人性化噪声;胜率表 assets/ai/winrate.bin)
+    // AI 玩家:接入 AIPlayer 真实决策(难度/风格取自当前配置;胜率表 assets/ai/winrate.bin)
+    // 难度由"选房间"界面的难度选择确定(见 SceneRoomSelect, 成员B 提供 setProfile/decideOrderAuto)
     for (int p = 1; p < room->playerCount; p++) {
         int order[9];
-        AIPlayer::decideOrderStyled(room->players[p].hand, room->playerCount,
-                                    AIPlayer::Difficulty::Greedy,
-                                    AIPlayer::Style::Balanced, 0.3f, order);
+        AIPlayer::decideOrderAuto(room->players[p].hand, room->playerCount, order);
         room->players[p].arrangeByOrder(order);
         room->players[p].hasArranged = true;
     }
