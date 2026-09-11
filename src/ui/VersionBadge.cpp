@@ -29,7 +29,7 @@ void centerText(sf::Text& t, float cx, float y) {
 
 VersionBadge::VersionBadge(bool clickable) : clickable_(clickable) {
     badge_.setFont(font_util::defaultFont());
-    badge_.setCharacterSize(16);
+    badge_.setCharacterSize(20);          // 版本号字体(略大)
     badge_.setFillColor(sf::Color(185, 185, 185));
     badge_.setString(str_util::utf8(GAME_VERSION));
 
@@ -48,12 +48,6 @@ VersionBadge::VersionBadge(bool clickable) : clickable_(clickable) {
     title_.setString(str_util::utf8("版本历史"));
     centerText(title_, WW / 2.f, PT + 24.f);
 
-    hint_.setFont(font_util::defaultFont());
-    hint_.setCharacterSize(15);
-    hint_.setFillColor(sf::Color(170, 180, 205));
-    hint_.setString(str_util::utf8("鼠标滚轮上下翻动 · 右上角圆圈关闭"));
-    centerText(hint_, WW / 2.f, PT + 64.f);
-
     // 关闭键: 圆圈 + close 图标
     closeRing_.setRadius(22.f);
     closeRing_.setPosition(PL + PW - 66.f, PT + 22.f);
@@ -68,8 +62,8 @@ VersionBadge::VersionBadge(bool clickable) : clickable_(clickable) {
         closeIcon_.setPosition(PL + PW - 66.f + 7.f, PT + 22.f + 7.f);
     }
 
-    // 列表区
-    listRect_ = sf::FloatRect(PL + 30.f, PT + 96.f, PW - 60.f, PH - 96.f - 28.f);
+    // 列表区(去掉提示行后上移, 可视行数更多)
+    listRect_ = sf::FloatRect(PL + 30.f, PT + 78.f, PW - 60.f, PH - 78.f - 28.f);
     listBg_.setSize(sf::Vector2f(listRect_.width, listRect_.height));
     listBg_.setPosition(listRect_.left, listRect_.top);
     listBg_.setFillColor(C_LIST_BG);
@@ -170,7 +164,6 @@ void VersionBadge::draw(sf::RenderWindow& win) {
     win.draw(overlay_);
     win.draw(panel_);
     win.draw(title_);
-    win.draw(hint_);
     win.draw(closeRing_);
     if (!closeIcon_.getTexture()) {          // 惰性获取(场景可能在素材加载前构造)
         if (const sf::Texture* ic = AssetManager::instance().icon("close")) {
