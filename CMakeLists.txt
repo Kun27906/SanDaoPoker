@@ -84,6 +84,7 @@ set(UI_SOURCES
     src/ui/ChipBar.cpp
     src/ui/IconButton.cpp
     src/ui/Avatar.cpp
+    src/ui/VersionBadge.cpp
 )
 
 # ------------------------------------------------------------

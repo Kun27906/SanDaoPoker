@@ -47,6 +47,7 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
     selfAvatar_.setTexture(AssetManager::instance().avatarTexture(0));   // 本人头像素材
     selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 190.f, 40.f));
     selfAvatar_.setNickname(Account::instance().ensureNickname());
+    versionBadge_.setPosition(sf::Vector2f(24.f, WH - 40.f));   // 左下角版本号(可点击)
 
     // 重置账号(右下角; 两段确认: 第一次点击进入确认态, 再点一次执行)
     btnReset_.setText("重置账号");
@@ -59,7 +60,8 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
             btnReset_.setText("再点一次确认重置");
             btnReset_.setColors(sf::Color(200, 60, 50), sf::Color(240, 90, 70), sf::Color(150, 40, 30));
         } else {
-            Account::instance().reset();   // 清空存档并初始化回 500
+            Account::instance().reset();   // 清空存档并初始化回 500(昵称一并清空)
+            selfAvatar_.setNickname(Account::instance().ensureNickname());   // 立即生成并显示新昵称
             resetArmed_ = false;
             btnReset_.setText("重置账号");
             btnReset_.setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
@@ -101,6 +103,7 @@ void SceneLobby::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
         btnTopUpOk_.handleEvent(e, win);   // 破产弹窗只响应确定
         return;
     }
+    if (versionBadge_.handleEvent(e, win)) return;   // 版本历史弹窗打开时拦截
     for (auto& b : btnSeats_) b.handleEvent(e, win);
     btnReset_.handleEvent(e, win);
 }
@@ -129,6 +132,7 @@ void SceneLobby::draw(sf::RenderWindow& win) {
     btnReset_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
     selfAvatar_.draw(win);   // 局外本人头像(筹码条左侧)
+    versionBadge_.draw(win); // 左下角版本号 + 版本历史弹窗
 
     if (pendingTopUp_) {
         win.draw(overlay_);

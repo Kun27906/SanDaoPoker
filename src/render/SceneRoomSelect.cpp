@@ -166,6 +166,7 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     selfAvatar_.setTexture(AssetManager::instance().avatarTexture(0));   // 本人头像素材
     selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 190.f, 40.f));
     selfAvatar_.setNickname(Account::instance().ensureNickname());
+    versionBadge_.setPosition(sf::Vector2f(24.f, WH - 40.f));   // 左下角版本号(可点击)
 }
 
 // ---- 难度选择(成员B) ----
@@ -257,6 +258,7 @@ void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& wi
         btnDenyOk_.handleEvent(e, win);
         return;
     }
+    if (versionBadge_.handleEvent(e, win)) return;   // 版本历史弹窗打开时拦截
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].handleEvent(e, win);
     btnDiffOpen_.handleEvent(e, win);
     btnStart_.handleEvent(e, win);
@@ -278,6 +280,7 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     btnStart_.draw(win);
     chipBar_.draw(win, Account::instance().balance());
     selfAvatar_.draw(win);   // 局外本人头像(筹码条左侧)
+    versionBadge_.draw(win); // 左下角版本号 + 版本历史弹窗
     if (notEnough_) {                  // 入场资格弹窗
         win.draw(overlay_);
         win.draw(dialog_);

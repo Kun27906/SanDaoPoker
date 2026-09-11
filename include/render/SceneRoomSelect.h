@@ -4,6 +4,7 @@
 #include "ui/TextBox.h"
 #include "ui/ChipBar.h"
 #include "ui/Avatar.h"
+#include "ui/VersionBadge.h"
 #include <array>
 
 // ====== 第三界面: 选房间(成员C, 原 SceneMenu 重构) ======
@@ -32,6 +33,7 @@ private:
     Button btnStart_;
     ChipBar chipBar_;
     Avatar  selfAvatar_;              // 局外: 本人头像(筹码条左侧)
+    VersionBadge versionBadge_{true}; // 左下角版本号(可点击查看版本历史)
 
     // 入场资格提示弹窗(余额 < 该房间第一局注金 ante 时点击房间弹出)
     bool notEnough_ = false;
