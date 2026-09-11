@@ -4,6 +4,7 @@
 #include "ui/TextBox.h"
 #include "ui/ChipBar.h"
 #include "ui/Avatar.h"
+#include "ui/VersionBadge.h"
 #include <array>
 
 // ====== 第二界面: 真大厅(成员C) ======
@@ -27,6 +28,7 @@ private:
     float resetArmTimer_ = 0.f;       // 确认状态超时(5秒)自动复原
     ChipBar chipBar_;
     Avatar  selfAvatar_;              // 局外: 本人头像(筹码条左侧)
+    VersionBadge versionBadge_{true}; // 左下角版本号(可点击查看版本历史)
 
     // 破产补充弹窗(余额<100 时进入大厅弹出)
     bool pendingTopUp_ = false;

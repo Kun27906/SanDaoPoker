@@ -26,10 +26,7 @@ SceneTitle::SceneTitle(SceneManager* mgr) : mgr_(mgr) {
     subtitle_.centerOrigin();
     subtitle_.setPosition(sf::Vector2f(WW / 2.f, 310.f));
 
-    version_.setText("v0.2");
-    version_.setCharacterSize(16);
-    version_.setColor(sf::Color(180, 180, 180));
-    version_.setPosition(sf::Vector2f(WW - 60.f, WH - 34.f));
+    versionBadge_.setPosition(sf::Vector2f(24.f, 800.f - 40.f));   // 左下角版本号
 
     btnStart_.setText("开始游戏");
     btnStart_.setPosition(sf::Vector2f(440.f, 420.f));
@@ -47,6 +44,6 @@ void SceneTitle::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
     title_.draw(win);
     subtitle_.draw(win);
-    version_.draw(win);
+    versionBadge_.draw(win);
     btnStart_.draw(win);
 }

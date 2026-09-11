@@ -2,6 +2,7 @@
 #include "render/SceneManager.h"
 #include "ui/Button.h"
 #include "ui/TextBox.h"
+#include "ui/VersionBadge.h"
 
 // ====== 第一界面: 启动页(成员C) ======
 // 只显示标题 + [开始游戏]; 后续可在此扩展设置/调试入口。
@@ -19,6 +20,6 @@ private:
     sf::Sprite bg_;
     TextBox title_;
     TextBox subtitle_;
-    TextBox version_;
+    VersionBadge versionBadge_{false};   // 左下角版本号(启动页不可点击)
     Button btnStart_;
 };
