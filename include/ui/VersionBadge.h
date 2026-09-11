@@ -40,7 +40,6 @@ private:
     sf::RectangleShape panel_;
     sf::RectangleShape listBg_;
     sf::Text title_;
-    sf::Text hint_;
     sf::CircleShape closeRing_;
     sf::Sprite closeIcon_;
     std::vector<sf::Text> verTexts_;
