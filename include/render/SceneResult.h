@@ -33,7 +33,8 @@ private:
     void confirmKickOut();         // 踢出弹窗确定 -> 回大厅
     void nextRound();
     int  matchTotal() const;       // 整场总盈亏(含逃跑罚)
-    void playFinalSound();         // 整场结束音效(按整场总盈亏播胜利/失败音)
+    void playFinalSound();         // 整场结束音效(胜负音; coins 延迟到点击返回大厅)
+    void startCoinsPhase();        // 点击[返回大厅]/home: 播 coins 音 + 盈亏数字跳动
 
     static constexpr int MAX_ROUND_LINES = 18;   // 最多 16 局 + 逃跑罚 行
 
@@ -70,4 +71,6 @@ private:
     bool final_ = false;        // 最终结算模式(打完或逃跑)
     int escapePenalty_ = 0;     // 逃跑罚金(显示在明细)
     bool synced_ = false;       // 本局只结算同步一次
+    bool settleSoundDone_ = false;  // 胜负音是否播完(播完瞬间才出现[返回大厅]与home)
+    bool coinsStarted_ = false;     // coins 音效+盈亏动画已启动(动画播完自动回大厅)
 };

@@ -104,6 +104,7 @@ void SceneLobby::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
         return;
     }
     if (versionBadge_.handleEvent(e, win)) return;   // 版本历史弹窗打开时拦截
+    if (chipBar_.handleEvent(e, win)) return;        // 点击筹码图标 -> chip 音效
     for (auto& b : btnSeats_) b.handleEvent(e, win);
     btnReset_.handleEvent(e, win);
 }

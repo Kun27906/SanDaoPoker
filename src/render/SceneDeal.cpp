@@ -164,6 +164,15 @@ void SceneDeal::spawnNextCard() {
 void SceneDeal::update(float dt) {
     chipBar_.update(dt);   // 筹码框数字滚动(下注扣款动画)
 
+    // 下注阶段: bet 音效 + 扣款动画播完之前不进入发牌(避免与发牌音效/动画重叠)
+    if (!betDone_) {
+        betWait_ += dt;
+        if ((!chipBar_.isRolling() && !SoundManager::instance().isPlaying()) || betWait_ >= 2.5f) {
+            betDone_ = true;
+        }
+        return;
+    }
+
     // 飞行中的牌推进
     for (Fly& f : flies_) {
         if (!f.active) continue;
@@ -282,6 +291,7 @@ void SceneDeal::draw(sf::RenderWindow& win) {
     chipBar_.draw(win);
 }
 
-void SceneDeal::handleEvent(const sf::Event&, const sf::RenderWindow&) {
-    // 发牌过程无交互
+void SceneDeal::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
+    // 发牌过程无交互; 仅筹码图标可点击(发出 chip 音效)
+    chipBar_.handleEvent(e, win);
 }

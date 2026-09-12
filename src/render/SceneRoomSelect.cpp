@@ -259,6 +259,7 @@ void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& wi
         return;
     }
     if (versionBadge_.handleEvent(e, win)) return;   // 版本历史弹窗打开时拦截
+    if (chipBar_.handleEvent(e, win)) return;        // 点击筹码图标 -> chip 音效
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].handleEvent(e, win);
     btnDiffOpen_.handleEvent(e, win);
     btnStart_.handleEvent(e, win);

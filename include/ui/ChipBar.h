@@ -22,6 +22,9 @@ public:
 
     void draw(sf::RenderWindow& win);            // 用内部显示值绘制
 
+    // 点击左端筹码图标 -> 播放 chip 音效; 返回 true 表示事件已被消费
+    bool handleEvent(const sf::Event& e, const sf::RenderWindow& win);
+
 private:
     sf::Vector2f pos_;
     sf::Text text_;        // 数字文本
