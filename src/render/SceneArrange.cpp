@@ -390,6 +390,7 @@ void SceneArrange::autoSubmit() {
 
 // ---- 事件 ----
 void SceneArrange::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
+    if (chipBar_.handleEvent(e, win)) return;        // 点击筹码图标 -> chip 音效
     for (auto& b : lineBtns_) b.handleEvent(e, win);
     btnReset_.handleEvent(e, win);
     btnSubmit_.handleEvent(e, win);

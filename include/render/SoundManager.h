@@ -33,6 +33,9 @@ public:
     void toggleBgm();     // 背景音乐开关(不影响音效 click 等)
     bool bgmOn() const { return bgmOn_; }
 
+    // 主短音通道是否正在播放(用于"等音效播完再继续"的时序控制)
+    bool isPlaying() const { return sound_.getStatus() == sf::Sound::Playing; }
+
     // ---- 全局音量(0~100,与系统音量刻度一致) ----
     // 用 sf::Listener::setGlobalVolume:对所有 Sound/Music 生效(音效+BGM),
     // 可移植(不依赖具体系统音量 API)

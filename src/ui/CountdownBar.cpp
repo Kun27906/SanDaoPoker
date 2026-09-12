@@ -75,10 +75,10 @@ void CountdownBar::draw(sf::RenderWindow& win) {
         win.draw(bg_);
     }
 
-    // ---- 填充: 三色贴图(绿>2/3, 黄1/3~2/3, 红<1/3), 按剩余比例裁切 ----
-    const char* fillName = ratio > 0.666f ? "countdown_fill_green"
-                         : ratio > 0.333f ? "countdown_fill_yellow"
-                                          : "countdown_fill_red";
+    // ---- 填充: 三色贴图(绿>50%, 黄15%~50%, 红<15%), 按剩余比例裁切 ----
+    const char* fillName = ratio > 0.50f ? "countdown_fill_green"
+                         : ratio > 0.15f ? "countdown_fill_yellow"
+                                         : "countdown_fill_red";
     const sf::Texture* fillTex = AssetManager::instance().tableTexture(fillName);
     if (fillTex) {
         float tw = static_cast<float>(fillTex->getSize().x);
@@ -93,9 +93,9 @@ void CountdownBar::draw(sf::RenderWindow& win) {
         }
     } else {
         fill_.setSize(sf::Vector2f(fillWidth_ * ratio, fill_.getSize().y));
-        fill_.setFillColor(ratio > 0.666f ? sf::Color(60, 180, 80)
-                         : ratio > 0.333f ? sf::Color(230, 190, 40)
-                                          : sf::Color(220, 60, 50));
+        fill_.setFillColor(ratio > 0.50f ? sf::Color(60, 180, 80)
+                         : ratio > 0.15f ? sf::Color(230, 190, 40)
+                                         : sf::Color(220, 60, 50));
         win.draw(fill_);
     }
 

@@ -4,7 +4,7 @@
 // ====== CountdownBar 倒计时条控件 ======
 // 功能:横向进度条,随时间流逝填充条缩短,并显示剩余秒数。
 // 贴图(assets/ui/table/, 400x24): countdown_bar_bg 底槽 + 三色填充
-//   countdown_fill_green(>2/3) / countdown_fill_yellow(1/3~2/3) / countdown_fill_red(<1/3)
+//   countdown_fill_green(>50%) / countdown_fill_yellow(15%~50%) / countdown_fill_red(<15%)
 //   素材缺失时自动回退为纯色矩形绘制(不影响功能)。
 // 用法:
 //   CountdownBar bar(10.f, {100,100}, {300,30});  // 10秒

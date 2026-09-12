@@ -1,6 +1,7 @@
 #include "ui/ChipBar.h"
 #include "ui/FontUtil.h"
 #include "render/AssetManager.h"
+#include "render/SoundManager.h"
 #include <cstdio>
 
 namespace {
@@ -53,6 +54,22 @@ void ChipBar::update(float dt) {
     }
     float e = 1.f - (1.f - t_) * (1.f - t_);   // 二次缓出
     shown_ = from_ + static_cast<int>((target_ - from_) * e);
+}
+
+// 点击左端筹码图标 -> 播放 chip 音效(筹码图案素材可见处均可点)
+bool ChipBar::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
+    if (e.type != sf::Event::MouseButtonPressed ||
+        e.mouseButton.button != sf::Mouse::Left) {
+        return false;
+    }
+    sf::Vector2f mp = win.mapPixelToCoords(
+        sf::Vector2i(e.mouseButton.x, e.mouseButton.y));
+    sf::FloatRect iconRect(pos_.x + 2.f, pos_.y + 2.f, 44.f, 44.f);
+    if (iconRect.contains(mp)) {
+        SoundManager::instance().playChip();
+        return true;
+    }
+    return false;
 }
 
 void ChipBar::draw(sf::RenderWindow& win) {
