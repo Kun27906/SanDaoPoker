@@ -69,7 +69,14 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnWrench_.setTexture(am.icon("wrench"));
     btnWrench_.setPosition(sf::Vector2f(12.f + PAD * 2.f, 12.f));
     btnWrench_.setSize(BTN);
-    btnWrench_.setCallback([this]() { openDevPopup(); });
+    btnWrench_.setCallback([this]() {
+        // 组牌界面禁用开发者模式: 播 error 音效, 不弹窗
+        if (mgr_ && mgr_->currentId() == SceneId::Arrange) {
+            SoundManager::instance().playError();
+            return;
+        }
+        openDevPopup();
+    });
 
     btnHome_.setTexture(am.icon("home"));
     btnHome_.setPosition(sf::Vector2f(12.f + PAD * 3.f, 12.f));

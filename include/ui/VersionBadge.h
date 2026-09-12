@@ -19,7 +19,6 @@ public:
     // 返回 true 表示事件已被弹窗消费(调用方应直接 return)
     bool handleEvent(const sf::Event& e, const sf::RenderWindow& win);
     void draw(sf::RenderWindow& win);
-    bool isOpen() const { return open_; }
 
 private:
     void buildEntries();

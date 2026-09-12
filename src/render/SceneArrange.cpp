@@ -341,6 +341,7 @@ void SceneArrange::submit() {
     if (!allPlaced()) {
         return;   // 未摆完 9 张: 不能交牌(无提示行)
     }
+    SoundManager::instance().stopClock();   // 交牌: 停止倒计时时钟音效
     submitted_ = true;
     Room* room = mgr_->room.get();
     rebuildLines();                        // 确保 lines 与界面一致
@@ -446,8 +447,15 @@ void SceneArrange::update(float dt) {
         }
     }
     countdown_.update(dt);
+
+    // 红色区(剩余 ≤15%): 循环播放倒计时时钟音效, 直到交牌或时间耗尽
+    if (!submitted_ && countdown_.getRemaining() <= countdown_.getMax() * 0.15f) {
+        SoundManager::instance().startClock();
+    }
+
     if (countdown_.isFinished() && !timeoutFired_) {
         timeoutFired_ = true;
+        SoundManager::instance().stopClock();   // 时间耗尽: 停止时钟音效
         autoSubmit();
     }
 }

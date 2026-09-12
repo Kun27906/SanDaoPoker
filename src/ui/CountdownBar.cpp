@@ -60,7 +60,8 @@ void CountdownBar::update(float dt) {
 
 void CountdownBar::draw(sf::RenderWindow& win) {
     // 剩余比例(基于初始满宽,避免逐帧乘当前宽度导致的指数衰减)
-    float ratio = maxSeconds_ > 0.f ? (remaining_ / maxSeconds_) : 0.f;
+    // 通过 getRemaining()/getMax() 读取(与外部查询共用同一实现)
+    float ratio = getMax() > 0.f ? (getRemaining() / getMax()) : 0.f;
     if (ratio < 0.f) ratio = 0.f;
     if (ratio > 1.f) ratio = 1.f;
 
@@ -104,7 +105,7 @@ void CountdownBar::draw(sf::RenderWindow& win) {
 
 void CountdownBar::setRemainingText() {
     char buf[16];
-    std::snprintf(buf, sizeof(buf), "%.1f", remaining_);
+    std::snprintf(buf, sizeof(buf), "%.1f", getRemaining());   // 通过访问器读取剩余秒数
     label_.setString(buf);
     // 重新居中
     sf::FloatRect lb = label_.getLocalBounds();
