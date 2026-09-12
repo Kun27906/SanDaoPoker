@@ -21,7 +21,7 @@ void SoundManager::loadAll() {
     loadBuffer(DEAL,    "assets/sounds/deal.ogg");
     loadBuffer(FLIP,    "assets/sounds/flip.ogg");
     loadBuffer(CHIP,    "assets/sounds/chip.ogg");
-    loadBuffer(WIN,     "assets/sounds/win.ogg");
+    loadBuffer(WIN,     "assets/sounds/win.mp3");
     loadBuffer(LOSE,    "assets/sounds/lose.ogg");
     loadBuffer(BET,     "assets/sounds/bet.ogg");
     // BGM(MP3 整曲,SoundBuffer 整曲载入后循环)
