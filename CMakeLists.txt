@@ -137,17 +137,21 @@ else()
 endif()
 
 # ------------------------------------------------------------
-# 资源拷贝:构建后自动将 assets/ 复制到可执行文件所在目录
-# (exe 在项目根时 assets 已在根目录, 跳过自拷贝; 其他输出目录才拷贝)
+# 资源同步: 每次构建都把 assets/ 增量同步到可执行文件所在目录
+#   - 新增/修改的素材自动拷贝(即使只改素材、源码未变, 构建也会同步)
+#   - 源中已删除的素材自动从输出目录清理(避免旧素材残留)
+#   - 仅拷贝有变化的文件, 开销极小
+# 脚本: cmake/sync_assets.cmake
 # ------------------------------------------------------------
-if(NOT "${SDP_OUTPUT_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
-    add_custom_command(TARGET SanDaoPoker POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${CMAKE_CURRENT_SOURCE_DIR}/assets"
-                "$<TARGET_FILE_DIR:SanDaoPoker>/assets"
-        COMMENT "Copying assets to output directory"
-    )
-endif()
+add_custom_target(sync_assets ALL
+    COMMAND ${CMAKE_COMMAND}
+            -DSRC=${CMAKE_CURRENT_SOURCE_DIR}/assets
+            -DDST=${SDP_OUTPUT_DIR}/assets
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sync_assets.cmake
+    COMMENT "Syncing assets to output directory"
+    VERBATIM
+)
+add_dependencies(SanDaoPoker sync_assets)
 
 # ------------------------------------------------------------
 # 编译器警告
