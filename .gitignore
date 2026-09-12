@@ -39,3 +39,6 @@ game_data/
 
 # ===== 发布目录(根目录 bin/: exe+DLL+assets 拷贝产物) =====
 /bin/
+
+*_preview.jpg
+deck_variants.jpg
