@@ -61,6 +61,7 @@ void SoundManager::startClock() {
     clock_.stop();
     clock_.setBuffer(bufs_[CLOCK]);
     clock_.setLoop(true);
+    clock_.setPitch(2.0f);   // 二倍速(12s 素材 -> 约 6s 循环; 节奏更紧迫)
     clock_.play();
 }
 

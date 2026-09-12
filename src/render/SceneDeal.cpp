@@ -28,7 +28,7 @@ constexpr float PILE_TOP = 56.f;
 constexpr float EDGE = (PILE_TEX_W - 200.f) / (LAYERS - 1);   // 每层露边宽度
 
 // 节奏
-constexpr float DEAL_PER_CARD = 1.f / 3.f; // 每 3 张 1 秒
+constexpr float DEAL_PER_CARD = 1.f / 4.f; // 每 4 张 1 秒(四人各一张即 1 秒)
 constexpr float FLIGHT_DUR = 0.22f;
 constexpr float FADE_DUR = 0.5f;
 constexpr float FLIP_DUR = 0.35f;
