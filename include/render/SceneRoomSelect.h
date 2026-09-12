@@ -25,7 +25,6 @@ private:
     SceneManager* mgr_;
     sf::Sprite bg_;
     TextBox title_;
-    TextBox hint_;
     std::array<Button, 6> roomBtns_;  // 同人数最多 5 个房间(+1 冗余)
     int roomIndex_[6] = {-1, -1, -1, -1, -1, -1};  // 全局配置下标
     int roomCount_ = 0;
@@ -37,6 +36,7 @@ private:
 
     // 入场资格提示弹窗(余额 < 该房间第一局注金 ante 时点击房间弹出)
     bool notEnough_ = false;
+    bool betting_ = false;   // 下注阶段(点[开始游戏]后: bet 音+扣减动画, 播完才进发牌)
     sf::RectangleShape overlay_;
     sf::RectangleShape dialog_;
     TextBox denyTitle_;

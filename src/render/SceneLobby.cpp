@@ -22,12 +22,6 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
     title_.centerOrigin();
     title_.setPosition(sf::Vector2f(WW / 2.f, 60.f));
 
-    hint_.setText("点击人数进入对应房间列表");
-    hint_.setCharacterSize(18);
-    hint_.setColor(sf::Color(220, 220, 220));
-    hint_.centerOrigin();
-    hint_.setPosition(sf::Vector2f(WW / 2.f, 110.f));
-
     const char* names[5] = {"2 人", "3 人", "4 人", "5 人", "6 人"};
     for (int i = 0; i < 5; i++) {
         btnSeats_[i].setText(names[i]);
@@ -128,7 +122,6 @@ void SceneLobby::update(float dt) {
 void SceneLobby::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
     title_.draw(win);
-    hint_.draw(win);
     for (auto& b : btnSeats_) b.draw(win);
     btnReset_.draw(win);
     chipBar_.setImmediate(Account::instance().balance());

@@ -83,12 +83,6 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     title_.centerOrigin();
     title_.setPosition(sf::Vector2f(WW / 2.f, 36.f));
 
-    hint_.setText("拖动牌到三道槽位(靠近自动吸附); 单击已放置的牌可收回; 全部放完点[交牌]");
-    hint_.setCharacterSize(18);
-    hint_.setColor(sf::Color(210, 210, 210));
-    hint_.centerOrigin();
-    hint_.setPosition(sf::Vector2f(WW / 2.f, 78.f));
-
     // 手牌:9 张
     const Card* hand = mgr_->room->players[0].hand;
     for (int i = 0; i < 9; i++) {
@@ -234,7 +228,6 @@ void SceneArrange::placeAt(int handIdx, int line, int pos) {
     refreshSlotSprites();
     rebuildLines();
     SoundManager::instance().playClick();   // 放入槽位:点击音效
-    hint_.setText("已放入; 可继续拖拽, 或单击已放置的牌收回");
 }
 
 void SceneArrange::placeCard(int handIdx) {
@@ -245,7 +238,6 @@ void SceneArrange::placeCard(int handIdx) {
             return;
         }
     }
-    hint_.setText("当前道已满, 请换道或拖到其它道");
 }
 
 void SceneArrange::startFlyBack(int handIdx) {
@@ -268,7 +260,6 @@ void SceneArrange::returnToHand(int line, int pos) {
     startFlyBack(hi);                       // 牌"飞回"下方原位置
     SoundManager::instance().playClick();   // 收回:点击音效
     rebuildLines();
-    hint_.setText("已收回手牌");
 }
 
 // ---- 拖拽 ----
@@ -336,7 +327,6 @@ void SceneArrange::resetArrange() {
     handUsed_.fill(false);
     refreshSlotSprites();
     rebuildLines();
-    hint_.setText("已一键重置, 请重新分三道(倒计时继续)");
 }
 
 bool SceneArrange::allPlaced() const {
@@ -349,8 +339,7 @@ bool SceneArrange::allPlaced() const {
 void SceneArrange::submit() {
     if (submitted_) return;
     if (!allPlaced()) {
-        hint_.setText("还有牌没摆完! 请把 9 张牌全部分到三道");
-        return;
+        return;   // 未摆完 9 张: 不能交牌(无提示行)
     }
     submitted_ = true;
     Room* room = mgr_->room.get();
@@ -384,7 +373,6 @@ void SceneArrange::autoSubmit() {
     }
     refreshSlotSprites();
     rebuildLines();
-    hint_.setText("时间到, 自动摆牌并交牌");
     submit();
 }
 
@@ -467,7 +455,6 @@ void SceneArrange::update(float dt) {
 void SceneArrange::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
     title_.draw(win);
-    hint_.draw(win);
 
     // 三道槽:已摆画牌(拖拽来源槽隐藏), 空槽画框, 吸附目标高亮
     for (int line = 0; line < 3; line++) {

@@ -65,10 +65,8 @@ SceneDeal::SceneDeal(SceneManager* mgr) : mgr_(mgr) {
     // 开局:洗牌 + 发牌 + 收底注(发牌动画只做表现, 真实牌已由 Room 发好)
     mgr_->room->startNewRound();
 
-    // 下注: bet 音效 + 筹码框数字"滚动减少"(下注前余额 -> 扣掉注金后余额)
-    SoundManager::instance().playBet();
-    chipBar_.setImmediate(Account::instance().balance());          // 下注前
-    chipBar_.rollTo(mgr_->room->players[0].chips, 0.75f);          // 滚动到"扣掉注金"
+    // 筹码框: 显示"已扣注金"后余额(下注音效+扣减动画已在上一界面播完)
+    chipBar_.setImmediate(mgr_->room->players[0].chips);
 
     // 本局牌背颜色(红/蓝/黑)与牌堆素材
     AssetManager::instance().rollBack();
@@ -78,11 +76,6 @@ SceneDeal::SceneDeal(SceneManager* mgr) : mgr_(mgr) {
     }
 
     // 提示
-    hint_.setText("发牌中...");
-    hint_.setCharacterSize(26);
-    hint_.setColor(sf::Color(255, 215, 0));
-    hint_.centerOrigin();
-    hint_.setPosition(sf::Vector2f(WW / 2.f, 30.f));
 
     chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
 
@@ -162,16 +155,7 @@ void SceneDeal::spawnNextCard() {
 }
 
 void SceneDeal::update(float dt) {
-    chipBar_.update(dt);   // 筹码框数字滚动(下注扣款动画)
-
-    // 下注阶段: bet 音效 + 扣款动画播完之前不进入发牌(避免与发牌音效/动画重叠)
-    if (!betDone_) {
-        betWait_ += dt;
-        if ((!chipBar_.isRolling() && !SoundManager::instance().isPlaying()) || betWait_ >= 2.5f) {
-            betDone_ = true;
-        }
-        return;
-    }
+    chipBar_.update(dt);   // 筹码框数字滚动(仅推进上一界面未完成的动画, 正常已静止)
 
     // 飞行中的牌推进
     for (Fly& f : flies_) {
@@ -209,7 +193,6 @@ void SceneDeal::update(float dt) {
             if (!flipSoundPlayed_) {
                 flipSoundPlayed_ = true;
                 SoundManager::instance().playFlip();   // 翻牌音效
-                hint_.setText("翻开手牌...");
             }
             flipT_ += dt / FLIP_DUR;
             if (flipT_ >= 1.f) {
@@ -235,7 +218,6 @@ void SceneDeal::drawCardAt(sf::RenderWindow& win, const Card& c, sf::Vector2f tl
 
 void SceneDeal::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
-    hint_.draw(win);
 
     // ---- 牌堆(从右边逐层切除一个白边并整体右移, 始终保留一张完整牌背) ----
     int remaining = LAYERS - dealt_;
@@ -287,7 +269,6 @@ void SceneDeal::draw(sf::RenderWindow& win) {
     for (int i = 0; i < mgr_->room->playerCount && i < MAX_PLAYERS; i++) {
         avatars_[i].draw(win);
     }
-
     chipBar_.draw(win);
 }
 

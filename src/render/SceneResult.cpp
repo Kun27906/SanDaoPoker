@@ -43,10 +43,6 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
     chipsLine_.setColor(C_GOLD);
     chipsLine_.centerOrigin();
 
-    tipText_.setCharacterSize(18);
-    tipText_.setColor(C_ALERT);        // 提示行统一亮红
-    tipText_.centerOrigin();
-
     // 高亮面板(与弹窗同色: 深蓝底 + 金边)
     for (sf::RectangleShape* p : {&panelRows_, &panelRounds_}) {
         p->setFillColor(C_PANEL_BG);
@@ -116,17 +112,11 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
     settleAndSync();
     final_ = mgr_->room->isFinished();
     if (!final_ && !kickPending_) refreshRows();
+    // 筹码框: 显示结算后余额(下注扣减动画移到点击[下一局]时播; 修复整场结束时显示 0 的问题)
+    chipBar_.setImmediate(Account::instance().balance());
     if (final_) {
         rebuildFinalText();
-        playFinalSound();   // 整场结束: 胜负音 + 金币音 + 总盈亏数字跳动
-    } else {
-        // 非最终局: 筹码框从"下注后余额"滚动到"本局结算后余额"(纯视觉, 不带音效)
-        Room* room = mgr_->room.get();
-        int ante = room->config.ante;
-        int d0 = room->historyCount > 0 ? room->roundHistory[room->historyCount - 1][0] : 0;
-        int after = Account::instance().balance();
-        chipBar_.setImmediate(after - d0 - ante);
-        chipBar_.rollTo(after, 0.8f);
+        playFinalSound();   // 整场结束: 仅胜负音(coins 延迟到点击[返回大厅])
     }
 }
 
@@ -203,7 +193,6 @@ void SceneResult::refreshRows() {
             playerRows_[i].setText(buf);
             playerRows_[i].setColor(d > 0 ? C_WIN : (d < 0 ? C_LOSE : sf::Color(235, 235, 235)));
         }
-        tipText_.setText("点[下一局]继续本场 · 点[逃跑]立即结束本场(罚 100)");
         layoutRows();
     } else {
         rebuildFinalText();
@@ -244,8 +233,6 @@ void SceneResult::rebuildFinalText() {
     chipsLine_.setText(buf);
 
     title_.setText(escapePenalty_ ? "本场提前结束" : "本场结束");
-    tipText_.setText("结算音效播放中…");   // 音效播完后 update() 切换为"点击返回大厅"
-    tipText_.setColor(C_ALERT);   // 亮红
 
     layoutFinal();
 }
@@ -271,8 +258,6 @@ void SceneResult::layoutRows() {
     for (int i = 0; i < pc; i++) {
         playerRows_[i].setPosition(sf::Vector2f(cx, blockTop + PANEL_PAD + i * rowH + rowH / 2.f));
     }
-
-    tipText_.setPosition(sf::Vector2f(cx, blockTop + rowsH + tipGap + tipH / 2.f));
 
     float btnY = blockTop + rowsH + tipGap + tipH + bGap;
     const float bw = 300.f, bg = 40.f;
@@ -321,7 +306,6 @@ void SceneResult::layoutFinal() {
     y += lineH;
     chipsLine_.setPosition(sf::Vector2f(cx, y));
 
-    tipText_.setPosition(sf::Vector2f(cx, panelTop + panelH + tipGap + tipH / 2.f));
     float btnY = panelTop + panelH + tipGap + tipH + bGap;
     btnLobby_.setPosition(sf::Vector2f(cx - 210.f, btnY));
     btnLobby_.setSize(sf::Vector2f(420.f, btnH));
@@ -354,8 +338,14 @@ void SceneResult::escape() {
 }
 
 void SceneResult::nextRound() {
-    if (final_) return;
-    mgr_->changeTo(SceneId::Deal);   // 下一局: 先播发牌动画
+    if (final_ || betting_) return;
+    // 下注阶段: 留在本界面(上一局结算界面)播 bet 音效 + 筹码数字滚动扣减;
+    // 播完由 update() 进入发牌动画(下注动画不再混在发牌场景内)
+    betting_ = true;
+    SoundManager::instance().playBet();
+    const int bal = Account::instance().balance();
+    chipBar_.setImmediate(bal);
+    chipBar_.rollTo(bal - mgr_->room->config.ante, 0.75f);
 }
 
 void SceneResult::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
@@ -369,6 +359,7 @@ void SceneResult::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
         btnLobby_.handleEvent(e, win);   // 点按钮 = 先播 coins+盈亏动画, 播完自动回大厅
         chipBar_.handleEvent(e, win);    // 筹码图标仍可点(发出 chip 音效)
     } else {
+        if (betting_) return;            // 下注动画播放中: 不接受输入
         btnNext_.handleEvent(e, win);
         btnEscape_.handleEvent(e, win);
         chipBar_.handleEvent(e, win);
@@ -376,13 +367,18 @@ void SceneResult::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
 }
 
 void SceneResult::update(float dt) {
-    chipBar_.update(dt);   // 筹码框数字滚动(结算收账/盈亏动画)
+    chipBar_.update(dt);   // 筹码框数字滚动(下注扣减 / 盈亏动画)
 
-    // 胜负音播完的瞬间: 出现[返回大厅]按钮与 home(位置不变), 提示同步切换
+    // 下注音效+扣减动画播完 -> 进入发牌动画
+    if (betting_ && !chipBar_.isRolling()) {
+        mgr_->changeTo(SceneId::Deal);
+        return;
+    }
+
+    // 胜负音播完的瞬间: 出现[返回大厅]按钮与 home(位置不变)
     if (final_ && !kickPending_ && !settleSoundDone_ &&
         !SoundManager::instance().isPlaying()) {
         settleSoundDone_ = true;
-        tipText_.setText("点击下方 [返回大厅] 回到人数选择");
     }
 
     // coins 盈亏动画播完 -> 自动返回大厅
@@ -404,7 +400,6 @@ void SceneResult::draw(sf::RenderWindow& win) {
             }
             totalLine_.draw(win);
             chipsLine_.draw(win);
-            tipText_.draw(win);
             if (settleSoundDone_) btnLobby_.draw(win);   // 胜负音播完才出现(原位置)
         }
     } else {
@@ -413,7 +408,6 @@ void SceneResult::draw(sf::RenderWindow& win) {
         for (int i = 0; i < mgr_->room->playerCount; i++) {
             playerRows_[i].draw(win);
         }
-        tipText_.draw(win);
         btnNext_.draw(win);
         btnEscape_.draw(win);
     }

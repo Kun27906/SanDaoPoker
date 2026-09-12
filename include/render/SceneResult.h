@@ -42,7 +42,6 @@ private:
     sf::Sprite bg_;
     TextBox title_;
     std::array<TextBox, MAX_PLAYERS> playerRows_;  // 非最终局: 各家行
-    TextBox tipText_;                              // 提示文字(亮红)
 
     // 最终局: 每局盈亏逐行(独立着色)
     std::array<TextBox, MAX_ROUND_LINES> roundLines_;
@@ -73,4 +72,5 @@ private:
     bool synced_ = false;       // 本局只结算同步一次
     bool settleSoundDone_ = false;  // 胜负音是否播完(播完瞬间才出现[返回大厅]与home)
     bool coinsStarted_ = false;     // coins 音效+盈亏动画已启动(动画播完自动回大厅)
+    bool betting_ = false;          // 下注阶段(点击[下一局]后: bet 音+扣减动画, 播完才进发牌)
 };

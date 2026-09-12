@@ -43,7 +43,6 @@ private:
     SceneManager* mgr_;
     sf::Sprite bg_;
     sf::Sprite pile_;
-    TextBox hint_;
     ChipBar chipBar_;
     std::array<Avatar, MAX_PLAYERS> avatars_;   // [0]=本人(左下), [1..]=他人(右中)
     std::array<Card, 9> handCards_{};
@@ -58,6 +57,4 @@ private:
     float flipT_ = 0.f;
     bool flipSoundPlayed_ = false;
     int  backIdx_ = 0;
-    bool betDone_ = false;      // 下注音效+扣款动画是否播完(播完才开始发牌)
-    float betWait_ = 0.f;
 };
