@@ -65,6 +65,11 @@ SceneDeal::SceneDeal(SceneManager* mgr) : mgr_(mgr) {
     // 开局:洗牌 + 发牌 + 收底注(发牌动画只做表现, 真实牌已由 Room 发好)
     mgr_->room->startNewRound();
 
+    // 下注: bet 音效 + 筹码框数字"滚动减少"(下注前余额 -> 扣掉注金后余额)
+    SoundManager::instance().playBet();
+    chipBar_.setImmediate(Account::instance().balance());          // 下注前
+    chipBar_.rollTo(mgr_->room->players[0].chips, 0.75f);          // 滚动到"扣掉注金"
+
     // 本局牌背颜色(红/蓝/黑)与牌堆素材
     AssetManager::instance().rollBack();
     backIdx_ = AssetManager::instance().currentBack();
@@ -157,6 +162,8 @@ void SceneDeal::spawnNextCard() {
 }
 
 void SceneDeal::update(float dt) {
+    chipBar_.update(dt);   // 筹码框数字滚动(下注扣款动画)
+
     // 飞行中的牌推进
     for (Fly& f : flies_) {
         if (!f.active) continue;
@@ -272,7 +279,7 @@ void SceneDeal::draw(sf::RenderWindow& win) {
         avatars_[i].draw(win);
     }
 
-    chipBar_.draw(win, Account::instance().balance());
+    chipBar_.draw(win);
 }
 
 void SceneDeal::handleEvent(const sf::Event&, const sf::RenderWindow&) {

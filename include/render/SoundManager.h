@@ -5,7 +5,7 @@
 // ====== SoundManager 音效管理器(阶段:素材集成) ======
 // 单例。统一加载 assets/sounds/ 下的 CC0 音效(Kenney casino-audio/interface-sounds)
 // 素材清单: deal发牌 / flip翻牌 / chip筹码 / win胜利 / lose失败 /
-//           bet下注 / click按钮
+//           bet下注 / coins金币结算 / click按钮
 // 用法:
 //   SoundManager::instance().loadAll();   // GameApp 启动时调用
 //   SoundManager::instance().playDeal();  // 需要时播放
@@ -24,6 +24,7 @@ public:
     void playWin();       // 胜利
     void playLose();      // 失败
     void playBet();       // 下注
+    void playCoins();     // 金币结算(独立通道: 可与 win/lose 同时播放)
 
     // ---- BGM 循环(主菜单/对局,MP3 整曲循环) ----
     void playBgmMenu();   // 主菜单循环
@@ -42,12 +43,14 @@ private:
     SoundManager() = default;
     bool loadBuffer(int idx, const char* path);
     void play(int idx);
+    void play2(int idx);          // 第二短音通道(coins 用, 不打断 win/lose)
     void playBgm(int idx);
 
-    enum { CLICK, DEAL, FLIP, CHIP, WIN, LOSE, BET,
+    enum { CLICK, DEAL, FLIP, CHIP, WIN, LOSE, BET, COINS,
            BGM_MENU, BGM_GAME, COUNT };
     sf::SoundBuffer bufs_[COUNT];
-    sf::Sound sound_;      // 单声道播放器(短音效串行足够)
+    sf::Sound sound_;      // 主短音通道(按钮/发牌/翻牌/胜负/下注 串行)
+    sf::Sound sound2_;     // 副短音通道(金币结算音, 与主通道叠加)
     sf::Sound bgm_;        // BGM 循环播放器
     bool loaded_ = false;
     bool bgmOn_ = true;             // 背景音乐总开关

@@ -1,14 +1,15 @@
 # assets — 游戏资源目录
 
-构建时由 CMake 自动复制到可执行文件所在目录（见根 `CMakeLists.txt`）。
+构建时由 CMake 自动同步到可执行文件所在目录（见 `cmake/sync_assets.cmake`；新增/修改/删除素材后直接 `cmake --build build` 即可）。
 
 | 目录 | 用途 |
 |------|------|
 | `cards/` | 扑克牌贴图：57 张（4 花色 × 13 点数 + 3 种牌背 + 大小王），PNG 高清 338×488 |
 | `cards/back/deck_pile_*` | 牌堆堆叠图（红/蓝/黑，689×292，54 层右侧露边）——发牌动画用 |
-| `ui/` | 界面素材：`backgrounds/` 背景图、`buttons/` 按钮三态图、`chips/` 筹码、`icons/` 图标、`table/` 桌面、`avatars/` 头像 |
+| `ui/` | 界面素材：`backgrounds/` 背景图、`buttons/` 按钮三态图、`chips/` 筹码、`icons/` 图标、`table/` 桌面小贴图、`avatars/` 头像 |
+| `ai/` | AI 胜率表 `winrate.bin`（24804 种三张牌组合；离线生成，见 `tools/gen_winrate_table`） |
 | `fonts/` | 字体文件（思源黑体 Source Han Sans SC） |
-| `sounds/` | 音效与背景音乐（发牌/翻牌/筹码/胜负/BGM） |
+| `sounds/` | 音效与背景音乐 |
 
 ## 牌图命名约定（AssetManager 加载用）
 
@@ -20,10 +21,12 @@ cards/Jokers/small.png     小王（黑色 JOKER，万能黑花色）
 cards/Jokers/big.png       大王（红色 JOKER，万能红花色）
 ui/avatars/<任意名>.png    头像图（100×100 方形；加载时自动按内切圆做圆形裁剪，
                            文件名排序后按序分配给各玩家；无需手动裁圆）
+ui/chips/chip_<区间>.png   筹码图标（文件名即档位区间，按余额自动选图）：
+                           chip_-1000=<1000 | chip_1000-2000 | chip_2000-5000
+                           chip_5000-10000 | chip_10000-15000 | chip_15000-=≥15000
+ui/icons/<名>.png          界面图标（文件名即查询名，代码用 icon("<名>") 取）
+ui/table/*.png             桌面小贴图（文件名即查询名，代码用 tableTexture("<名>") 取）
 ```
-
-素材来源：[SVG-cards 4.0](https://github.com/htdebeer/SVG-cards)（LGPL-2.1，经典法式牌面，J/Q/K 带人物画像）。
-程序生成的旧几何牌面已替换。后续想换画风可重新渲染（Edge headless 渲染 SVG，源文件在 `C:\Users\27906\SVG-cards`）。
 
 ## UI 素材
 
@@ -35,37 +38,38 @@ ui/avatars/<任意名>.png    头像图（100×100 方形；加载时自动按�
 | `ui/buttons/btn_hover.png` | 按钮-悬停 |
 | `ui/buttons/btn_pressed.png` | 按钮-按下 |
 | `ui/buttons/btn_disabled.png` | 按钮-禁用 |
-| `ui/chips/chip_1/5/10/25/50/100.png` | 筹码 6 种面值（416×416，3D 渲染高清，CC0） |
-| `ui/icons/mark_win.png` | 胜利标记（绿底奖杯） |
-| `ui/icons/mark_lose.png` | 失败标记（灰底叉） |
-| `ui/icons/mark_draw.png` | 平局标记（黄底横杠） |
-| `ui/table/countdown_bar_bg.png` | 倒计时条底 |
-| `ui/table/countdown_fill_*.png` | 倒计时填充（绿/黄/红） |
+| `ui/chips/chip_*.png` | 筹码 6 档区间（416×416，3D 渲染高清，CC0） |
+| `ui/icons/*.png` | 界面图标 100×100：menuList / musicOn / musicOff / soundSetting / soundOff / wrench / home / close / slider |
+| `ui/table/countdown_bar_bg.png` | 倒计时条底槽（400×24）——组牌限时条 |
+| `ui/table/countdown_fill_green/yellow/red.png` | 倒计时填充（绿 >2/3，黄 1/3~2/3，红 <1/3） |
 | `fonts/SourceHanSansSC-Regular.otf` | 思源黑体（开源可分发） |
 
-## 音效（assets/sounds/，CC0，Kenney casino-audio / interface-sounds）
+## 音效（assets/sounds/，CC0）
 
 | 文件 | 用途 | 播放时机 |
 |------|------|----------|
 | `deal.ogg` | 发牌 | 发牌动画(逐张) |
 | `flip.ogg` | 翻牌 | 比牌翻牌 / 发牌后手牌统一翻转 |
-| `chip.ogg` | 筹码 | 进入结算场景 |
-| `win.ogg` / `lose.ogg` | 胜负 | 结算判定（后续接入） |
-| `bet.ogg` | 下注 | 备用 |
-| `click.ogg` | 按钮点击 | 所有按钮通用 |
+| `chip.ogg` | 筹码 | 暂未调用（保留素材） |
+| `win.mp3` | 胜利 | 整场结束且总盈利 |
+| `lose.ogg` | 失败 | 整场结束且总亏损 |
+| `bet.ogg` | 下注 | 每局开始（进入发牌动画，配合筹码数字滚动扣减） |
+| `coins.wav` | 金币结算 | 整场结束（独立通道，与胜负音叠加；配合盈亏数字跳动） |
+| `click.ogg` | 按钮点击 | 所有按钮/图标按钮通用 |
+| `bgm_menu.mp3` / `bgm_game.mp3` | 背景音乐 | 菜单组 / 对局组循环（music 键开关） |
 
-接入：`SoundManager`（单例）加载与播放，`Button` 点击、`SceneManager` 场景切换已自动触发。
+接入：`SoundManager`（单例）加载与播放；短音效有**主/副两条通道**（coins 走副通道，可与 win/lose 叠加）。
 （注：洗牌音效 `shuffle.ogg` 已按设计决定移除——舍弃洗牌动画。）
 
-素材来源：poker_pack（CC0，筹码/桌），Kenney UI Pack（CC0，按钮），Kenney Game Icons（CC0，标记图标），[SVG-cards](https://github.com/htdebeer/SVG-cards)（LGPL-2.1，牌面）。
+素材来源：poker_pack（CC0，筹码/桌），Kenney UI Pack（CC0，按钮），Kenney casino-audio / interface-sounds（CC0，音效），[SVG-cards](https://github.com/htdebeer/SVG-cards)（LGPL-2.1，牌面）。
 
 ## 牌堆素材(发牌环节)
 
 | 文件 | 说明 |
 |------|------|
-| `ui/table/deck_pile_red.png` | 红背牌堆(54层,右侧逐层露边,每层牌=200×280 原尺寸,689×292) |
-| `ui/table/deck_pile_blue.png` | 蓝背牌堆(同上) |
-| `ui/table/deck_pile_black.png` | 黑背牌堆(同上) |
+| `cards/back/deck_pile_red.png` | 红背牌堆(54层,右侧逐层露边,每层牌=200×280 原尺寸,689×292) |
+| `cards/back/deck_pile_blue.png` | 蓝背牌堆(同上) |
+| `cards/back/deck_pile_black.png` | 黑背牌堆(同上) |
 
-生成脚本:`tools/gen_deck_pile.py`(改层数/错开量/纸边宽度后重跑即可)
-用途:发牌环节展示牌堆;动画可按"剩余张数"裁剪右侧宽度,或逐帧切换层数。
+生成脚本：`tools/gen_deck_pile.py`（改层数/错开量/纸边宽度后重跑即可）
+用途：发牌环节展示牌堆；动画按"剩余张数"从右侧裁切。

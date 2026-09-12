@@ -24,6 +24,7 @@ void SoundManager::loadAll() {
     loadBuffer(WIN,     "assets/sounds/win.mp3");
     loadBuffer(LOSE,    "assets/sounds/lose.ogg");
     loadBuffer(BET,     "assets/sounds/bet.ogg");
+    loadBuffer(COINS,   "assets/sounds/coins.wav");
     // BGM(MP3 整曲,SoundBuffer 整曲载入后循环)
     loadBuffer(BGM_MENU, "assets/sounds/bgm_menu.mp3");
     loadBuffer(BGM_GAME, "assets/sounds/bgm_game.mp3");
@@ -35,6 +36,12 @@ void SoundManager::play(int idx) {
     sound_.play();
 }
 
+void SoundManager::play2(int idx) {
+    if (bufs_[idx].getSampleCount() == 0) return;  // 未加载成功
+    sound2_.setBuffer(bufs_[idx]);
+    sound2_.play();
+}
+
 void SoundManager::playClick()   { play(CLICK); }
 void SoundManager::playDeal()    { play(DEAL); }
 void SoundManager::playFlip()    { play(FLIP); }
@@ -42,6 +49,7 @@ void SoundManager::playChip()    { play(CHIP); }
 void SoundManager::playWin()     { play(WIN); }
 void SoundManager::playLose()    { play(LOSE); }
 void SoundManager::playBet()     { play(BET); }
+void SoundManager::playCoins()   { play2(COINS); }
 
 // ---- BGM ----
 void SoundManager::playBgm(int idx) {
