@@ -112,11 +112,22 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
     settleAndSync();
     final_ = mgr_->room->isFinished();
     if (!final_ && !kickPending_) refreshRows();
-    // 筹码框: 显示结算后余额(下注扣减动画移到点击[下一局]时播; 修复整场结束时显示 0 的问题)
-    chipBar_.setImmediate(Account::instance().balance());
     if (final_) {
+        // 整场结束: 未点击[返回大厅]前一律不显示结算后的筹码数(点击后由 coins 动画补上)
+        chipBar_.setImmediate(Account::instance().balance() - matchTotal());
         rebuildFinalText();
-        playFinalSound();   // 整场结束: 仅胜负音(coins 延迟到点击[返回大厅])
+        playFinalSound();   // 仅胜负音(coins 延迟到点击[返回大厅])
+    } else {
+        // 每局结算: 底注返还动画 + coins 音效
+        // 显示值从"下注后"(进局时已扣)滚动到"结算后"(底注返还 + 本局盈亏)
+        // —— 未点击时不会先显示结算值, 避免"先结算值后跳回"的问题
+        Room* room = mgr_->room.get();
+        int ante = room->config.ante;
+        int d0 = room->historyCount > 0 ? room->roundHistory[room->historyCount - 1][0] : 0;
+        int after = Account::instance().balance();
+        chipBar_.setImmediate(after - d0 - ante);   // 下注后
+        chipBar_.rollTo(after, 0.8f);               // 滚动到结算后(底注返还)
+        SoundManager::instance().playCoins();       // 每局结算: 金币音效
     }
 }
 
@@ -139,13 +150,20 @@ void SceneResult::playFinalSound() {
 
 // 点击[返回大厅]/home: 播 coins 金币音(副通道) + 筹码框盈亏数字跳动; 留在本界面,
 // 动画播完由 update() 自动回大厅。
+// 起始值取"结算前"(与整场结束时显示的未结算值一致), 因此点击瞬间不会跳变。
 void SceneResult::startCoinsPhase() {
     if (coinsStarted_) return;
     coinsStarted_ = true;
     SoundManager::instance().playCoins();
     int t = matchTotal();
-    chipBar_.setImmediate(Account::instance().balance() - t);   // 结算前
-    chipBar_.rollTo(Account::instance().balance(), 1.0f);       // 滚动到结算后(整场盈亏)
+    int after = Account::instance().balance();
+    if (chipBar_.isRolling()) {
+        // 极少数情况: 仍在滚动(如每局动画未播完) -> 直接以当前显示为起点
+        chipBar_.rollTo(after, 1.0f);
+    } else {
+        chipBar_.setImmediate(after - t);   // 结算前
+        chipBar_.rollTo(after, 1.0f);       // 结算后(整场盈亏)
+    }
 }
 
 void SceneResult::settleAndSync() {

@@ -18,7 +18,6 @@ public:
     void rollTo(int v, float seconds = 0.6f);    // 滚动到 v(缓出: 先快后慢)
     void update(float dt);                       // 推进滚动动画
     bool isRolling() const { return rolling_; }
-    int  displayValue() const { return shown_; }
 
     void draw(sf::RenderWindow& win);            // 用内部显示值绘制
 

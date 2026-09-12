@@ -21,10 +21,9 @@ public:
     void reset();   // 复位到满时间(不自动开始)
     void update(float dt);
 
-    bool isRunning() const { return running_; }
     bool isFinished() const { return finished_; }
-    float getRemaining() const { return remaining_; }
-    float getMax() const { return maxSeconds_; }
+    float getRemaining() const { return remaining_; }   // 剩余秒数(内部实现与外部查询共用)
+    float getMax() const { return maxSeconds_; }        // 总时长(秒)
 
     void draw(sf::RenderWindow& win);
 
