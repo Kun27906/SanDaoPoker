@@ -46,6 +46,8 @@ public:
     const sf::Texture* deckPile(int backIndex) const;
     // 头像素材(assets/ui/avatars/*.png 自动扫描, 100x100): 按序号取(取模循环)
     const sf::Texture* avatarTexture(int idx) const;
+    // 桌面小贴图(assets/ui/table/, 400x24): "countdown_bar_bg"/"countdown_fill_green|yellow|red"
+    const sf::Texture* tableTexture(const std::string& name) const;
 
     bool isLoaded() const { return loaded_; }
 
@@ -68,6 +70,7 @@ private:
     std::map<std::string, sf::Texture> icons_;
     sf::Texture pileTex_[3];             // 牌堆堆叠图(发牌动画, 红/蓝/黑)
     std::vector<sf::Texture> avatarTex_; // 头像图(自动扫描 assets/ui/avatars/*.png)
+    std::map<std::string, sf::Texture> tableTex_;   // 桌面小贴图(assets/ui/table/)
     int backRoll_ = 0;                   // 当前局牌背颜色(0红 1蓝 2黑)
     bool loaded_ = false;
 };

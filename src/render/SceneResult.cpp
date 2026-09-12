@@ -118,7 +118,15 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
     if (!final_ && !kickPending_) refreshRows();
     if (final_) {
         rebuildFinalText();
-        playFinalSound();   // 整场结束: 按整场总盈亏播放胜负音(仅此一处)
+        playFinalSound();   // 整场结束: 胜负音 + 金币音 + 总盈亏数字跳动
+    } else {
+        // 非最终局: 筹码框从"下注后余额"滚动到"本局结算后余额"(纯视觉, 不带音效)
+        Room* room = mgr_->room.get();
+        int ante = room->config.ante;
+        int d0 = room->historyCount > 0 ? room->roundHistory[room->historyCount - 1][0] : 0;
+        int after = Account::instance().balance();
+        chipBar_.setImmediate(after - d0 - ante);
+        chipBar_.rollTo(after, 0.8f);
     }
 }
 
@@ -130,11 +138,15 @@ int SceneResult::matchTotal() const {
     return t;
 }
 
-// 整场结束音效: 总盈亏 >0 胜利音, <0 失败音(0 不播)
+// 整场结束音效 + 盈亏数字跳动: 胜负音(主通道) + 金币音(副通道) + 筹码框从
+// "结算前"滚动到"结算后"(一整场盈亏以数字跳动呈现)
 void SceneResult::playFinalSound() {
     int t = matchTotal();
     if (t > 0)      SoundManager::instance().playWin();
     else if (t < 0) SoundManager::instance().playLose();
+    SoundManager::instance().playCoins();   // 金币结算音(独立通道, 可与胜负音叠加)
+    chipBar_.setImmediate(Account::instance().balance() - t);   // 结算前
+    chipBar_.rollTo(Account::instance().balance(), 1.0f);       // 滚动到结算后
 }
 
 void SceneResult::settleAndSync() {
@@ -347,7 +359,9 @@ void SceneResult::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     }
 }
 
-void SceneResult::update(float) {}
+void SceneResult::update(float dt) {
+    chipBar_.update(dt);   // 筹码框数字滚动(结算收账动画)
+}
 
 void SceneResult::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
@@ -376,7 +390,7 @@ void SceneResult::draw(sf::RenderWindow& win) {
         btnEscape_.draw(win);
     }
 
-    chipBar_.draw(win, Account::instance().balance());
+    chipBar_.draw(win);
     for (int i = 0; i < mgr_->room->playerCount && i < MAX_PLAYERS; i++) {
         avatars_[i].draw(win);   // 局内头像: 本人左下 / 他人右中
     }

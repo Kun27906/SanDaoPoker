@@ -511,7 +511,8 @@ void SceneArrange::draw(sf::RenderWindow& win) {
     btnReset_.draw(win);
     btnSubmit_.draw(win);
     countdown_.draw(win);
-    chipBar_.draw(win, Account::instance().balance());
+    chipBar_.setImmediate(mgr_->room->players[0].chips);
+    chipBar_.draw(win);   // 组牌/比牌期间显示"下注后余额"(发牌时已滚动扣减)
     for (int i = 0; i < mgr_->room->playerCount && i < MAX_PLAYERS; i++) {
         avatars_[i].draw(win);   // 局内头像: 本人左下 / 他人右中
     }

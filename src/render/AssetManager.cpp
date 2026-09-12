@@ -234,6 +234,26 @@ bool AssetManager::loadMiscTextures() {
             }
         }
     }
+    // 桌面小贴图(assets/ui/table/*.png 自动扫描, 文件名(去扩展名)即查询名)
+    {
+        tableTex_.clear();
+        namespace fs = std::filesystem;
+        std::error_code ec;
+        if (fs::exists("assets/ui/table", ec)) {
+            for (auto& entry : fs::directory_iterator("assets/ui/table", ec)) {
+                if (!entry.is_regular_file(ec)) continue;
+                if (entry.path().extension() != ".png") continue;
+                sf::Texture t;
+                if (t.loadFromFile(entry.path().string())) {
+                    tableTex_[entry.path().stem().string()] = std::move(t);
+                } else {
+                    std::fprintf(stderr, "[AssetManager] 加载失败: %s\n",
+                                 entry.path().string().c_str());
+                }
+            }
+        }
+    }
+
     return true;
 }
 
@@ -289,6 +309,12 @@ const sf::Texture* AssetManager::avatarTexture(int idx) const {
     int n = static_cast<int>(avatarTex_.size());
     int i = ((idx % n) + n) % n;                  // 取模循环
     return avatarTex_[i].getSize().x > 0 ? &avatarTex_[i] : nullptr;
+}
+
+const sf::Texture* AssetManager::tableTexture(const std::string& name) const {
+    auto it = tableTex_.find(name);
+    if (it == tableTex_.end()) return nullptr;
+    return it->second.getSize().x > 0 ? &it->second : nullptr;
 }
 
 const sf::Texture* AssetManager::backTexture(int index) const {

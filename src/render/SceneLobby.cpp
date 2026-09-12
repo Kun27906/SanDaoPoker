@@ -130,7 +130,8 @@ void SceneLobby::draw(sf::RenderWindow& win) {
     hint_.draw(win);
     for (auto& b : btnSeats_) b.draw(win);
     btnReset_.draw(win);
-    chipBar_.draw(win, Account::instance().balance());
+    chipBar_.setImmediate(Account::instance().balance());
+    chipBar_.draw(win);
     selfAvatar_.draw(win);   // 局外本人头像(筹码条左侧)
     versionBadge_.draw(win); // 左下角版本号 + 版本历史弹窗
 

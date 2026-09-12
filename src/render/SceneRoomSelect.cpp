@@ -278,7 +278,8 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].draw(win);
     btnDiffOpen_.draw(win);
     btnStart_.draw(win);
-    chipBar_.draw(win, Account::instance().balance());
+    chipBar_.setImmediate(Account::instance().balance());
+    chipBar_.draw(win);
     selfAvatar_.draw(win);   // 局外本人头像(筹码条左侧)
     versionBadge_.draw(win); // 左下角版本号 + 版本历史弹窗
     if (notEnough_) {                  // 入场资格弹窗

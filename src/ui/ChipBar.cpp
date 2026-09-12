@@ -21,7 +21,41 @@ void ChipBar::setPosition(const sf::Vector2f& pos) {
     pos_ = pos;
 }
 
-void ChipBar::draw(sf::RenderWindow& win, int balance) {
+// 立即设定显示值(无动画)
+void ChipBar::setImmediate(int v) {
+    shown_ = v;
+    from_ = v;
+    target_ = v;
+    rolling_ = false;
+    t_ = 0.f;
+    inited_ = true;
+}
+
+// 从当前显示值滚动到 v(缓出: 先快后慢, 像计数器)
+void ChipBar::rollTo(int v, float seconds) {
+    if (!inited_) { setImmediate(v); return; }
+    if (v == shown_) { target_ = v; rolling_ = false; return; }
+    from_ = shown_;
+    target_ = v;
+    t_ = 0.f;
+    dur_ = seconds > 0.05f ? seconds : 0.05f;
+    rolling_ = true;
+}
+
+void ChipBar::update(float dt) {
+    if (!rolling_) return;
+    t_ += dt / dur_;
+    if (t_ >= 1.f) {
+        t_ = 1.f;
+        rolling_ = false;
+        shown_ = target_;
+        return;
+    }
+    float e = 1.f - (1.f - t_) * (1.f - t_);   // 二次缓出
+    shown_ = from_ + static_cast<int>((target_ - from_) * e);
+}
+
+void ChipBar::draw(sf::RenderWindow& win) {
     sf::FloatRect box(pos_, sf::Vector2f(W, H));
 
     // 1. 渐变背景(上深蓝->下亮蓝紫, 垂直渐变)
@@ -36,16 +70,17 @@ void ChipBar::draw(sf::RenderWindow& win, int balance) {
     grad[3].color = sf::Color(70, 110, 200, 235);
     win.draw(grad);
 
-    // 2. 外边框(亮金)
+    // 2. 外边框(亮金; 滚动中加亮提示)
     sf::RectangleShape border(sf::Vector2f(box.width, box.height));
     border.setPosition(box.left, box.top);
     border.setFillColor(sf::Color::Transparent);
-    border.setOutlineColor(sf::Color(255, 215, 0));
-    border.setOutlineThickness(2.f);
+    border.setOutlineColor(rolling_ ? sf::Color(255, 245, 160) : sf::Color(255, 215, 0));
+    border.setOutlineThickness(rolling_ ? 3.f : 2.f);
     win.draw(border);
 
-    // 3. 左端筹码图标(按余额所在区间档位取素材)
-    if (const sf::Texture* t = AssetManager::instance().chipForAmount(balance)) {
+    // 3. 左端筹码图标(按当前显示值所在区间档位取素材; 滚动时图标随数字换档)
+    int shownForIcon = rolling_ ? shown_ : target_;
+    if (const sf::Texture* t = AssetManager::instance().chipForAmount(shownForIcon)) {
         sf::Sprite chip(*t);
         float scale = 36.f / t->getSize().x;
         chip.setScale(scale, scale);
@@ -59,12 +94,12 @@ void ChipBar::draw(sf::RenderWindow& win, int balance) {
     sep.setFillColor(sf::Color(255, 255, 255, 160));
     win.draw(sep);
 
-    // 5. 数字
-    char buf[24];
-    std::snprintf(buf, sizeof(buf), "%d", balance);
-    if (balance != shownBalance_) {
+    // 5. 数字(滚动中显示中间值)
+    if (shown_ != cachedShown_) {
+        char buf[24];
+        std::snprintf(buf, sizeof(buf), "%d", shown_);
         text_.setString(str_util::utf8(buf));
-        shownBalance_ = balance;
+        cachedShown_ = shown_;
     }
     text_.setPosition(box.left + 64.f, box.top + 4.f);
     label_.setString(str_util::utf8("筹码"));
