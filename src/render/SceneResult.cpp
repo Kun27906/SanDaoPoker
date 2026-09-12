@@ -1,5 +1,6 @@
 #include "render/SceneResult.h"
 #include "render/AssetManager.h"
+#include "render/SoundManager.h"
 #include "render/Account.h"
 #include "core/Room.h"
 #include <cstdio>
@@ -128,6 +129,9 @@ void SceneResult::settleAndSync() {
     if (room->historyCount > 0) {
         int d0 = room->roundHistory[room->historyCount - 1][0];
         Account::instance().add(d0);
+        // 结算音效: 本局盈利=胜利音, 亏损=失败音
+        if (d0 > 0)      SoundManager::instance().playWin();
+        else if (d0 < 0) SoundManager::instance().playLose();
     }
 
     // 踢出判定: 本局结算后筹码不足下一局个人注金 -> 踢出(不扣逃跑费)

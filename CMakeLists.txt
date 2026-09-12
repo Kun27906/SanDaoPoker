@@ -241,6 +241,14 @@ if(BUILD_TOOLS)
         target_compile_options(room_smoke_test PRIVATE /utf-8)
     endif()
 
+    # 5. 音效试听拼盘: 把多个 ogg 拼成一段 wav(便于挑选音效)
+    add_executable(audio_montage tools/audio_montage.cpp)
+    target_include_directories(audio_montage PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_link_libraries(audio_montage PRIVATE sfml-audio sfml-system)
+    if(MSVC)
+        target_compile_options(audio_montage PRIVATE /utf-8)
+    endif()
+
     # 4. 素材生成(需 python3 + pillow): 牌面贴图 + UI 素材
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_FOUND)
