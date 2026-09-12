@@ -44,7 +44,6 @@ private:
     SceneManager* mgr_;
     sf::Sprite bg_;
     TextBox title_;
-    TextBox hint_;
     std::array<CardSprite, 9> handSprites_;            // 手牌区
     std::array<std::array<CardSprite, 3>, 3> lineSprites_;  // 三道已摆牌
     std::array<sf::RectangleShape, 9> handSlotRects_;       // 手牌空位框

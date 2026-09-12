@@ -1,5 +1,6 @@
 #include "render/SceneRoomSelect.h"
 #include "render/AssetManager.h"
+#include "render/SoundManager.h"
 #include "render/Account.h"
 #include "core/NameGen.h"
 #include "core/Room.h"
@@ -62,11 +63,8 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
             roomIndex_[roomCount_++] = i;
         }
     }
-    hint_.setText("选择房间(注金为每人每局下注额, 总池均分三道)");
-    hint_.setCharacterSize(17);
-    hint_.setColor(sf::Color(215, 215, 215));
-    hint_.centerOrigin();
-    hint_.setPosition(sf::Vector2f(WW / 2.f, 115.f));
+    chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
+    chipBar_.setImmediate(Account::instance().balance());   // 初值(下注滚动不被覆盖)
 
     // 房间按钮: 居中一列
     for (int i = 0; i < roomCount_; i++) {
@@ -245,7 +243,13 @@ void SceneRoomSelect::startGame() {
     for (int i = 0; i < mgr_->room->playerCount; i++) {
         mgr_->room->players[i].chips = entryChips;
     }
-    mgr_->changeTo(SceneId::Deal);   // 进入发牌动画(之后自动进组牌)
+
+    // 下注阶段: 留在本界面播 bet 音效 + 筹码数字滚动扣减;
+    // 播完由 update() 进入发牌动画(下注动画不再混在发牌场景内)
+    betting_ = true;
+    SoundManager::instance().playBet();
+    chipBar_.setImmediate(entryChips);
+    chipBar_.rollTo(entryChips - cfg.ante, 0.75f);
 }
 
 void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
@@ -270,16 +274,19 @@ void SceneRoomSelect::onHomePressed() {
     mgr_->changeTo(SceneId::Lobby);   // home 键返回大厅
 }
 
-void SceneRoomSelect::update(float) {}
+void SceneRoomSelect::update(float dt) {
+    chipBar_.update(dt);   // 筹码框数字滚动(下注扣减动画)
+    if (betting_ && !chipBar_.isRolling()) {
+        mgr_->changeTo(SceneId::Deal);   // 下注音效+扣减动画播完 -> 进入发牌动画
+    }
+}
 
 void SceneRoomSelect::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
     title_.draw(win);
-    hint_.draw(win);
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].draw(win);
     btnDiffOpen_.draw(win);
     btnStart_.draw(win);
-    chipBar_.setImmediate(Account::instance().balance());
     chipBar_.draw(win);
     selfAvatar_.draw(win);   // 局外本人头像(筹码条左侧)
     versionBadge_.draw(win); // 左下角版本号 + 版本历史弹窗
