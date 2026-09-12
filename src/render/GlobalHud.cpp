@@ -70,10 +70,13 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnWrench_.setPosition(sf::Vector2f(12.f + PAD * 2.f, 12.f));
     btnWrench_.setSize(BTN);
     btnWrench_.setCallback([this]() {
-        // 组牌界面禁用开发者模式: 播 error 音效, 不弹窗
-        if (mgr_ && mgr_->currentId() == SceneId::Arrange) {
-            SoundManager::instance().playError();
-            return;
+        // 发牌/组牌/比牌界面禁用开发者模式: 播 error 音效, 不弹窗
+        if (mgr_) {
+            SceneId id = mgr_->currentId();
+            if (id == SceneId::Deal || id == SceneId::Arrange || id == SceneId::Battle) {
+                SoundManager::instance().playError();
+                return;
+            }
         }
         openDevPopup();
     });
