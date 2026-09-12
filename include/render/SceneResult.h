@@ -13,6 +13,7 @@
 //         每局结算块 与 总盈亏结算块 各自带边框+底色面板, 整块居中; [返回大厅]。
 // 提示行(逃跑/下一局提示 与 返回大厅提示)统一亮红色。
 // 踢出机制: 每局结算后筹码不足下一局注金 -> 弹窗告知被踢出(不扣逃跑费)。
+// 胜负音效: 仅在"整场结束"(最终结算/逃跑)时按整场总盈亏播放一次, 单局不播。
 
 class SceneResult : public Scene {
 public:
@@ -31,6 +32,8 @@ private:
     void escape();                 // 逃跑: 罚100 -> 立即最终结算
     void confirmKickOut();         // 踢出弹窗确定 -> 回大厅
     void nextRound();
+    int  matchTotal() const;       // 整场总盈亏(含逃跑罚)
+    void playFinalSound();         // 整场结束音效(按整场总盈亏播胜利/失败音)
 
     static constexpr int MAX_ROUND_LINES = 18;   // 最多 16 局 + 逃跑罚 行
 

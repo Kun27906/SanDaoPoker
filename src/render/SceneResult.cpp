@@ -116,7 +116,25 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
     settleAndSync();
     final_ = mgr_->room->isFinished();
     if (!final_ && !kickPending_) refreshRows();
-    if (final_) rebuildFinalText();
+    if (final_) {
+        rebuildFinalText();
+        playFinalSound();   // 整场结束: 按整场总盈亏播放胜负音(仅此一处)
+    }
+}
+
+// 整场总盈亏(含逃跑罚): 用于整场结束音效判定
+int SceneResult::matchTotal() const {
+    Room* room = mgr_->room.get();
+    int t = -escapePenalty_;
+    for (int r = 0; r < room->historyCount; r++) t += room->roundHistory[r][0];
+    return t;
+}
+
+// 整场结束音效: 总盈亏 >0 胜利音, <0 失败音(0 不播)
+void SceneResult::playFinalSound() {
+    int t = matchTotal();
+    if (t > 0)      SoundManager::instance().playWin();
+    else if (t < 0) SoundManager::instance().playLose();
 }
 
 void SceneResult::settleAndSync() {
@@ -129,9 +147,7 @@ void SceneResult::settleAndSync() {
     if (room->historyCount > 0) {
         int d0 = room->roundHistory[room->historyCount - 1][0];
         Account::instance().add(d0);
-        // 结算音效: 本局盈利=胜利音, 亏损=失败音
-        if (d0 > 0)      SoundManager::instance().playWin();
-        else if (d0 < 0) SoundManager::instance().playLose();
+        // (胜负音效不在此处播放: 改为整场结束时统一播放, 见 playFinalSound)
     }
 
     // 踢出判定: 本局结算后筹码不足下一局个人注金 -> 踢出(不扣逃跑费)
@@ -310,6 +326,7 @@ void SceneResult::escape() {
     escapePenalty_ = 100;
     Account::instance().add(-100);
     rebuildFinalText();
+    playFinalSound();   // 整场结束(提前逃跑): 同样按总盈亏播放
 }
 
 void SceneResult::nextRound() {
