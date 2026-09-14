@@ -114,15 +114,12 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
         lineBtns_[i].setCallback([this, i]() {
             currentLine_ = i;
             for (int j = 0; j < 3; j++) {
-                if (j == currentLine_) {
-                    lineBtns_[j].setColors(sf::Color(46, 160, 80), sf::Color(70, 190, 100), sf::Color(30, 120, 55));
-                } else {
-                    lineBtns_[j].setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
-                }
+                // 选中态 = 常驻"按下"贴图(不恢复)
+                lineBtns_[j].setSelected(j == currentLine_);
             }
         });
     }
-    lineBtns_[0].setColors(sf::Color(46, 160, 80), sf::Color(70, 190, 100), sf::Color(30, 120, 55));
+    lineBtns_[0].setSelected(true);
 
     // 一键重置 / 交牌
     btnReset_.setText("一键重置");
