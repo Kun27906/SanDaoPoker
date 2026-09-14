@@ -12,7 +12,6 @@
 //   - 大小王 2 张:       assets/cards/Jokers/{big,small}.png
 //   - 牌背 3 张:         assets/cards/back/{red,blue,black}.png
 //   - 桌面背景:          assets/ui/backgrounds/table_bg.png
-//   - 按钮四态图:        assets/ui/buttons/btn_{normal,hover,pressed,disabled}.png
 //   - 筹码图标 5 枚:     assets/ui/chips/chip_{1,5,10,50,100}.png
 // 用法:
 //   AssetManager::instance().loadAll();        // 程序启动时调用一次
