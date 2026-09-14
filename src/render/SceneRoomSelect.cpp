@@ -120,7 +120,6 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     // ---- 难度选择(成员B): 入口按钮 + 居中弹窗 ----
     btnDiffOpen_.setPosition(sf::Vector2f(330.f, 590.f));
     btnDiffOpen_.setSize(sf::Vector2f(150.f, 58.f));
-    btnDiffOpen_.setColors(sf::Color(96, 84, 160), sf::Color(126, 112, 200), sf::Color(70, 60, 122));
     btnDiffOpen_.setCallback([this]() { openDiffPopup(); });
 
     const float DW = 620.f, DH = 340.f;
@@ -182,11 +181,8 @@ void SceneRoomSelect::applyDifficulty(int idx) {
 void SceneRoomSelect::refreshDiffColors() {
     const int cur = indexOfDiff(AIPlayer::difficulty());
     for (int i = 0; i < 3; i++) {
-        if (i == cur) {
-            diffBtns_[i].setColors(sf::Color(46, 160, 80), sf::Color(70, 190, 100), sf::Color(30, 120, 55));
-        } else {
-            diffBtns_[i].setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
-        }
+        // 选中难度 = 常驻"按下"贴图(不恢复)
+        diffBtns_[i].setSelected(i == cur);
     }
     diffDesc_.setText(diffDescOf(cur));
     btnDiffOpen_.setText(std::string("难度: ") + AIPlayer::difficultyName(AIPlayer::difficulty()));
@@ -197,12 +193,16 @@ void SceneRoomSelect::refreshColors() {
     for (int i = 0; i < roomCount_; i++) {
         const RoomConfig& cfg = ROOM_CONFIGS[roomIndex_[i]];
         if (bal < cfg.ante) {
-            // 余额不足该房间第一局注金: 灰色(不可进入,点击仍弹提示)
-            roomBtns_[i].setColors(sf::Color(88, 92, 104), sf::Color(104, 108, 122), sf::Color(66, 70, 82));
+            // 余额不足该房间第一局注金: 灰色禁用贴图(点击仍弹提示, 由回调处理)
+            roomBtns_[i].setDisabled(true);
+            roomBtns_[i].setSelected(false);
         } else if (i == selected_) {
-            roomBtns_[i].setColors(sf::Color(46, 160, 80), sf::Color(70, 190, 100), sf::Color(30, 120, 55));
+            // 已选中房间 = 常驻"按下"贴图(不恢复)
+            roomBtns_[i].setDisabled(false);
+            roomBtns_[i].setSelected(true);
         } else {
-            roomBtns_[i].setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
+            roomBtns_[i].setDisabled(false);
+            roomBtns_[i].setSelected(false);
         }
     }
 }

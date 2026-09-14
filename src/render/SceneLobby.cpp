@@ -52,13 +52,13 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
             resetArmed_ = true;
             resetArmTimer_ = 0.f;
             btnReset_.setText("再点一次确认重置");
-            btnReset_.setColors(sf::Color(200, 60, 50), sf::Color(240, 90, 70), sf::Color(150, 40, 30));
+            btnReset_.setTint(sf::Color(255, 140, 140));   // 警告态: 红色着色
         } else {
             Account::instance().reset();   // 清空存档并初始化回 500(昵称一并清空)
             selfAvatar_.setNickname(Account::instance().ensureNickname());   // 立即生成并显示新昵称
             resetArmed_ = false;
             btnReset_.setText("重置账号");
-            btnReset_.setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
+            btnReset_.setTint(sf::Color::White);
         }
     });
 
@@ -114,7 +114,7 @@ void SceneLobby::update(float dt) {
         if (resetArmTimer_ >= 5.f) {
             resetArmed_ = false;
             btnReset_.setText("重置账号");
-            btnReset_.setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
+            btnReset_.setTint(sf::Color::White);
         }
     }
 }

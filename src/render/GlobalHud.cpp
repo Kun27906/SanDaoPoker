@@ -424,20 +424,18 @@ void GlobalHud::openDevPopup() {
     refreshDevToggle();
 }
 
-// 统一刷新"启用/关闭开发者模式"按钮: 文字 + 配色 + 位置 随 devOn_/devArm_ 变化
-// (蓝色=正常/已启用, 红色=已进入"再点一次确认"状态)
+// 统一刷新"启用/关闭开发者模式"按钮: 文字 + 位置 随 devOn_/devArm_ 变化
+// (贴图按钮: 常态用原色, 已进入"再点一次确认"的警告态用红色着色)
 void GlobalHud::refreshDevToggle() {
-    const sf::Color blue(64, 120, 200), blueHover(90, 160, 240), bluePress(40, 85, 150);
-    const sf::Color red(200, 90, 60), redHover(230, 120, 90), redPress(160, 60, 40);
     if (devOn_) {
         btnDevToggle_.setText("关闭开发者模式");
-        btnDevToggle_.setColors(blue, blueHover, bluePress);
+        btnDevToggle_.setTint(sf::Color::White);
     } else if (devArm_) {
         btnDevToggle_.setText("再点一次确认启用");
-        btnDevToggle_.setColors(red, redHover, redPress);
+        btnDevToggle_.setTint(sf::Color(255, 140, 140));   // 警告态: 红色着色
     } else {
         btnDevToggle_.setText("启用开发者模式");
-        btnDevToggle_.setColors(blue, blueHover, bluePress);
+        btnDevToggle_.setTint(sf::Color::White);
     }
     // 启用态按钮在下方居中
     btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f,

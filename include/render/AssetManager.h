@@ -12,6 +12,7 @@
 //   - 大小王 2 张:       assets/cards/Jokers/{big,small}.png
 //   - 牌背 3 张:         assets/cards/back/{red,blue,black}.png
 //   - 桌面背景:          assets/ui/backgrounds/table_bg.png
+//   - 按钮四态图:        assets/ui/buttons/btn_{normal,hover,pressed,disabled}.png
 //   - 筹码图标 5 枚:     assets/ui/chips/chip_{1,5,10,50,100}.png
 // 用法:
 //   AssetManager::instance().loadAll();        // 程序启动时调用一次
@@ -32,6 +33,8 @@ public:
     const sf::Texture* background() const;
     // 主菜单背景(1920x1080),加载失败时回退到桌面背景
     const sf::Texture* menuBackground() const;
+    // 按钮四态图:0=normal 1=hover 2=pressed 3=disabled (assets/ui/buttons/btn_*.png)
+    const sf::Texture* buttonTexture(int state) const;
     const sf::Texture* chipForAmount(int amount) const;
     // 牌背:当前局随机颜色(0=红 1=蓝 2=黑)
     void rollBack();                 // 每局开局调用:随机选一种牌背颜色
@@ -56,6 +59,7 @@ private:
     std::vector<sf::Texture> backTex_;   // 3 张牌背
     sf::Texture bgTex_;                  // 桌面背景
     sf::Texture menuTex_;                // 主菜单背景
+    sf::Texture btnTex_[4];              // 按钮四态(正常/悬停/按下/禁用; UI 按钮统一使用)
     // 筹码素材:区间命名 chip_<min>-<max> / chip_-<max>(无下界) / chip_<min>-(无上界)
     struct ChipDef { int lo; int hi; sf::Texture tex; };
     std::vector<ChipDef> chipDefs_;

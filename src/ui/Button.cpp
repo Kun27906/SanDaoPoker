@@ -1,5 +1,6 @@
 #include "ui/Button.h"
 #include "ui/FontUtil.h"
+#include "render/AssetManager.h"
 #include "render/SoundManager.h"
 
 Button::Button(const std::string& text, const sf::Vector2f& pos, const sf::Vector2f& size) {
@@ -18,12 +19,14 @@ void Button::setText(const std::string& t) {
 }
 
 void Button::setPosition(const sf::Vector2f& p) {
-    rect_.setPosition(p);
+    pos_ = p;
+    refreshSprite();
     centerText();
 }
 
 void Button::setSize(const sf::Vector2f& s) {
-    rect_.setSize(s);
+    size_ = s;
+    refreshSprite();
     centerText();
 }
 
@@ -36,14 +39,13 @@ void Button::setCallback(std::function<void()> cb) {
     callback_ = std::move(cb);
 }
 
-void Button::setColors(sf::Color normal, sf::Color hover, sf::Color pressed) {
-    normal_ = normal;
-    hover_ = hover;
-    pressed_ = pressed;
-}
+void Button::setSelected(bool s) { selected_ = s; }
+void Button::setDisabled(bool d) { disabled_ = d; }
+void Button::setTint(sf::Color c) { tint_ = c; }
 
 bool Button::contains(const sf::Vector2f& point) const {
-    return rect_.getGlobalBounds().contains(point);
+    return point.x >= pos_.x && point.x <= pos_.x + size_.x &&
+           point.y >= pos_.y && point.y <= pos_.y + size_.y;
 }
 
 void Button::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
@@ -62,19 +64,32 @@ void Button::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
 }
 
 void Button::draw(sf::RenderWindow& win) {
-    // 三态颜色
-    sf::Color c = normal_;
-    if (hovered_) c = hover_;
-    rect_.setFillColor(c);
-    win.draw(rect_);
+    refreshSprite();
+    win.draw(sprite_);
     win.draw(text_);
+}
+
+// 状态 -> 贴图: 禁用 > 选中(常驻按下) > 悬停 > 正常
+void Button::refreshSprite() {
+    const AssetManager& am = AssetManager::instance();
+    int state = 0;                  // 0=正常
+    if (disabled_)      state = 3;  // 禁用(灰)
+    else if (selected_) state = 2;  // 选中: 常驻"按下"贴图, 不恢复
+    else if (hovered_)  state = 1;  // 悬停(亮)
+    const sf::Texture* t = am.buttonTexture(state);
+    if (!t) return;                 // 贴图缺失(不应发生): 保持上次状态
+    sprite_.setTexture(*t);
+    sprite_.setColor(tint_);
+    const sf::Vector2u ts = t->getSize();
+    if (ts.x == 0 || ts.y == 0) return;
+    sprite_.setScale(size_.x / static_cast<float>(ts.x),
+                     size_.y / static_cast<float>(ts.y));
+    sprite_.setPosition(pos_);
 }
 
 void Button::centerText() {
     // 以按钮中心为锚点居中文字
     sf::FloatRect tb = text_.getLocalBounds();
-    sf::Vector2f pos = rect_.getPosition();
-    sf::Vector2f size = rect_.getSize();
     text_.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
-    text_.setPosition(pos.x + size.x / 2.f, pos.y + size.y / 2.f);
+    text_.setPosition(pos_.x + size_.x / 2.f, pos_.y + size_.y / 2.f);
 }
