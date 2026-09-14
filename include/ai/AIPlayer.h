@@ -13,7 +13,7 @@
 //   Greedy      胜率表贪心: 枚举全部 1680 种分组, 选"三组胜率期望"最高的
 //   MonteCarlo  蒙特卡洛模拟: 对候选分组模拟对手(对手也用贪心), 选期望赢池数最高
 //
-// 胜率表: 离线生成 (tools/gen_winrate_table), 运行时加载
+// 胜率表: 离线生成 (tools/gen_winrate_table), 游戏启动时由 GameApp 加载 (assets/ai/winrate.bin)
 //   对所有 C(54,3)=24804 种三张牌组合, 精确计算 vs 随机对手(剩余51张任取3)的胜率
 class AIPlayer {
 public:
@@ -73,12 +73,10 @@ public:
                            Difficulty diff, Style style, float noise,
                            int trials);
 
-    // 胜率表: 运行时加载 (winrate.bin)
+    // 胜率表: 离线生成 (tools/gen_winrate_table), 游戏启动时由 GameApp 加载
     static bool loadWinRateTable(const std::string& path);
     // 胜率表: 离线生成 (训练), 保存到 path
     static bool generateWinRateTable(const std::string& path, bool verbose = true);
-    // 是否已加载
-    static bool hasWinRateTable() { return s_loaded; }
 
     // 单组 3 张牌 vs 随机对手的胜率 (查表; 未加载返回 -1)
     static float winRateOf(const Card& a, const Card& b, const Card& c);
@@ -122,9 +120,6 @@ private:
     static float styleScore(const float w[3], Style style);
     // 人性化选择: scores 降序后, 以 noise 概率从 top-K 里随机挑, 否则选最优
     static int humanPick(const std::vector<float>& scores, int topK, float noise);
-
-    // 牌型打分 (无表时的退化方案): 豹子>顺金>金花>顺子>对子>散牌, 同型比点数
-    static float fallbackScore(const Card& a, const Card& b, const Card& c);
 };
 
 #endif // AI_PLAYER_H

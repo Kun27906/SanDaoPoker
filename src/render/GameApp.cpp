@@ -1,7 +1,9 @@
 #include "render/GameApp.h"
 #include "render/AssetManager.h"
 #include "render/SoundManager.h"
+#include "ai/AIPlayer.h"
 #include "ui/FontUtil.h"
+#include <cstdio>
 
 namespace {
 constexpr unsigned WINDOW_W = 1280;
@@ -20,6 +22,11 @@ GameApp::GameApp()
     AssetManager::instance().loadAll();
     // 加载全部音效(发牌/翻牌/筹码/胜负/按钮点击;失败静默)
     SoundManager::instance().loadAll();
+    // 加载 AI 胜率表(组牌决策: 24804 种三张牌组合 vs 随机对手胜率)
+    // 失败不致命: 打印错误, AI 评分退化为 0(启动后应保证该素材存在)
+    if (!AIPlayer::loadWinRateTable("assets/ai/winrate.bin")) {
+        std::fprintf(stderr, "[AI] 胜率表加载失败: assets/ai/winrate.bin\n");
+    }
     // 启动即循环播放主菜单 BGM
     SoundManager::instance().playBgmMenu();
     window_.setFramerateLimit(60);
