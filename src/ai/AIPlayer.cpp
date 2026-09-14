@@ -175,26 +175,11 @@ float AIPlayer::winRateOf(const Card& a, const Card& b, const Card& c) {
     return s_winrate[combIndex(ids[0], ids[1], ids[2])];
 }
 
-// ====== 牌型打分(无表时的退化方案) ======
-float AIPlayer::fallbackScore(const Card& a, const Card& b, const Card& c) {
-    std::vector<Card> three = { a, b, c };
-    HandResult r = HandEvaluator::evaluate(three);
-    // 牌型权重(豹子=6...散牌=1) + 点数归一化
-    float base = (float)((int)r.type + 1) * 100.0f;
-    float key = (float)r.keys[0] + (float)r.keys[1] / 100.0f + (float)r.keys[2] / 10000.0f;
-    float s = base + key;
-    if (r.is235) s += 0.5f;  // 235 特殊加成
-    return s;
-}
-
 // ====== 单组评分: 赢过所有对手的概率 ======
+// 胜率表(游戏启动时由 GameApp 加载): 赢过所有对手 ≈ 每个对手独立: p^opponents
 float AIPlayer::groupScore(const Card* hand, int idx0, int idx1, int idx2, int opponents) {
     float wr = winRateOf(hand[idx0], hand[idx1], hand[idx2]);
-    if (wr < 0) {
-        // 无表: 退回牌型打分 (不做指数, 直接返回)
-        return fallbackScore(hand[idx0], hand[idx1], hand[idx2]);
-    }
-    // 赢过所有对手 ≈ 每个对手独立: p^opponents
+    if (wr < 0.f) wr = 0.f;   // 表未加载(不应发生;启动时已校验并报错) -> 记为 0 分
     return std::pow(wr, (float)opponents);
 }
 
