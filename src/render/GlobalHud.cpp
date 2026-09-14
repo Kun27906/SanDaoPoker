@@ -503,8 +503,18 @@ void GlobalHud::setBalanceFromMouse(float mx) {
     if (t < 0.f) t = 0.f;
     if (t > 1.f) t = 1.f;
     int v = static_cast<int>(t * DEV_MAX);
-    Account::instance().setBalance(v);
+    applyDevBalance(v);
     if (devInputFocus_) devInputStr_ = std::to_string(v);  // 同步输入框显示
+}
+
+// 开发者模式统一写余额入口:
+//   除账号存档外, 若当前存在"进行中"的房间, 同步写入本人局内筹码 —— 否则账号与房间筹码
+//   会各存一份(结算/踢出判定/下局扣注读局内筹码, 大厅与HUD读账号), 出现显示跳变与账目错乱。
+void GlobalHud::applyDevBalance(int v) {
+    Account::instance().setBalance(v);
+    if (mgr_ && mgr_->room && !mgr_->room->isFinished()) {
+        mgr_->room->players[0].chips = v;
+    }
 }
 
 void GlobalHud::applyDevInput() {
@@ -514,7 +524,7 @@ void GlobalHud::applyDevInput() {
     }
     if (v < 0) v = 0;
     if (v > static_cast<int>(DEV_MAX)) v = static_cast<int>(DEV_MAX);
-    Account::instance().setBalance(v);
+    applyDevBalance(v);
     devInputStr_ = std::to_string(v);
 }
 
