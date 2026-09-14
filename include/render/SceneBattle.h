@@ -25,7 +25,8 @@ public:
 
 private:
     void loadLine(int lineId, bool faceUp);  // 装载某道所有玩家的牌(或牌背)
-    void flipUp();                           // 当前道翻正 + 显示结果
+    void flipPlayer(int p);                  // 翻开某一位玩家的当前道 3 张(逐家翻牌)
+    void revealWinner();                     // 最后一家翻完停留结束后: 计算并显示本道赢家/牌型
     void advance();                          // 进入下一道(或完成)
 
     SceneManager* mgr_;
@@ -37,7 +38,9 @@ private:
     std::array<Avatar, 6> seatAvatars_;                // 各玩家头像+昵称名牌(与牌组同座)
     int playerCount_ = 0;
     int showLine_ = 0;     // 当前比牌道 0..2
-    int phase_ = 0;        // 0=等翻正 1=展示结果 2=比完等3秒自动进结算
+    // 动画阶段: 0=全家牌背亮相 1=逐家翻牌(按座位号 1..N, 每家停留 1 秒) 2=本道结果停留 3=三组比完等进结算
+    int phase_ = 0;
+    int flipIndex_ = -1;   // 逐家翻牌进度: 已翻到的玩家下标(phase 0 结束时置 0)
     float timer_ = 0.f;
     bool showNext_ = false;    // 三道比完,3 秒后自动进结算
 };
