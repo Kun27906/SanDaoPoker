@@ -29,6 +29,7 @@ private:
     int roomIndex_[6] = {-1, -1, -1, -1, -1, -1};  // 全局配置下标
     int roomCount_ = 0;
     int selected_ = 0;
+    int lastBalance_ = 0;   // 上次余额(检测开发者模式改筹码后, 刷新房间禁用态/筹码显示)
     Button btnStart_;
     ChipBar chipBar_;
     Avatar  selfAvatar_;              // 局外: 本人头像(筹码条左侧)

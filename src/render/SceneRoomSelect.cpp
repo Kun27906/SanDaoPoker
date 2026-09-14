@@ -66,6 +66,7 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     }
     chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
     chipBar_.setImmediate(Account::instance().balance());   // 初值(下注滚动不被覆盖)
+    lastBalance_ = Account::instance().balance();           // 余额基线(用于变化检测)
 
     // 房间按钮: 居中一列
     for (int i = 0; i < roomCount_; i++) {
@@ -277,6 +278,15 @@ void SceneRoomSelect::onHomePressed() {
 
 void SceneRoomSelect::update(float dt) {
     chipBar_.update(dt);   // 筹码框数字滚动(下注扣减动画)
+
+    // 余额变化(如开发者模式里改筹码) -> 立即同步: 房间禁用态 + 顶部筹码显示
+    const int bal = Account::instance().balance();
+    if (bal != lastBalance_) {
+        lastBalance_ = bal;
+        refreshColors();                          // 房间: 余额不足 -> 灰禁用; 选中态重算
+        if (!betting_) chipBar_.setImmediate(bal);  // 下注滚动动画期间不打断
+    }
+
     if (betting_ && !chipBar_.isRolling()) {
         mgr_->changeTo(SceneId::Deal);   // 下注音效+扣减动画播完 -> 进入发牌动画
     }
