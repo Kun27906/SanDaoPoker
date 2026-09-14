@@ -6,7 +6,7 @@
 |------|------|
 | `cards/` | 扑克牌贴图：57 张（4 花色 × 13 点数 + 3 种牌背 + 大小王），PNG 高清 338×488 |
 | `cards/back/deck_pile_*` | 牌堆堆叠图（红/蓝/黑，689×292，54 层右侧露边）——发牌动画用 |
-| `ui/` | 界面素材：`backgrounds/` 背景图、`buttons/` 按钮四态图（UI 按钮统一使用）、`chips/` 筹码、`icons/` 图标、`table/` 桌面小贴图、`avatars/` 头像 |
+| `ui/` | 界面素材：`backgrounds/` 背景图、`buttons/` 按钮四态图（UI 按钮统一使用）、`chips/` 筹码、`icons/` 图标、`table/` 桌面小贴图（倒计时贴图 + `panel_frame.png` 弹窗装饰边框，生成器见 `tools/gen_panel_frame.py`）、`avatars/` 头像 |
 | `ai/` | AI 胜率表 `winrate.bin`（24804 种三张牌组合；离线生成，见 `tools/gen_winrate_table`；**游戏启动时由 GameApp 加载**） |
 | `fonts/` | 字体文件（思源黑体 Source Han Sans SC） |
 | `sounds/` | 音效与背景音乐 |
