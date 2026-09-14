@@ -65,8 +65,9 @@ const Seat* seatFor(int pc, int p) {
     return (n >= 1 && n <= 6) ? &SEATS[n] : nullptr;
 }
 const char* LINE_NAMES[3] = {"头道", "中道", "尾道"};
-constexpr float FLIP_DELAY = 0.8f;    // 牌背展示时间
-constexpr float HOLD_TIME = 2.5f;     // 结果停留时间
+constexpr float BACK_SHOW = 0.8f;     // 全家牌背亮相时间
+constexpr float PER_HOLD = 1.0f;      // 逐家翻牌: 每家翻完停留 1 秒再翻下一家
+constexpr float HOLD_TIME = 2.5f;     // 本道结果(赢家/牌型)停留时间
 }
 
 SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
@@ -148,18 +149,18 @@ void SceneBattle::loadLine(int lineId, bool faceUp) {
     }
 }
 
-void SceneBattle::flipUp() {
-    Room* room = mgr_->room.get();
-    // 翻正当前道的牌
-    for (int p = 0; p < playerCount_; p++) {
-        const Seat* st = seatFor(playerCount_, p);
-        if (!st) continue;
-        for (int pos = 0; pos < 3; pos++) {
-            cards_[p][pos].setFaceUp(true);
-        }
+// 翻开某一位玩家的当前道 3 张(逐家翻牌: 按座位号由小到大, 即玩家下标 0,1,2,...)
+void SceneBattle::flipPlayer(int p) {
+    const Seat* st = seatFor(playerCount_, p);
+    if (!st) return;
+    for (int pos = 0; pos < 3; pos++) {
+        cards_[p][pos].setFaceUp(true);
     }
+}
 
-    // 计算该道赢家 + 牌型(纯展示)
+// 最后一家翻完并停留结束后: 计算并显示本道赢家 + 牌型(纯展示, 不结算筹码)
+void SceneBattle::revealWinner() {
+    Room* room = mgr_->room.get();
     int winners[MAX_PLAYERS];
     int cnt = Round::findWinners(room->players, playerCount_, showLine_, winners);
     char buf[96];
@@ -187,7 +188,7 @@ void SceneBattle::advance() {
         info_.setText("比牌完成, 即将进入结算...");
         lineTag_.setText("三组比完");
         showNext_ = true;
-        phase_ = 2;
+        phase_ = 3;      // 阶段 3 = 等进结算(新编号: 2 让给"本道结果停留")
         timer_ = 0.f;
         return;
     }
@@ -203,23 +204,41 @@ void SceneBattle::handleEvent(const sf::Event&, const sf::RenderWindow&) {
 }
 
 void SceneBattle::update(float dt) {
-    if (phase_ == 2) {
-        // 比完等待 3 秒自动进结算
+    // 阶段 3: 三组比完, 等 3 秒自动进结算
+    if (phase_ == 3) {
         timer_ += dt;
-        if (timer_ >= 3.f) {
-            mgr_->changeTo(SceneId::Result);
-        }
+        if (timer_ >= 3.f) mgr_->changeTo(SceneId::Result);
         return;
     }
+
     timer_ += dt;
-    if (phase_ == 0 && timer_ >= FLIP_DELAY) {
-        timer_ = 0.f;
-        phase_ = 1;
-        flipUp();
-    } else if (phase_ == 1 && timer_ >= HOLD_TIME) {
-        timer_ = 0.f;
-        phase_ = 0;
-        advance();
+    if (phase_ == 0) {
+        // 全家牌背亮相 -> 从 1 号座位(本人)开始逐家翻牌
+        if (timer_ >= BACK_SHOW) {
+            timer_ = 0.f;
+            phase_ = 1;
+            flipIndex_ = 0;
+            flipPlayer(flipIndex_);
+        }
+    } else if (phase_ == 1) {
+        // 每家翻完停留 PER_HOLD(1 秒)再翻下一家; 最后一家停留结束 -> 宣布赢家
+        if (timer_ >= PER_HOLD) {
+            timer_ = 0.f;
+            flipIndex_++;
+            if (flipIndex_ < playerCount_) {
+                flipPlayer(flipIndex_);
+            } else {
+                revealWinner();
+                phase_ = 2;
+            }
+        }
+    } else if (phase_ == 2) {
+        // 本道结果停留 HOLD_TIME -> 进入下一道(或"三组比完")
+        if (timer_ >= HOLD_TIME) {
+            timer_ = 0.f;
+            phase_ = 0;
+            advance();
+        }
     }
 }
 
