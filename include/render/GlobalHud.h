@@ -38,6 +38,7 @@ private:
     void showRulesPage();        // 切到"游戏规则"页
     void showMainPage();         // 回到主菜单页
     void openDevPopup();         // wrench 打开开发者模式弹窗
+    void refreshDevToggle();     // 统一刷新"启用/关闭开发者模式"按钮外观(文字+配色+位置)
     void drawDevPopup(sf::RenderWindow& win);   // 绘制开发者模式弹窗
     void updateDevKnob();        // dev 滑块位置 = 当前余额
     void setBalanceFromMouse(float mx);

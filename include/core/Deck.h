@@ -21,9 +21,6 @@ public:
     // 返回：二维数组，[玩家编号][9张牌]
     std::vector<std::vector<Card>> deal(int numPlayers) const;
 
-    // 获取牌堆中剩余的牌（调试用）
-    const std::vector<Card>& getCards() const;
-
     // 获取牌堆张数
     int size() const;
 

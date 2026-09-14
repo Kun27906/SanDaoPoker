@@ -86,12 +86,6 @@ std::vector<std::vector<Card>> Deck::deal(int numPlayers) const {
     return hands;
 }
 
-// ====== 获取牌堆（调试用） ======
-
-const std::vector<Card>& Deck::getCards() const {
-    return cards_;
-}
-
 // ====== 获取牌堆张数 ======
 
 int Deck::size() const {

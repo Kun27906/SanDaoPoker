@@ -37,9 +37,6 @@ public:
 
     // 比牌结算：按头→中→尾逐道比，赢家拿池 / 平局平分，返回结果文字
     static std::string settle(Player* players, int playerCount, int pools[3]);
-
-    // 比较某一道，返回唯一赢家的下标；平局返回 -1（一般用 findWinners）
-    static int compareLine(const Player* players, int playerCount, int lineId);
 };
 
 #endif // ROUND_H

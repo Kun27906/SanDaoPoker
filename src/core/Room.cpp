@@ -108,14 +108,3 @@ std::string Room::getRanking() const {
     }
     return out.str();
 }
-
-// ====== 重开一桌 ======
-
-void Room::resetGame() {
-    currentRound = 0;
-    historyCount = 0;
-    pools[0] = pools[1] = pools[2] = 0;
-    for (int i = 0; i < playerCount; i++) {
-        players[i] = Player(players[i].name, players[i].isAI);  // 筹码重置
-    }
-}

@@ -27,22 +27,10 @@ sf::FloatRect CardSprite::getBounds() const {
     return sf::FloatRect(sprite_.getPosition(), getSize());
 }
 
-bool CardSprite::hasTexture() const {
-    const AssetManager& am = AssetManager::instance();
-    const sf::Texture* t = nullptr;
-    int bi = backIndex_ >= 0 ? backIndex_ : am.currentBack();
-    if (faceUp_) {
-        t = joker_ ? nullptr : am.cardTexture(card_.getSuit(), card_.getRank());
-    } else {
-        t = am.backTexture(bi);
-    }
-    return t != nullptr;
-}
-
 void CardSprite::updateTexture() {
     const AssetManager& am = AssetManager::instance();
     const sf::Texture* t = nullptr;
-    int bi = backIndex_ >= 0 ? backIndex_ : am.currentBack();
+    int bi = am.currentBack();
     if (faceUp_) {
         // 大小王走 Jokers 贴图(cardTexture 已支持);加载失败时用牌背兜底
         t = am.cardTexture(card_.getSuit(), card_.getRank());

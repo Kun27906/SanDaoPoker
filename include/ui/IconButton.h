@@ -23,7 +23,6 @@ public:
     void setCallback(std::function<void()> cb) { callback_ = std::move(cb); }
     // 是否可见(不可见时不参与事件与绘制)
     void setVisible(bool v) { visible_ = v; }
-    bool isVisible() const { return visible_; }
 
     bool contains(const sf::Vector2f& point) const {
         return point.x >= pos_.x && point.x <= pos_.x + size_ &&

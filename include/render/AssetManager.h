@@ -33,9 +33,6 @@ public:
     const sf::Texture* background() const;
     // 主菜单背景(1920x1080),加载失败时回退到桌面背景
     const sf::Texture* menuBackground() const;
-    // 按钮图:0=normal 1=hover 2=pressed 3=disabled
-    const sf::Texture* buttonTexture(int state) const;
-    // 筹码图标:按金额所在档位区间取对应素材(区间命名 chip_<min>-<max>)
     const sf::Texture* chipForAmount(int amount) const;
     // 牌背:当前局随机颜色(0=红 1=蓝 2=黑)
     void rollBack();                 // 每局开局调用:随机选一种牌背颜色
@@ -49,8 +46,6 @@ public:
     // 桌面小贴图(assets/ui/table/, 400x24): "countdown_bar_bg"/"countdown_fill_green|yellow|red"
     const sf::Texture* tableTexture(const std::string& name) const;
 
-    bool isLoaded() const { return loaded_; }
-
 private:
     AssetManager() = default;
     bool loadCardTextures();
@@ -62,7 +57,6 @@ private:
     std::vector<sf::Texture> backTex_;   // 3 张牌背
     sf::Texture bgTex_;                  // 桌面背景
     sf::Texture menuTex_;                // 主菜单背景
-    sf::Texture btnTex_[4];              // 按钮四态
     // 筹码素材:区间命名 chip_<min>-<max> / chip_-<max>(无下界) / chip_<min>-(无上界)
     struct ChipDef { int lo; int hi; sf::Texture tex; };
     std::vector<ChipDef> chipDefs_;

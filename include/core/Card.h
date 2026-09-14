@@ -50,10 +50,6 @@ public:
     // 获取花色的整数值（用于同花判定）
     int getSuitValue() const;
 
-    // 转为可读字符串（用于调试和显示）
-    // 例如: "♠A" "♥10" "小王" "大王"
-    std::string toString() const;
-
     // 比较运算符（按点数大小比较，不考虑花色）
     bool operator<(const Card& other) const;
     bool operator>(const Card& other) const;

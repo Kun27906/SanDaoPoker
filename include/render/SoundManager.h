@@ -30,7 +30,6 @@ public:
     // ---- 倒计时时钟(红色区循环播放, 直到交牌或时间耗尽) ----
     void startClock();    // 开始循环播放 count_down_clock
     void stopClock();     // 停止
-    bool clockOn() const { return clock_.getStatus() == sf::Sound::Playing; }
 
     // ---- BGM 循环(主菜单/对局,MP3 整曲循环) ----
     void playBgmMenu();   // 主菜单循环

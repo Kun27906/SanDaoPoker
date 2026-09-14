@@ -25,7 +25,6 @@ public:
 
     // ---- 查询 ----
     bool contains(const sf::Vector2f& point) const;
-    bool isHovered() const { return hovered_; }
 
     // ---- 交互与绘制 ----
     // 在事件循环中调用:处理悬停高亮 + 左键点击(按下瞬间触发回调)

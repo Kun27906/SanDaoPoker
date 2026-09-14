@@ -86,15 +86,6 @@ int Round::findWinners(const Player* players, int playerCount, int lineId, int* 
     return count;
 }
 
-// ====== 比较某一道（旧接口，保留给外部用） ======
-
-int Round::compareLine(const Player* players, int playerCount, int lineId) {
-    int winners[MAX_PLAYERS];
-    int count = findWinners(players, playerCount, lineId, winners);
-    if (count == 1) return winners[0];
-    return -1;  // 平局
-}
-
 // ====== 比牌结算 ======
 // 按 头道 → 中道 → 尾道 的顺序逐道比：
 //   唯一赢家：拿走整个池子

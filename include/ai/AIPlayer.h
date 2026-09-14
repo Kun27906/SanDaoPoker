@@ -47,23 +47,17 @@ public:
     // ====== 难度/风格配置 (供界面层调用; 界面按钮由成员C接入) ======
     // 未设置时默认: Greedy + Balanced + 0.3f (与历史行为完全一致)
     static void setProfile(Difficulty d, Style s, float noise);  // 一键设置(难度按钮直接调这个)
-    static void setDifficulty(Difficulty d);
-    static void setStyle(Style s);
     static void setNoise(float n);          // 自动夹到 [0,1]
     static Difficulty difficulty();         // 当前难度
-    static Style style();                   // 当前风格
-    static float noise();                   // 当前失误率
 
     // 三档难度枚举 (界面层建按钮用)
-    static int difficultyCount();                            // 3
-    static const char* difficultyKey(Difficulty d);          // "random"/"greedy"/"montecarlo"
     static const char* difficultyName(Difficulty d);         // "随机"/"普通"/"困难"
     static bool difficultyFromKey(const std::string& key, Difficulty& out);
 
     // 用"当前配置"决策: 界面层把 decideOrderStyled(...) 换成这一个即可
     static void decideOrderAuto(const Card* hand, int playerCount, int order[9]);
 
-    // 是否已有"生效配置": 界面调过 setProfile/setDifficulty... 或设了环境变量
+    // 是否已有"生效配置": 界面调过 setProfile... 或设了环境变量
     // 为 true 时 decideOrder/decideOrderStyled 以配置为准(忽略传入的 diff/style/noise)
     static bool userProfileSet();
 
@@ -96,8 +90,6 @@ private:
     static int cardId(const Card& c);
     // 组合编号: 3 张牌的全局编号 (调用方保证 a<b<c) -> 0~24803
     static int combIndex(int a, int b, int c);
-    // 组合数 C(n,k), n<k 返回 0
-    static long long combN(int n, int k);
 
     // 枚举 9 张牌的全部 1680 种分组 (头/中/尾有序), 对每种调用 fn(line0, line1, line2)
     // line* 是长度为 3 的 int 数组 (手牌下标)

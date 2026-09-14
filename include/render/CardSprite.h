@@ -22,9 +22,6 @@ public:
     void setCard(const Card& card);
     // 正面/牌背
     void setFaceUp(bool up) { faceUp_ = up; }
-    bool isFaceUp() const { return faceUp_; }
-    // 牌背颜色:0=红 1=蓝 2=黑; 默认 -1 = 跟随 AssetManager 当前局随机色
-    void setBackIndex(int idx) { backIndex_ = idx; }
 
     void setPosition(const sf::Vector2f& p);
     void setScale(float s);          // 整体缩放(原图 200x280)
@@ -32,7 +29,6 @@ public:
     sf::FloatRect getBounds() const; // 点击检测/布局用
 
     bool isJoker() const { return joker_; }
-    bool hasTexture() const;         // 当前是否有可用贴图(否则画占位块)
 
     void draw(sf::RenderWindow& win) const;
 
@@ -42,7 +38,6 @@ private:
     Card card_{};              // A 成员的牌对象
     bool joker_ = false;
     bool faceUp_ = true;
-    int backIndex_ = -1;   // -1 = 跟随 AssetManager 当前局随机牌背色
     float scale_ = 1.f;
     sf::Sprite sprite_;
     sf::RectangleShape placeholder_;  // 无贴图时的占位块
