@@ -29,7 +29,7 @@ private:
     void rebuildFinalText();       // 组装最终结算明细(逐行着色)
     void layoutRows();             // 非最终局: 居中排布面板/提示/按钮
     void layoutFinal();            // 最终局: 居中排布两个面板/提示/按钮
-    void escape();                 // 逃跑: 罚100 -> 立即最终结算
+    void escape();                 // 逃跑: 梯度罚金(按本场已玩局数 x 本场底注) -> 立即最终结算
     void confirmKickOut();         // 踢出弹窗确定 -> 回大厅
     void nextRound();
     int  matchTotal() const;       // 整场总盈亏(含逃跑罚)
