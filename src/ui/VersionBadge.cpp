@@ -1,5 +1,6 @@
 #include "ui/VersionBadge.h"
 #include "ui/FontUtil.h"
+#include "ui/PanelFrame.h"
 #include "render/AssetManager.h"
 #include "render/SoundManager.h"
 #include "core/VersionInfo.h"
@@ -163,6 +164,7 @@ void VersionBadge::draw(sf::RenderWindow& win) {
     // ---- 弹窗 ----
     win.draw(overlay_);
     win.draw(panel_);
+    panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));  // 装饰边框
     win.draw(title_);
     win.draw(closeRing_);
     if (!closeIcon_.getTexture()) {          // 惰性获取(场景可能在素材加载前构造)

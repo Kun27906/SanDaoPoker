@@ -2,6 +2,7 @@
 #include "render/AssetManager.h"
 #include "render/SoundManager.h"
 #include "render/Account.h"
+#include "ui/PanelFrame.h"
 #include "core/NameGen.h"
 #include "core/Room.h"
 #include "core/RuleConfig.h"
@@ -293,6 +294,7 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     if (notEnough_) {                  // 入场资格弹窗
         win.draw(overlay_);
         win.draw(dialog_);
+        panel_frame::draw(win, sf::FloatRect(dialog_.getPosition(), dialog_.getSize()));  // 装饰边框
         denyTitle_.draw(win);
         denyText_.draw(win);
         btnDenyOk_.draw(win);
@@ -300,6 +302,7 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     if (diffOpen_) {                   // 难度选择弹窗
         win.draw(overlay_);
         win.draw(diffDialog_);
+        panel_frame::draw(win, sf::FloatRect(diffDialog_.getPosition(), diffDialog_.getSize()));  // 装饰边框
         diffTitle_.draw(win);
         for (int i = 0; i < 3; i++) diffBtns_[i].draw(win);
         diffDesc_.draw(win);

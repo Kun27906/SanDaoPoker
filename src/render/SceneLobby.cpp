@@ -1,6 +1,7 @@
 #include "render/SceneLobby.h"
 #include "render/AssetManager.h"
 #include "render/Account.h"
+#include "ui/PanelFrame.h"
 #include <array>
 
 namespace {
@@ -132,6 +133,7 @@ void SceneLobby::draw(sf::RenderWindow& win) {
     if (pendingTopUp_) {
         win.draw(overlay_);
         win.draw(dialog_);
+        panel_frame::draw(win, sf::FloatRect(dialog_.getPosition(), dialog_.getSize()));  // 装饰边框
         topUpText_.draw(win);
         btnTopUpOk_.draw(win);
     }

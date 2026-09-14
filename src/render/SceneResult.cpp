@@ -3,6 +3,7 @@
 #include "render/SoundManager.h"
 #include "render/Account.h"
 #include "core/Room.h"
+#include "ui/PanelFrame.h"
 #include <cstdio>
 
 namespace {
@@ -438,6 +439,7 @@ void SceneResult::draw(sf::RenderWindow& win) {
     if (kickPending_) {
         win.draw(overlay_);
         win.draw(dialog_);
+        panel_frame::draw(win, sf::FloatRect(dialog_.getPosition(), dialog_.getSize()));  // 装饰边框
         dialogText_.draw(win);
         dialogSub_.draw(win);
         btnDialogOk_.draw(win);
