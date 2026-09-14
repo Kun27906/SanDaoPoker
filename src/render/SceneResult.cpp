@@ -124,7 +124,10 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
 
     // 结算 + 账号同步 + 踢出判定 + 最终模式判定
     settleAndSync();
-    final_ = mgr_->room->isFinished();
+    // 踢出 = 本场提前结束, 与"打满轮次"同属最终模式:
+    // 若漏掉 kickPending_, final_ 会被 isFinished() 覆盖成 false -> 两个布局函数都不会执行,
+    // 未定位的[下一局]/[逃跑]停在默认 (0,0), 从踢出弹窗的半透明遮罩下露出(左上角误现"逃跑"键)。
+    final_ = mgr_->room->isFinished() || kickPending_;
     if (!final_ && !kickPending_) refreshRows();
     if (final_) {
         // 整场结束: 未点击[返回大厅]前一律不显示结算后的筹码数(点击后由 coins 动画补上)
@@ -224,6 +227,7 @@ void SceneResult::reevaluateKick() {
         kickPending_ = true;
         final_ = true;
         buildKickDialog();
+        rebuildFinalText();   // 切到最终布局/标题(避免常规布局残留)
     } else if (!tooPoor && kickPending_) {
         kickPending_ = false;
         final_ = false;
