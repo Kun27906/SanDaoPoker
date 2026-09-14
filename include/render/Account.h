@@ -21,7 +21,6 @@ public:
     int add(int delta);        // 余额增减(delta 可为负),返回新余额并保存
 
     // ---- 昵称(账号数据, 与筹码一同存档; 存档第 2 行) ----
-    const std::string& nickname() const { return nickname_; }
     void setNickname(const std::string& n);   // 设置并立即保存
     std::string ensureNickname();             // 无则随机生成并保存, 返回
 

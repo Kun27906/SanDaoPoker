@@ -151,26 +151,18 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
             devOn_ = false;
             devArm_ = false;
             devInputFocus_ = false;
-            btnDevToggle_.setText("启用开发者模式");
-            btnDevToggle_.setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
-            btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f, DEV_BTN_Y - 30.f));
-        } else {
+        } else if (!devArm_) {
             // 两段确认: 第一次进入确认态, 5 秒内再点一次才真正启用
-            if (!devArm_) {
-                devArm_ = true;
-                devArmTimer_ = 0.f;
-                btnDevToggle_.setText("再点一次确认启用");
-                btnDevToggle_.setColors(sf::Color(200, 90, 60), sf::Color(230, 120, 90), sf::Color(160, 60, 40));
-            } else {
-                devArm_ = false;
-                devOn_ = true;
-                devInputStr_.clear();
-                devInputFocus_ = false;
-                btnDevToggle_.setText("关闭开发者模式");
-                btnDevToggle_.setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
-                btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f, DEV_BTN_Y_ON - 30.f));   // 下移居中
-            }
+            devArm_ = true;
+            devArmTimer_ = 0.f;
+        } else {
+            // 第二次: 真正启用
+            devArm_ = false;
+            devOn_ = true;
+            devInputStr_.clear();
+            devInputFocus_ = false;
         }
+        refreshDevToggle();   // 统一刷新按钮外观(修复: 关闭弹窗后残留红色确认态)
     });
 
     // dev 滑条(0 ~ 100000)
@@ -294,8 +286,7 @@ void GlobalHud::update(float dt) {
         devArmTimer_ += dt;
         if (devArmTimer_ >= 5.f) {
             devArm_ = false;
-            btnDevToggle_.setText("启用开发者模式");
-            btnDevToggle_.setColors(sf::Color(64, 120, 200), sf::Color(90, 160, 240), sf::Color(40, 85, 150));
+            refreshDevToggle();
         }
     }
 }
@@ -429,8 +420,26 @@ void GlobalHud::openDevPopup() {
     devArmTimer_ = 0.f;
     devInputFocus_ = false;
     devInputStr_.clear();
-    // 按当前启用状态同步按钮文字/位置(启用态按钮在下方居中)
-    btnDevToggle_.setText(devOn_ ? "关闭开发者模式" : "启用开发者模式");
+    // 每次打开都按当前启用状态重置外观(修复: 上次确认态残留红色文案/配色)
+    refreshDevToggle();
+}
+
+// 统一刷新"启用/关闭开发者模式"按钮: 文字 + 配色 + 位置 随 devOn_/devArm_ 变化
+// (蓝色=正常/已启用, 红色=已进入"再点一次确认"状态)
+void GlobalHud::refreshDevToggle() {
+    const sf::Color blue(64, 120, 200), blueHover(90, 160, 240), bluePress(40, 85, 150);
+    const sf::Color red(200, 90, 60), redHover(230, 120, 90), redPress(160, 60, 40);
+    if (devOn_) {
+        btnDevToggle_.setText("关闭开发者模式");
+        btnDevToggle_.setColors(blue, blueHover, bluePress);
+    } else if (devArm_) {
+        btnDevToggle_.setText("再点一次确认启用");
+        btnDevToggle_.setColors(red, redHover, redPress);
+    } else {
+        btnDevToggle_.setText("启用开发者模式");
+        btnDevToggle_.setColors(blue, blueHover, bluePress);
+    }
+    // 启用态按钮在下方居中
     btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f,
                                            (devOn_ ? DEV_BTN_Y_ON : DEV_BTN_Y) - 30.f));
 }

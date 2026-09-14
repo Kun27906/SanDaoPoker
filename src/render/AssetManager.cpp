@@ -112,14 +112,6 @@ bool AssetManager::loadMiscTextures() {
     if (!menuTex_.loadFromFile("assets/ui/backgrounds/menu.jpg")) {
         std::fprintf(stderr, "[AssetManager] 加载失败: assets/ui/backgrounds/menu.jpg\n");
     }
-    const char* btnStates[4] = {"normal", "hover", "pressed", "disabled"};
-    for (int i = 0; i < 4; i++) {
-        char path[128];
-        std::snprintf(path, sizeof(path), "assets/ui/buttons/btn_%s.png", btnStates[i]);
-        if (!btnTex_[i].loadFromFile(path)) {
-            std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", path);
-        }
-    }
     // 筹码图标(区间命名,自动扫描 assets/ui/chips/chip_*.png)
     //   格式: chip_<min>-<max>.png | chip_-<max>.png(无下界) | chip_<min>-.png(无上界)
     {
@@ -330,9 +322,4 @@ const sf::Texture* AssetManager::background() const {
 const sf::Texture* AssetManager::menuBackground() const {
     if (menuTex_.getSize().x > 0) return &menuTex_;
     return bgTex_.getSize().x > 0 ? &bgTex_ : nullptr;  // 回退到桌面背景
-}
-
-const sf::Texture* AssetManager::buttonTexture(int state) const {
-    if (state < 0 || state > 3) return nullptr;
-    return btnTex_[state].getSize().x > 0 ? &btnTex_[state] : nullptr;
 }

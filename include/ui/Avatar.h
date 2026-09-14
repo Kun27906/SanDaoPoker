@@ -18,8 +18,6 @@ public:
     void setMinPlateWidth(float w) { minPlateW_ = w; }
     // 本人样式: 名牌与圆心共线且昵称居中于可见区; 他人(false): 名牌置于圆环右下角
     void setSelfStyle(bool s) { selfStyle_ = s; }
-    float radius() const { return r_; }
-    float charSize() const { return cs_; }
     sf::FloatRect getBounds() const;                          // 圆环+名牌整体范围(布局用)
     void draw(sf::RenderWindow& win);
 

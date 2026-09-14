@@ -35,16 +35,6 @@ struct ComboEntry {
 static std::vector<ComboEntry> g_combos;   // 长度 24804
 static std::unordered_map<unsigned long long, int> g_comboIndex; // (id0<<12|id1<<6|id2) -> idx
 
-// ====== 组合数 C(n,k), n<k 返回 0 ======
-long long AIPlayer::combN(int n, int k) {
-    if (k < 0 || n < k) return 0;
-    long long r = 1;
-    for (int i = 1; i <= k; i++) {
-        r = r * (n - k + i) / i;
-    }
-    return r;
-}
-
 // ====== 牌 -> 全局编号 0~53 ======
 // 与 Deck 生成顺序一致: suit(0..3) x rank(2..14), 然后 SmallJoker=52, BigJoker=53
 int AIPlayer::cardId(const Card& c) {
@@ -519,9 +509,6 @@ void AIPlayer::setProfile(Difficulty d, Style s, float noise) {
     s_profileSet = true;
 }
 
-void AIPlayer::setDifficulty(Difficulty d) { s_difficulty = d; s_profileSet = true; }
-void AIPlayer::setStyle(Style s) { s_style = s; s_profileSet = true; }
-
 void AIPlayer::setNoise(float n) {
     if (n < 0.0f) n = 0.0f;
     if (n > 1.0f) n = 1.0f;
@@ -530,18 +517,6 @@ void AIPlayer::setNoise(float n) {
 }
 
 AIPlayer::Difficulty AIPlayer::difficulty() { return s_difficulty; }
-AIPlayer::Style AIPlayer::style() { return s_style; }
-float AIPlayer::noise() { return s_noise; }
-
-int AIPlayer::difficultyCount() { return 3; }
-
-const char* AIPlayer::difficultyKey(Difficulty d) {
-    switch (d) {
-        case Difficulty::Random:     return "random";
-        case Difficulty::MonteCarlo: return "montecarlo";
-        default:                     return "greedy";
-    }
-}
 
 const char* AIPlayer::difficultyName(Difficulty d) {
     switch (d) {

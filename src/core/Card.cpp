@@ -59,40 +59,6 @@ int Card::getSuitValue() const {
     return static_cast<int>(suit_);
 }
 
-// ====== 转为可读字符串 ======
-
-std::string Card::toString() const {
-    // 大小王
-    if (rank_ == Rank::BigJoker)   return "BigJoker";
-    if (rank_ == Rank::SmallJoker) return "SmallJoker";
-
-    // 花色符号
-    const char* suitStr[] = { "S", "H", "C", "D" };
-    int s = static_cast<int>(suit_);
-    std::string result = suitStr[s];
-
-    // 点数文字
-    switch (rank_) {
-        case Rank::Two:   result += "2";   break;
-        case Rank::Three: result += "3";   break;
-        case Rank::Four:  result += "4";   break;
-        case Rank::Five:  result += "5";   break;
-        case Rank::Six:   result += "6";   break;
-        case Rank::Seven: result += "7";   break;
-        case Rank::Eight: result += "8";   break;
-        case Rank::Nine:  result += "9";   break;
-        case Rank::Ten:   result += "10";  break;
-        case Rank::Jack:  result += "J";   break;
-        case Rank::Queen: result += "Q";   break;
-        case Rank::King:  result += "K";   break;
-        case Rank::Ace:   result += "A";   break;
-        default: break;
-    }
-    return result;
-}
-
-// ====== 比较运算符 ======
-
 bool Card::operator<(const Card& other) const {
     return getRankValue() < other.getRankValue();
 }

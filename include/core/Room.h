@@ -52,9 +52,6 @@ public:
 
     // 看总账（按筹码从高到低排），返回排名文字
     std::string getRanking() const;
-
-    // 重开一桌：筹码全部重置，轮次清零（玩家保留）
-    void resetGame();
 };
 
 #endif // ROOM_H
