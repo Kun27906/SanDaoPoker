@@ -9,51 +9,60 @@ namespace {
 constexpr unsigned WW = 1280;
 constexpr unsigned WH = 800;
 
-// 各玩家座位参数: cx,cy=牌组中心; 3 张横排间距 dx; s=缩放
-// 支持 2~6 人: 下标0=你(players[0], 底部大牌), 其余按 p 顺序落座
+// ====== 座位表(按用户指定编号) ======
+// 1=你(下方大牌)  2=右中下  3=右中上  4=上方靠右  5=上方靠左  6=左中
+// 每人一座: 牌组(3 张横排) + 头像昵称位(ax,ay)
+// 约束: 所有座位的牌组顶边与头像顶边都不得高于标题下边沿 TITLE_BOTTOM(编译期 static_assert 护栏)
 struct Seat {
-    float cx, cy, dx, s;
+    float cx, cy, dx, s;   // 牌组: 中张左缘 x / 中线 y / 张间距 / 缩放
+    float ax, ay;          // 头像圆心(名牌由 Avatar 自绘)
 };
-const Seat* seatFor(int pc, int p) {
-    static const Seat s2[2] = {
-        { 640.f, 620.f, 128.f, 0.68f },  // 你
-        { 640.f, 110.f, 112.f, 0.58f }   // 上
-    };
-    static const Seat s3[3] = {
-        { 640.f, 625.f, 122.f, 0.64f },  // 你
-        { 330.f, 120.f, 104.f, 0.52f },  // 左上
-        { 950.f, 120.f, 104.f, 0.52f }   // 右上
-    };
-    static const Seat s4[4] = {
-        { 640.f, 630.f, 120.f, 0.62f },  // 你
-        { 640.f, 100.f, 96.f, 0.48f },   // 上
-        { 195.f, 335.f, 96.f, 0.48f },   // 左
-        { 1085.f, 335.f, 96.f, 0.48f }   // 右
-    };
-    static const Seat s5[5] = {
-        { 640.f, 640.f, 104.f, 0.52f },  // 你
-        { 640.f, 100.f, 80.f, 0.40f },   // 上中
-        { 245.f, 170.f, 80.f, 0.40f },   // 左上
-        { 1035.f, 170.f, 80.f, 0.40f },  // 右上
-        { 155.f, 480.f, 80.f, 0.40f }    // 左下
-    };
-    static const Seat s6[6] = {
-        { 640.f, 645.f, 96.f, 0.48f },   // 你
-        { 640.f, 95.f, 72.f, 0.36f },    // 上中
-        { 275.f, 160.f, 72.f, 0.36f },   // 左上
-        { 1005.f, 160.f, 72.f, 0.36f },  // 右上
-        { 155.f, 490.f, 72.f, 0.36f },   // 左下
-        { 1125.f, 490.f, 72.f, 0.36f }   // 右下
-    };
-    if (p < 0) return nullptr;
-    switch (pc) {
-        case 2: return (p < 2) ? &s2[p] : nullptr;
-        case 3: return (p < 3) ? &s3[p] : nullptr;
-        case 4: return (p < 4) ? &s4[p] : nullptr;
-        case 5: return (p < 5) ? &s5[p] : nullptr;
-        case 6: return (p < 6) ? &s6[p] : nullptr;
+constexpr float TITLE_BOTTOM = 50.f;   // 标题(第 X 局·比牌 @y22)下边沿 + 余量
+constexpr float CARD_UNIT_W = 200.f;   // 单张牌素材宽
+constexpr float CARD_UNIT_H = 280.f;   // 单张牌素材高
+
+constexpr Seat SEATS[7] = {            // 下标 = 座位号(0 空置)
+    { 0.f,     0.f,    0.f,   0.f,    0.f,    0.f    },   // 0 占位
+    { 588.f,   660.f,  100.f, 0.52f,  300.f,  700.f  },   // 1 你(下方, 大牌)
+    { 1060.f,  480.f,  58.f,  0.40f,  1010.f, 575.f  },   // 2 右中下(头像在牌下)
+    { 1060.f,  300.f,  58.f,  0.40f,  1010.f, 388.f  },   // 3 右中上(头像在牌下)
+    { 700.f,   150.f,  58.f,  0.40f,  880.f,  150.f  },   // 4 上方靠右(头像在牌右侧)
+    { 330.f,   150.f,  58.f,  0.40f,  180.f,  150.f  },   // 5 上方靠左(头像在牌左侧)
+    { 180.f,   340.f,  58.f,  0.40f,  135.f,  432.f  },   // 6 左中(头像在牌下)
+};
+
+// 编译期护栏: 任何座位的牌组顶 / 头像顶 都不得高于标题下边沿
+constexpr bool layoutBelowTitle() {
+    for (int i = 1; i <= 6; ++i) {
+        const Seat& st = SEATS[i];
+        if (st.cy - CARD_UNIT_H * 0.5f * st.s < TITLE_BOTTOM) return false;
+        if (st.ay - 28.f < TITLE_BOTTOM) return false;   // 28 = 头像圆环半径+边框余量
     }
-    return nullptr;
+    return true;
+}
+static_assert(layoutBelowTitle(), "seat layout must stay below the title bottom edge");
+
+// 人数 -> 座位号序列(玩家 p 使用第 p 个座位号; 用户指定映射)
+constexpr int SEAT_ORDER_2[2] = { 1, 4 };
+constexpr int SEAT_ORDER_3[3] = { 1, 4, 5 };
+constexpr int SEAT_ORDER_4[4] = { 1, 2, 3, 6 };
+constexpr int SEAT_ORDER_5[5] = { 1, 2, 3, 5, 6 };
+constexpr int SEAT_ORDER_6[6] = { 1, 2, 3, 4, 5, 6 };
+
+int seatNumberOf(int pc, int p) {
+    switch (pc) {
+        case 2: return (p < 2) ? SEAT_ORDER_2[p] : 0;
+        case 3: return (p < 3) ? SEAT_ORDER_3[p] : 0;
+        case 4: return (p < 4) ? SEAT_ORDER_4[p] : 0;
+        case 5: return (p < 5) ? SEAT_ORDER_5[p] : 0;
+        case 6: return (p < 6) ? SEAT_ORDER_6[p] : 0;
+    }
+    return 0;
+}
+
+const Seat* seatFor(int pc, int p) {
+    const int n = seatNumberOf(pc, p);
+    return (n >= 1 && n <= 6) ? &SEATS[n] : nullptr;
 }
 const char* LINE_NAMES[3] = {"头道", "中道", "尾道"};
 constexpr float FLIP_DELAY = 0.8f;    // 牌背展示时间
@@ -80,16 +89,18 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
     title_.centerOrigin();
     title_.setPosition(sf::Vector2f(WW / 2.f, 22.f));
 
-    // 玩家名标签(2~6 人全部落座)
+    // 头像昵称系统(替换原"纯昵称"标签): 每人一座, 与牌组同座
     for (int p = 0; p < playerCount_; p++) {
         const Seat* st = seatFor(playerCount_, p);
         if (!st) continue;
-        const char* dn = (p == 0) ? "你" : room->players[p].name.c_str();
-        nameTags_[p].setText(dn);
-        nameTags_[p].setCharacterSize(p == 0 ? 22 : 16);
-        nameTags_[p].setColor(sf::Color(255, 235, 170));
-        nameTags_[p].centerOrigin();
-        nameTags_[p].setPosition(sf::Vector2f(st->cx, st->cy - 140.f * st->s - 24.f));
+        Avatar& av = seatAvatars_[p];
+        const bool isSelf = (p == 0);
+        av.setRadius(isSelf ? 26.f : 22.f);
+        av.setSelfStyle(isSelf);                 // 本人: 名牌与圆心共线; 他人: 名牌在圆环右下
+        if (isSelf) av.setMinPlateWidth(150.f);  // 本人: 预留更长昵称空间
+        av.setTexture(AssetManager::instance().avatarTexture(p));   // 各玩家不同头像(取模循环)
+        av.setNickname(room->players[p].name);
+        av.setCenter(sf::Vector2f(st->ax, st->ay));
     }
 
     // 中央信息(金色大字)
@@ -103,13 +114,7 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
     lineTag_.centerOrigin();
     lineTag_.setPosition(sf::Vector2f(640.f, 285.f));
 
-    // 局内: 本人头像(左下角; 他人由各自座位体现)
-    selfAvatar_.setRadius(26.f);
-    selfAvatar_.setMinPlateWidth(150.f);   // 本人: 预留更长昵称空间
-    selfAvatar_.setSelfStyle(true);        // 名牌与圆心共线, 昵称居中
-    selfAvatar_.setTexture(AssetManager::instance().avatarTexture(0));   // 本人头像素材
-    selfAvatar_.setCenter(sf::Vector2f(70.f, 690.f));
-    if (room) selfAvatar_.setNickname(room->players[0].name);
+    // 局内本人头像已由座位表(1 号位)统一承载, 不再单独绘制
 
     // 牌精灵初始化位置(内容由 loadLine 装载)
     for (int p = 0; p < playerCount_; p++) {
@@ -227,12 +232,11 @@ void SceneBattle::draw(sf::RenderWindow& win) {
     for (int p = 0; p < playerCount_; p++) {
         const Seat* st = seatFor(playerCount_, p);
         if (!st) continue;
-        nameTags_[p].draw(win);
         for (int pos = 0; pos < 3; pos++) {
             cards_[p][pos].draw(win);
         }
+        seatAvatars_[p].draw(win);   // 该玩家头像 + 昵称名牌(与牌组同座)
     }
-    selfAvatar_.draw(win);   // 局内本人头像(左下角)
 
     if (showNext_) {
         // 比完提示文字持续显示(无需额外按钮)
