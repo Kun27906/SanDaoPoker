@@ -1,5 +1,6 @@
 #include "render/GlobalHud.h"
 #include "render/AssetManager.h"
+#include "ui/PanelFrame.h"
 #include "render/SoundManager.h"
 #include "render/Account.h"
 #include "render/SceneManager.h"
@@ -302,6 +303,7 @@ void GlobalHud::draw(sf::RenderWindow& win) {
     // 弹窗层
     win.draw(overlay_);
     win.draw(panel_);
+    panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));  // 装饰边框
     sf::CircleShape ring(24.f);
     ring.setPosition(sf::Vector2f(PL + PW - 60.f + 20.f - 24.f,
                                   PT + 20.f + 20.f - 24.f));
