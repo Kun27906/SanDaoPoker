@@ -43,6 +43,7 @@ private:
     void updateDevKnob();        // dev 滑块位置 = 当前余额
     void setBalanceFromMouse(float mx);
     void applyDevInput();        // 输入框内容 -> 余额
+    void applyDevBalance(int v); // 统一写余额: 账号 + (局内活跃房间)本人筹码, 防两处脱节
     void handleDevText(const sf::Event& e);
 
     SceneManager* mgr_;

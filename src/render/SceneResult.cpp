@@ -194,17 +194,40 @@ void SceneResult::settleAndSync() {
     }
 
     // 踢出判定: 本局结算后筹码不足下一局个人注金 -> 踢出(不扣逃跑费)
-    if (!room->isFinished()) {
-        int needNext = room->config.ante;
-        if (room->players[0].chips < needNext) {
-            kickPending_ = true;
-            final_ = true;
-            char t[128];
-            std::snprintf(t, sizeof(t), "您的筹码 (%d) 不足以支付下一局底注 (%d)，\n您已被踢出本场对局",
-                          room->players[0].chips, needNext);
-            dialogText_.setText(t);
-            dialogSub_.setText("本次不扣除逃跑费用 · 点击确定返回大厅");
-        }
+    // 口径: 用"已加上本局盈亏之后"的局内筹码比较(上面的 settleRound 已完成筹码写回);
+    //       开发者模式补足筹码后由 reevaluateKick() 撤销/重判。
+    if (!room->isFinished() && room->players[0].chips < room->config.ante) {
+        kickPending_ = true;
+        final_ = true;
+        buildKickDialog();
+    }
+    lastChips_ = room->players[0].chips;   // 判定基准(供开发者模式改余额后的变化检测)
+}
+
+// 踢出弹窗文案(结算判定与开发者模式重判共用)
+void SceneResult::buildKickDialog() {
+    Room* room = mgr_->room.get();
+    char t[128];
+    std::snprintf(t, sizeof(t), "您的筹码 (%d) 不足以支付下一局底注 (%d)，\n您已被踢出本场对局",
+                  room->players[0].chips, room->config.ante);
+    dialogText_.setText(t);
+    dialogSub_.setText("本次不扣除逃跑费用 · 点击确定返回大厅");
+}
+
+// 局内筹码被外部改动(开发者模式改余额)后重判踢出状态:
+//   仍不足下一局底注 -> 弹出踢出弹窗;  已补足 -> 撤销踢出, 回到常规结算界面
+void SceneResult::reevaluateKick() {
+    Room* room = mgr_->room.get();
+    if (!room || !synced_ || room->isFinished() || betting_) return;   // 最终局/未结算/动画中不判
+    const bool tooPoor = room->players[0].chips < room->config.ante;
+    if (tooPoor && !kickPending_) {
+        kickPending_ = true;
+        final_ = true;
+        buildKickDialog();
+    } else if (!tooPoor && kickPending_) {
+        kickPending_ = false;
+        final_ = false;
+        refreshRows();   // 恢复非最终局界面(各家筹码行 + 下一局/逃跑按钮)
     }
 }
 
@@ -402,6 +425,18 @@ void SceneResult::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
 
 void SceneResult::update(float dt) {
     chipBar_.update(dt);   // 筹码框数字滚动(下注扣减 / 盈亏动画)
+
+    // 局内筹码被外部改动(开发者模式改余额) -> 重判踢出状态 + 同步顶部筹码显示
+    if (mgr_->room) {
+        const int chips = mgr_->room->players[0].chips;
+        if (chips != lastChips_) {
+            lastChips_ = chips;
+            reevaluateKick();
+            if (!betting_ && !chipBar_.isRolling()) {
+                chipBar_.setImmediate(Account::instance().balance());
+            }
+        }
+    }
 
     // 下注音效+扣减动画播完 -> 进入发牌动画
     if (betting_ && !chipBar_.isRolling()) {
