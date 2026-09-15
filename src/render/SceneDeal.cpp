@@ -215,7 +215,6 @@ void SceneDeal::drawCardAt(sf::RenderWindow& win, const Card& c, sf::Vector2f tl
 void SceneDeal::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
 
-    // ---- 牌堆(从右边逐层切除一个白边并整体右移, 始终保留一张完整牌背) ----
     int remaining = LAYERS - dealt_;
     if (remaining > 0) {
         float w = 200.f + (remaining - 1) * EDGE;      // 剩余宽度(>=200, 留完整牌背)
@@ -231,7 +230,6 @@ void SceneDeal::draw(sf::RenderWindow& win) {
         win.draw(pile_);
     }
 
-    // ---- 本人手牌槽(发到的牌) ----
     for (int i = 0; i < 9; i++) {
         if (!arrived_[i]) continue;
         bool faceUp = (phase_ == Phase::Flipping && flipT_ >= 0.5f);
@@ -245,7 +243,6 @@ void SceneDeal::draw(sf::RenderWindow& win) {
                    CARD_SCALE * sxFactor, CARD_SCALE, faceUp);
     }
 
-    // ---- 飞行中的牌 ----
     const sf::Texture* backTex = AssetManager::instance().backTexture(backIdx_);
     if (backTex) {
         for (const Fly& f : flies_) {
@@ -261,7 +258,6 @@ void SceneDeal::draw(sf::RenderWindow& win) {
         }
     }
 
-    // ---- 头像(本人左下 / 他人右侧居中) ----
     for (int i = 0; i < mgr_->room->playerCount && i < MAX_PLAYERS; i++) {
         avatars_[i].draw(win);
     }

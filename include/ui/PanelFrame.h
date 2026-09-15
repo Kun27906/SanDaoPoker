@@ -3,7 +3,6 @@
 #include <algorithm>
 #include "render/AssetManager.h"
 
-// ====== 弹窗装饰边框: 9 宫格伸缩绘制 ======
 // 素材: assets/ui/table/panel_frame.png (256x320; 四角 112x144 + 四边中段 32px, 中心透明)
 // 来源: 用户提供的边框图 -> 去白底/去水印 -> 纯金重着色(保留原明暗起伏) -> 切 9 宫格
 // 纹样: 四角卷草角饰 + 四边细金线(实测 1px)
@@ -40,7 +39,6 @@ inline void draw(sf::RenderWindow& win, const sf::FloatRect& rect) {
 
     sf::Sprite sp(*t);
 
-    // ---- 四角: 按 s 缩放(角饰整体等比) ----
     const float cx[4] = {0.f, texW - CW, 0.f, texW - CW};
     const float cy[4] = {0.f, 0.f, texH - CH, texH - CH};
     const float dx[4] = {ox, ox + ow - cw, ox, ox + ow - cw};
@@ -53,7 +51,6 @@ inline void draw(sf::RenderWindow& win, const sf::FloatRect& rect) {
         win.draw(sp);
     }
 
-    // ---- 上/下边中段: 横向拉伸(纵向保持 s, 与角饰厚度一致) ----
     const float lenH = ow - cw * 2.f;
     if (lenH > 0.5f) {
         for (int r = 0; r < 2; r++) {
@@ -67,7 +64,6 @@ inline void draw(sf::RenderWindow& win, const sf::FloatRect& rect) {
         }
     }
 
-    // ---- 左/右边中段: 纵向拉伸 ----
     const float lenV = oh - ch * 2.f;
     if (lenV > 0.5f) {
         for (int c = 0; c < 2; c++) {

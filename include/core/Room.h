@@ -7,7 +7,6 @@
 #include "core/RuleConfig.h"
 #include <string>
 
-// ====== 房间 ======
 // 一桌游戏 = 一个房间
 // 职责：
 //   1. 选房间（16 种配置：人数 + 底注 + 轮次）
@@ -26,7 +25,6 @@ public:
     int pools[3] = {0, 0, 0};     // 三个小池（头道/中道/尾道）
     int currentRound = 0;         // 第几局（从 1 开始）
 
-    // ===== 每局盈亏追踪(成员C: 供结算界面显示每局盈亏/最终明细) =====
     int roundStartChips[MAX_PLAYERS] = {0};    // 本局开始前筹码快照(startNewRound 时记)
     int roundHistory[32][MAX_PLAYERS] = {{0}}; // 每局盈亏历史(settle 后记, 行=局序)
     int historyCount = 0;                      // 已结算局数

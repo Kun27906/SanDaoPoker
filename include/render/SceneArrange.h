@@ -8,7 +8,6 @@
 #include "ui/Avatar.h"
 #include <array>
 
-// ====== 组牌界面(阶段5: 分三道) ======
 // 玩法:9 张手牌分配到三道(头/中/尾,每道3张=共9个预定槽位)。
 //  - 拖拽: 按住一张牌拖动到任意预定槽位, 靠近槽位时自动吸附;
 //  - 放回: 单击已放置的牌 -> 牌"飞回"下方原手牌位(无需一键重置);
@@ -60,7 +59,6 @@ private:
     ChipBar chipBar_;                  // 右上角账号筹码
     std::array<Avatar, MAX_PLAYERS> avatars_;  // 局内头像: [0]本人左下, [1..]他人右侧居中
 
-    // ---- 拖拽状态 ----
     CardSprite dragSprite_;            // 拖动中的牌
     bool pendingDrag_ = false;         // 已按下某张牌(尚未判定拖拽/点击)
     bool dragging_ = false;            // 正在拖动
@@ -72,7 +70,6 @@ private:
     sf::Vector2f pressPos_{0.f, 0.f};  // 按下点(判定点击/拖拽)
     int  snapSlot_ = -1;               // 当前吸附到的高亮槽(-1 无)
 
-    // ---- 飞回动画 ----
     CardSprite flySprite_;
     bool flying_ = false;
     int  flyHand_ = -1;                // 飞回的手牌下标

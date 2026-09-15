@@ -1,8 +1,6 @@
 #include "core/HandEvaluator.h"
 #include <algorithm>
 
-// ====== 牌型的中文名字 ======
-
 std::string HandResult::name() const {
     switch (type) {
         case HandType::ThreeOfAKind:  return "豹子";
@@ -13,8 +11,6 @@ std::string HandResult::name() const {
         default:                      return is235 ? "异花235" : "散牌";
     }
 }
-
-// ====== 判断 3 张牌是什么牌型 ======
 
 HandResult HandEvaluator::evaluate(const std::vector<Card>& three) {
     // 复制一份，因为枚举王的时候要改牌
@@ -37,7 +33,6 @@ HandResult HandEvaluator::evaluate(const std::vector<Card>& three) {
     return best;
 }
 
-// ====== 枚举：把王变成每种普通牌 ======
 // 规则（按分工方案）：
 //   大王（BigJoker）→ 只能变成 红色 花色（♥ 红桃 / ♦ 方块）的任意点数
 //   小王（SmallJoker）→ 只能变成 黑色 花色（♠ 黑桃 / ♣ 梅花）的任意点数
@@ -77,8 +72,6 @@ void HandEvaluator::enumerateJokers(std::vector<Card>& cards, int idx, HandResul
     // 重要！把王变回来，否则后面的组合会乱套（双王时尤其明显）
     cards[idx] = original;
 }
-
-// ====== 判断 3 张普通牌（没有王）的牌型 ======
 
 HandResult HandEvaluator::evaluateNormal(const Card& c1, const Card& c2, const Card& c3) {
     // 先按点数从小到大排序
@@ -164,8 +157,6 @@ HandResult HandEvaluator::evaluateNormal(const Card& c1, const Card& c2, const C
     }
     return r;
 }
-
-// ====== 比较两手牌的大小 ======
 
 int HandEvaluator::compare(const HandResult& a, const HandResult& b) {
     // 特殊规则：异花 235 吃豹子！

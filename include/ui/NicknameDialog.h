@@ -4,7 +4,6 @@
 #include <string>
 #include "ui/Button.h"
 
-// ====== 自设昵称弹窗(成员C) ======
 // 打开方式: 在大厅点击本人昵称名牌(SceneLobby 里 Avatar::plateBounds 命中)。
 // 允许字符: 中文 / 英文字母 / 下划线 / 数字; 最长 8 个字(名牌宽度可容纳)。
 // 确定 -> 回调新昵称(由调用方写入 Account 并存档)。

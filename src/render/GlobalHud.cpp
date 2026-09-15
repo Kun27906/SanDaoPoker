@@ -64,7 +64,6 @@ const char* RULES_TEXT =
 GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     AssetManager& am = AssetManager::instance();
 
-    // ---- 左上角四键 ----
     btnMenu_.setTexture(am.icon("menuList"));
     btnMenu_.setPosition(sf::Vector2f(12.f, 12.f));
     btnMenu_.setSize(BTN);
@@ -99,7 +98,6 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnHome_.setSize(BTN);
     btnHome_.setCallback([this]() { if (mgr_) mgr_->onHomePressed(); });
 
-    // ---- 退出确认弹窗(局内一局未结束时, 点窗口 X / Esc 弹出) ----
     exitDialog_.setSize(sf::Vector2f(EXIT_W, EXIT_H));
     exitDialog_.setPosition(sf::Vector2f(EXIT_L, EXIT_T));
     exitDialog_.setFillColor(sf::Color(30, 40, 70));
@@ -124,7 +122,6 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnExitCancel_.setSize(sf::Vector2f(EXIT_BTN_W, EXIT_BTN_H));
     btnExitCancel_.setCallback([this]() { exitPopupOpen_ = false; });
 
-    // ---- 弹窗 ----
     overlay_.setSize(sf::Vector2f(WW, WH));
     overlay_.setFillColor(sf::Color(0, 0, 0, 160));
     panel_.setSize(sf::Vector2f(PW, PH));
@@ -138,7 +135,6 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnClose_.setPosition(sf::Vector2f(PL + PW - 60.f, PT + 20.f));
     btnClose_.setCallback([this]() { closePopup(); });
 
-    // ---- 主菜单页: 音量行 ----
     btnVolIcon_.setTexture(am.icon("soundSetting"));
     btnVolIcon_.setSize(46.f);
     btnVolIcon_.setPosition(sf::Vector2f(VOL_X - 23.f, ROW_Y - 23.f));
@@ -162,7 +158,6 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnRules_.setSize(sf::Vector2f(PW - 200.f, 56.f));
     btnRules_.setCallback([this]() { showRulesPage(); });
 
-    // ---- 规则页 ----
     rulesTitle_.setText("游戏规则");
     rulesTitle_.setCharacterSize(30);
     rulesTitle_.setColor(sf::Color(255, 220, 130));
@@ -179,7 +174,6 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnRulesBack_.setSize(sf::Vector2f(160.f, 48.f));
     btnRulesBack_.setCallback([this]() { showMainPage(); });
 
-    // ---- 开发者模式弹窗 ----
     btnDevToggle_.setText("启用开发者模式");
     btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f, DEV_BTN_Y - 30.f));
     btnDevToggle_.setSize(sf::Vector2f(380.f, 60.f));
@@ -294,9 +288,7 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
         return false;
     }
 
-    // ---- 弹窗打开: 拦截 ----
     if (devPopup) {
-        // ---- 开发者模式弹窗 ----
         // 键盘输入(启用后且输入框聚焦)
         if (devOn_ && devInputFocus_) {
             handleDevText(e);
@@ -337,7 +329,6 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
         return true;
     }
 
-    // ---- 菜单弹窗 ----
     if (e.type == sf::Event::MouseButtonPressed &&
         e.mouseButton.button == sf::Mouse::Left) {
         sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseButton.x,
@@ -445,7 +436,6 @@ void GlobalHud::draw(sf::RenderWindow& win) {
 // 开发者模式弹窗绘制(与主菜单弹窗同尺寸)
 void GlobalHud::drawDevPopup(sf::RenderWindow& win) {
     if (!devOn_) {
-        // ---- 未启用: 提示 + 启用按钮 ----
         TextBox ttl("工具", sf::Vector2f(WW / 2.f, PT + 52.f), 28);
         ttl.setColor(sf::Color(255, 220, 130));
         ttl.centerOrigin();
@@ -462,7 +452,6 @@ void GlobalHud::drawDevPopup(sf::RenderWindow& win) {
         btnDevToggle_.draw(win);
         return;
     }
-    // ---- 已启用: 标注 + 输入框 + 筹码+滑条 + 关闭按钮 ----
     TextBox ttl("开发者模式", sf::Vector2f(WW / 2.f, PT + 44.f), 28);
     ttl.setColor(sf::Color(255, 220, 130));
     ttl.centerOrigin();

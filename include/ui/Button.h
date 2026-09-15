@@ -3,7 +3,6 @@
 #include <functional>
 #include <string>
 
-// ====== Button 通用按钮控件(贴图版) ======
 // 四态贴图按钮(正常/悬停/按下/禁用) + 居中文字 + 点击回调
 //   贴图: assets/ui/buttons/btn_{normal,hover,pressed,disabled}.png (由 AssetManager 统一加载)
 //   选中态 setSelected(true): 常驻"按下"贴图且不恢复 —— 选房/难度/道选择的"已选中"提示
@@ -19,7 +18,6 @@ public:
     Button() = default;
     Button(const std::string& text, const sf::Vector2f& pos, const sf::Vector2f& size);
 
-    // ---- 属性设置 ----
     void setText(const std::string& t);
     void setPosition(const sf::Vector2f& p);
     void setSize(const sf::Vector2f& s);
@@ -29,10 +27,8 @@ public:
     void setDisabled(bool d);      // 禁用外观: 灰色贴图(不拦截点击)
     void setTint(sf::Color c);     // 贴图着色(默认白)
 
-    // ---- 查询 ----
     bool contains(const sf::Vector2f& point) const;
 
-    // ---- 交互与绘制 ----
     // 在事件循环中调用:处理悬停高亮 + 左键点击(按下瞬间触发回调)
     void handleEvent(const sf::Event& e, const sf::RenderWindow& win);
     // 非 const:按当前状态切换四态贴图

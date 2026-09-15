@@ -4,7 +4,6 @@
 #include "ui/Button.h"
 #include "ui/TextBox.h"
 
-// ====== GlobalHud 全局悬浮工具栏(成员C, 阶段9) ======
 // 所有界面左上角常驻: [menuList] [music] [wrench] [home](按场景显隐)
 //   - menuList: 打开游戏内大弹窗(右上角圆圈+close 关闭)
 //     · 主菜单页: 音量(soundSetting 图标可点击=静音切换, 滑动条 slider 拖动
@@ -28,7 +27,6 @@ public:
     void update(float dt);       // 两段确认计时复原
     void draw(sf::RenderWindow& win);
 
-    // ---- 窗口关闭请求(标题栏 X / Esc) ----
     // 局内"一局未结束"(发牌/组牌/比牌)或结算界面但本场还有下一局时弹确认窗;
     // 返回 true = 已拦截(不要关窗口)
     bool onCloseRequested(bool isEscape);
@@ -81,7 +79,6 @@ private:
     float savedVol_ = 100.f;         // 静音前音量(点 soundOff 恢复)
     bool dragging_ = false;
 
-    // ---- 开发者模式弹窗部件(与菜单弹窗共用 overlay_/panel_/btnClose_ 几何) ----
     Button btnDevToggle_;            // 启用(两段确认)/关闭 开发者模式
     sf::RectangleShape devTrack_;    // dev 滑轨(底)
     sf::RectangleShape devFill_;     // dev 滑轨(金色已填充)
@@ -94,7 +91,6 @@ private:
     std::string devInputStr_;        // 聚焦编辑中的数字串
     bool devPopupOpen_ = false;      // dev 弹窗是否打开
 
-    // ---- 退出确认弹窗(局内一局未结束时, 点 X / Esc 弹出) ----
     bool exitPopupOpen_ = false;     // 确认窗是否打开
     bool exitConfirmed_ = false;     // 玩家点[确定] -> GameApp 关闭窗口
     sf::RectangleShape exitDialog_;  // 独立小面板(复用 overlay_ 遮罩)

@@ -4,8 +4,6 @@
 #include <string>
 #include <cstdint>
 
-// ====== 枚举定义 ======
-
 // 花色：黑桃、红桃、梅花、方块
 enum class Suit : uint8_t {
     Spade,    // 黑桃 ♠
@@ -22,7 +20,6 @@ enum class Rank : uint8_t {
     BigJoker   = 21   // 大王
 };
 
-// ====== Card 类声明 ======
 // 一张牌 = 花色 + 点数
 // 大小王的花色无意义（用 SmallJoker/BigJoker 区分）
 

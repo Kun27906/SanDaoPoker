@@ -8,7 +8,6 @@
 #include "ui/ProfileEditor.h"
 #include <array>
 
-// ====== 第二界面: 真大厅(成员C) ======
 // 五个大按钮按人数(2/3/4/5/6)进入对应房间列表; 右上角实时显示账号筹码。
 class SceneLobby : public Scene {
 public:

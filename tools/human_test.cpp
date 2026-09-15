@@ -1,4 +1,3 @@
-// ====== 人性化快速检验 (成员B) ======
 // 只测: 决策多样性 + 风格对战 (都是贪心, 秒出结果)
 #include "ai/AIPlayer.h"
 #include "core/Deck.h"

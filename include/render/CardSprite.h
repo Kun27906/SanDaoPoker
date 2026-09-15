@@ -2,7 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include "core/Card.h"
 
-// ====== CardSprite 牌精灵(阶段2) ======
 // 把 A 成员的核心牌对象(Card)显示为界面上的牌图。
 //  - 正面:按 花色/点数 从 AssetManager 取贴图
 //  - 牌背:setFaceUp(false) 显示背面

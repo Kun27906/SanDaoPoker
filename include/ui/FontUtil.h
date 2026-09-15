@@ -2,7 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 
-// ====== 字体工具 ======
 // 提供全局唯一的默认字体(懒加载单例)。
 // 加载顺序:
 //   1) 项目自带字体 assets/fonts/SourceHanSansSC-Regular.otf (思源黑体,支持中文)
@@ -35,7 +34,6 @@ inline const sf::Font& defaultFont() {
 
 } // namespace font_util
 
-// ====== UTF-8 字符串工具 ======
 // 注意:SFML 的 sf::String(const char*) 不按 UTF-8 解码(按本地 ANSI 代码页),
 //      中文会乱码。所有界面文字必须经此函数显式转换。
 namespace str_util {

@@ -2,13 +2,10 @@
 #include <algorithm>
 #include <sstream>
 
-// ====== 构造函数：默认选 "4人·休闲房" ======
-
 Room::Room() {
     config = ROOM_CONFIGS[7];  // { "4人·休闲房", 4, 2, 3 }
 }
 
-// ====== 选房间 ======
 // 换房 = 清空玩家 + 筹码重置 + 轮次清零，重新开始
 
 bool Room::setRoomConfig(int configIndex) {
@@ -26,8 +23,6 @@ bool Room::setRoomConfig(int configIndex) {
     return true;
 }
 
-// ====== 加玩家 ======
-
 bool Room::addPlayer(const std::string& name, bool isAI) {
     // 人数不能超过房间配置的人数
     if (playerCount >= config.players) {
@@ -38,7 +33,6 @@ bool Room::addPlayer(const std::string& name, bool isAI) {
     return true;
 }
 
-// ====== 开始新一局 ======
 // 只有人数凑齐（和房间配置一致）才发牌，然后收底注
 
 bool Room::startNewRound() {
@@ -55,7 +49,6 @@ bool Room::startNewRound() {
     return true;
 }
 
-// ====== 结算本局 ======
 // 交牌锁定：所有人都摆好牌才能比
 
 std::string Room::settleRound() {
@@ -73,13 +66,9 @@ std::string Room::settleRound() {
     return text;
 }
 
-// ====== 轮次打完了吗？ ======
-
 bool Room::isFinished() const {
     return currentRound >= config.rounds;
 }
-
-// ====== 看总账（按筹码排名） ======
 
 std::string Room::getRanking() const {
     std::stringstream out;

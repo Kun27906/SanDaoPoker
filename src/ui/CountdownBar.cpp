@@ -65,7 +65,6 @@ void CountdownBar::draw(sf::RenderWindow& win) {
     if (ratio < 0.f) ratio = 0.f;
     if (ratio > 1.f) ratio = 1.f;
 
-    // ---- 底槽: 贴图优先, 缺失则纯色矩形 ----
     const sf::Texture* bgTex = AssetManager::instance().tableTexture("countdown_bar_bg");
     if (bgTex) {
         sf::Sprite s(*bgTex);
@@ -76,7 +75,6 @@ void CountdownBar::draw(sf::RenderWindow& win) {
         win.draw(bg_);
     }
 
-    // ---- 填充: 三色贴图(绿>50%, 黄15%~50%, 红<15%), 按剩余比例裁切 ----
     const char* fillName = ratio > 0.50f ? "countdown_fill_green"
                          : ratio > 0.15f ? "countdown_fill_yellow"
                                          : "countdown_fill_red";

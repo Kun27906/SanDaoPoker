@@ -236,7 +236,6 @@ bool AssetManager::loadMiscTextures() {
                 std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", p.c_str());
                 continue;
             }
-            // ---- 圆形裁剪(共用助手): 距中心 > 半径的像素 alpha 置 0, 边缘 1px 羽化 ----
             cropToCircle(img);
             sf::Texture t;
             if (t.loadFromImage(img)) {

@@ -12,7 +12,6 @@ namespace {
 constexpr unsigned WW = layout::WINDOW_W;
 constexpr unsigned WH = layout::WINDOW_H;
 
-// ---- 难度选择(成员B): 索引 0/1/2 <-> AIPlayer::Difficulty ----
 AIPlayer::Difficulty diffOf(int idx) {
     switch (idx) {
         case 0:  return AIPlayer::Difficulty::Random;
@@ -114,7 +113,6 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     btnStart_.setSize(sf::Vector2f(290.f, 58.f));
     btnStart_.setCallback([this]() { startGame(); });
 
-    // ---- 难度选择(成员B): 入口按钮 + 居中弹窗 ----
     btnDiffOpen_.setPosition(sf::Vector2f(330.f, 590.f));
     btnDiffOpen_.setSize(sf::Vector2f(150.f, 58.f));
     btnDiffOpen_.setCallback([this]() { openDiffPopup(); });
@@ -159,7 +157,6 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     profile_.bind(&selfAvatar_);
 }
 
-// ---- 难度选择(成员B) ----
 void SceneRoomSelect::openDiffPopup() {
     diffOpen_ = true;
     refreshDiffColors();

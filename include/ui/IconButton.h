@@ -2,7 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include <functional>
 
-// ====== IconButton 图标按钮控件(成员C, 阶段9) ======
 // 用一张方形贴图做按钮(图标素材 100x100 缩放到按钮尺寸),
 // 无文字; hover 时图标下方衬一圈半透明白底突出; 按下瞬间触发回调。
 // 用法:

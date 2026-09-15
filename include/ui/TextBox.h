@@ -2,7 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 
-// ====== TextBox 文本显示控件 ======
 // 功能:一行(或多行,支持 \n)文字的显示封装(字体/字号/颜色/位置/对齐)
 // 用法:
 //   TextBox t("Hello", {100,100}, 28);

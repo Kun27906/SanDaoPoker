@@ -4,7 +4,6 @@
 #include "core/Card.h"
 #include <vector>
 
-// ====== Deck 类声明 ======
 // 一副牌 = 54张（52普通 + 2王）
 // 职责：生成全副牌、洗牌、发牌
 

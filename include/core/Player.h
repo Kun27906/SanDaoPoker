@@ -5,7 +5,6 @@
 #include "core/RuleConfig.h"
 #include <string>
 
-// ====== 玩家 ======
 // 一个玩家有：名字、9 张手牌、摆好的 3 道牌、总分
 // hand[9]     ：刚发到手的 9 张牌
 // lines[3][3] ：摆好之后的牌，lines[0]=头道, lines[1]=中道, lines[2]=尾道

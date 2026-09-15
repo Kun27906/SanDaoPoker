@@ -9,7 +9,6 @@ namespace {
 constexpr unsigned WW = layout::WINDOW_W;
 constexpr unsigned WH = layout::WINDOW_H;
 
-// ====== 座位表(按用户指定编号) ======
 // 1=你(下方大牌)  2=右中下  3=右中上  4=上方靠右  5=上方靠左  6=左中
 // 每人一座: 牌组(3 张横排) + 头像昵称位(ax,ay)
 // 约束: 所有座位的牌组顶边与头像顶边都不得高于标题下边沿 TITLE_BOTTOM(编译期 static_assert 护栏)

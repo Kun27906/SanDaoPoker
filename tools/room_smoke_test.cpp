@@ -1,4 +1,3 @@
-// ====== Round/Room 完整对局冒烟验证 (成员D, 集成用) ======
 // 覆盖: 16房间配置 -> 开新局(发牌+收底注) -> 全员随机交牌 -> 结算 -> 多轮 -> 总账
 #include "core/Room.h"
 #include "core/Round.h"

@@ -1,4 +1,3 @@
-// ====== AI 对战评估器 v3 (成员B 训练工具) ======
 // 功能: 胜率表抽查 / 难度对比 / 4人局 / 人性化多样性检验 / 风格对战
 #include "ai/AIPlayer.h"
 #include "core/Deck.h"
@@ -55,7 +54,6 @@ static void sanityCheck() {
     std::printf("  单王(小王)+AA   : %.1f%%\n", 100.0 * AIPlayer::winRateOf(Card(Rank::SmallJoker), Card(Suit::Spade, Rank::Ace), Card(Suit::Heart, Rank::Ace)));
 }
 
-// ====== 人性化检验 1: 同一手牌决策 200 次的方案多样性 ======
 static void diversityTest() {
     std::printf("\n===== 人性化检验: 同一手牌决策 200 次的方案多样性 =====\n");
     Card hand[9] = {
@@ -81,7 +79,6 @@ static void diversityTest() {
     std::printf("  (说明: 1680=完全随机, 1=每次完全一样; 人性化应在两者之间)\n");
 }
 
-// ====== 人性化检验 2: 风格对战 ======
 static void styleBattle(int rounds) {
     std::printf("\n===== 风格对战 (%d 局, 2人局, 贪心难度) =====\n", rounds);
     AIPlayer::Style styles[3] = {

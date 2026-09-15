@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 
-// ====== Account 玩家账号(本地存档,成员C) ======
 // "账号" = 一个本地存档(唯一),记录玩家持有的筹码余额。
 //   - 存档文件: <项目根>/game_data/save.dat (一行整数)
 //   - 初始资金: 500
@@ -20,7 +19,6 @@ public:
     void setBalance(int v);    // 设置余额并立即保存
     int add(int delta);        // 余额增减(delta 可为负),返回新余额并保存
 
-    // ---- 昵称(账号数据, 与筹码一同存档; 存档第 2 行) ----
     void setNickname(const std::string& n);   // 手动设置昵称并立即保存(自设昵称)
     std::string ensureNickname();             // 无则随机生成并保存, 返回
 

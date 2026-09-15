@@ -5,7 +5,6 @@
 #include <vector>
 #include "core/Card.h"
 
-// ====== AssetManager 资源管理器(阶段2) ======
 // 单例,统一加载和管理游戏素材:
 //   - 扑克牌贴图 52 张:  assets/cards/{spades,hearts,clubs,diamonds}/{A,2..10,J,Q,K}.png
 //     (命名约定见 assets/README.md:文件名即点数名,如 A.png/10.png/J.png/Q.png/K.png)
@@ -24,7 +23,6 @@ public:
     // 加载全部素材(可重复调用,内部有保护)
     bool loadAll();
 
-    // ---- 查询接口 ----
     // 按 A 成员 Card 枚举取牌面纹理;大小王(无贴图)或加载失败返回 nullptr
     const sf::Texture* cardTexture(Suit s, Rank r) const;
     // 牌背纹理:0=红 1=蓝 2=黑(默认红)
@@ -46,7 +44,6 @@ public:
     // 头像素材(assets/ui/avatars/*.png 自动扫描, 100x100): 按序号取(取模循环)
     // 注: 0 号位 = 本人 -> 若玩家已设自定义头像(game_data/avatar.png)则优先返回它
     const sf::Texture* avatarTexture(int idx) const;
-    // ---- 本人自定义头像(由"点击本人头像"上传裁剪生成, 见 AvatarCropDialog) ----
     // 本人自定义头像(game_data/avatar.png; 加载后与默认头像同样做圆形裁剪)
     const sf::Texture* customAvatar() const;   // 已设置则返回纹理, 否则 nullptr
     bool reloadCustomAvatar();                 // 重新读取 game_data/avatar.png(保存头像后调用)

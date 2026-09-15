@@ -35,7 +35,6 @@ VersionBadge::VersionBadge(bool clickable) : clickable_(clickable) {
     badge_.setFillColor(sf::Color(185, 185, 185));
     badge_.setString(str_util::utf8(GAME_VERSION));
 
-    // ---- 弹窗 ----
     overlay_.setSize(sf::Vector2f(WW, WH));
     overlay_.setFillColor(sf::Color(0, 0, 0, 170));
     panel_.setSize(sf::Vector2f(PW, PH));
@@ -162,7 +161,6 @@ void VersionBadge::draw(sf::RenderWindow& win) {
     win.draw(badge_);
     if (!open_) return;
 
-    // ---- 弹窗 ----
     win.draw(overlay_);
     win.draw(panel_);
     panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));  // 装饰边框
@@ -179,7 +177,6 @@ void VersionBadge::draw(sf::RenderWindow& win) {
     if (closeIcon_.getTexture()) win.draw(closeIcon_);
     win.draw(listBg_);
 
-    // ---- 列表(子视图裁剪 + 滚轮滚动) ----
     sf::View prev = win.getView();
     win.setView(listView_);
     const float xVer = listRect_.left + 16.f;
@@ -193,7 +190,6 @@ void VersionBadge::draw(sf::RenderWindow& win) {
     }
     win.setView(prev);
 
-    // ---- 滚动条(内容超出时) ----
     float ms = maxScroll();
     if (ms > 0.f) {
         float trackH = listRect_.height - 8.f;

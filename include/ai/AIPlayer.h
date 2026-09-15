@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-// ====== AI 玩家 (成员B: src/ai) ======
 // 职责: 拿到 9 张手牌, 决策如何分成 3 道, 输出 order[9] 交给 Player::arrangeByOrder
 //
 // 难度分级:
@@ -23,7 +22,6 @@ public:
         MonteCarlo = 2  // 蒙特卡洛 (困难)
     };
 
-    // ====== 人性化风格 ======
     // 真人玩家的三种打法风格
     enum class Style {
         Balanced = 0,      // 均衡型: 三组胜率总和优先 (理性打法)
@@ -44,7 +42,6 @@ public:
                                   Difficulty diff, Style style, float noise,
                                   int order[9]);
 
-    // ====== 难度/风格配置 (供界面层调用; 界面按钮由成员C接入) ======
     // 未设置时默认: Greedy + Balanced + 0.3f (与历史行为完全一致)
     static void setProfile(Difficulty d, Style s, float noise);  // 一键设置(难度按钮直接调这个)
     static void setNoise(float n);          // 自动夹到 [0,1]

@@ -2,7 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
-// ====== VersionBadge 左下角版本号(+ 可点击展开版本历史) ======
 // 左下角显示 GAME_VERSION(来源 core/VersionInfo.h)。
 // clickable=true 时单击可打开"版本历史"弹窗:
 //   按时间顺序(从早到晚)逐条列出 版本号 + 主要更新;
@@ -34,7 +33,6 @@ private:
     sf::Text badge_;
     sf::FloatRect badgeRect_;
 
-    // ---- 弹窗 ----
     sf::RectangleShape overlay_;
     sf::RectangleShape panel_;
     sf::RectangleShape listBg_;

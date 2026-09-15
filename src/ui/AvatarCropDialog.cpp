@@ -8,7 +8,6 @@
 #include <iterator>
 #include <vector>
 
-// ---- Windows 原生打开文件对话框(comdlg32) ----
 // WIN32_LEAN_AND_MEAN / NOMINMAX: 避免引入 winsock 与 min/max 宏(与 SFML/std 冲突)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN

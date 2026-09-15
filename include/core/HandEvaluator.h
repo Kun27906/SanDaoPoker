@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-// ====== 牌型等级（从弱到强） ======
 // 扎金花的牌型，从小到大排列
 enum class HandType {
     HighCard = 0,       // 散牌：啥都不是，比如 2, 7, K
@@ -16,7 +15,6 @@ enum class HandType {
     ThreeOfAKind        // 豹子：三张一样，比如 3张 K（最大！）
 };
 
-// ====== 一手牌（3张）的判断结果 ======
 struct HandResult {
     HandType type = HandType::HighCard;  // 牌型
     int keys[3] = {0, 0, 0};             // 比大小用的点数，从大到小排
@@ -24,7 +22,6 @@ struct HandResult {
     std::string name() const;            // 牌型的中文名字（"豹子"、"顺子"等）
 };
 
-// ====== 牌型判断器 ======
 // 作用：给 3 张牌，告诉你是什么牌型；给两手牌，告诉你谁大
 class HandEvaluator {
 public:

@@ -157,7 +157,6 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     }
 }
 
-// ---- 槽位/几何辅助 ----
 sf::Vector2f SceneArrange::slotPos(int line, int pos) const {
     return sf::Vector2f(SLOT_X[pos], LINE_Y[line]);
 }
@@ -177,7 +176,6 @@ int SceneArrange::nearestSlot(const sf::Vector2f& cardTopLeft, float maxDist) co
     return best;
 }
 
-// ---- 模型 <-> 房间同步 ----
 void SceneArrange::refreshSlotSprites() {
     const Card* hand = mgr_->room->players[0].hand;
     for (int line = 0; line < 3; line++) {
@@ -205,7 +203,6 @@ void SceneArrange::rebuildLines() {
     }
 }
 
-// ---- 放置 / 收回 ----
 void SceneArrange::placeAt(int handIdx, int line, int pos) {
     if (submitted_) return;
     if (line < 0 || line > 2 || pos < 0 || pos > 2) return;
@@ -254,7 +251,6 @@ void SceneArrange::returnToHand(int line, int pos) {
     rebuildLines();
 }
 
-// ---- 拖拽 ----
 void SceneArrange::beginDrag(int handIdx, int fromLine, int fromPos, const sf::Vector2f& mouse) {
     dragHand_ = handIdx;
     dragFromLine_ = fromLine;
@@ -312,7 +308,6 @@ void SceneArrange::dropDrag() {
     dragFromLine_ = dragFromPos_ = -1;
 }
 
-// ---- 重置 / 交牌 ----
 void SceneArrange::resetArrange() {
     if (submitted_) return;
     for (auto& row : slotHand_) row.fill(-1);
@@ -369,7 +364,6 @@ void SceneArrange::autoSubmit() {
     submit();
 }
 
-// ---- 事件 ----
 void SceneArrange::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     if (chipBar_.handleEvent(e, win)) return;        // 点击筹码图标 -> chip 音效
     for (auto& b : lineBtns_) b.handleEvent(e, win);

@@ -4,7 +4,6 @@
 #include <string>
 #include "ui/Button.h"
 
-// ====== 自设头像弹窗(本地图片上传 + 手动裁剪)(成员C) ======
 // 打开方式: 在大厅点击本人头像圆(SceneLobby 里 Avatar::hitCircle 命中)。
 // 流程: 系统"打开文件"对话框选图(comdlg32) -> 弹窗内拖动平移 / 滚轮缩放 ->
 //       方形裁剪框内所见即所得 -> [确定] 输出 100x100 的 game_data/avatar.png。

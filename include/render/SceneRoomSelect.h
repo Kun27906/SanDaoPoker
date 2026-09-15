@@ -8,7 +8,6 @@
 #include "ui/VersionBadge.h"
 #include <array>
 
-// ====== 第三界面: 选房间(成员C, 原 SceneMenu 重构) ======
 // 从大厅按人数进入后, 只显示该人数对应的房间(ROOM_CONFIGS 过滤),
 // 按钮居中; 点[开始游戏]创建 Room(真人+AI 入场筹码=账号余额)进入组牌。
 class SceneRoomSelect : public Scene {
@@ -46,7 +45,6 @@ private:
     TextBox denyText_;
     Button btnDenyOk_;
 
-    // ---- 难度选择(成员B 接入: 简单/中等/困难) ----
     bool diffOpen_ = false;
     sf::RectangleShape diffDialog_;
     TextBox diffTitle_;

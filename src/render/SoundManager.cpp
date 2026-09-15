@@ -54,7 +54,6 @@ void SoundManager::playBet()     { play(BET); }
 void SoundManager::playCoins()   { play2(COINS); }
 void SoundManager::playError()   { play(ERROR); }
 
-// ---- 倒计时时钟(循环) ----
 void SoundManager::startClock() {
     if (bufs_[CLOCK].getSampleCount() == 0) return;              // 未加载成功
     if (clock_.getStatus() == sf::Sound::Playing) return;        // 已在播
@@ -67,7 +66,6 @@ void SoundManager::startClock() {
 
 void SoundManager::stopClock() { clock_.stop(); }
 
-// ---- BGM ----
 void SoundManager::playBgm(int idx) {
     curBgm_ = idx;
     if (!bgmOn_) return;               // 音乐总开关关闭时不播

@@ -1,7 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
-// ====== CountdownBar 倒计时条控件 ======
 // 功能:横向进度条,随时间流逝填充条缩短,并显示剩余秒数。
 // 贴图(assets/ui/table/, 400x24): countdown_bar_bg 底槽 + 三色填充
 //   countdown_fill_green(>50%) / countdown_fill_yellow(15%~50%) / countdown_fill_red(<15%)

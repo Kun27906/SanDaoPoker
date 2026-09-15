@@ -1,7 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
-// ====== ChipBar 筹码显示条(成员C) ======
 // 右上角长条形筹码框:
 //   左端筹码图标(按"当前显示值"所在档位区间取素材, 见 AssetManager::chipForAmount)
 //   + 竖分隔线 + 数字; 背景用渐变色块(上下两色)以凸显与游戏背景的区别

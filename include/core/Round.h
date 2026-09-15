@@ -7,7 +7,6 @@
 #include "core/RuleConfig.h"
 #include <string>
 
-// ====== 一局游戏 ======
 // 职责：
 //   1. 发牌（每人 9 张）
 //   2. 收底注（三小池：头道池 / 中道池 / 尾道池）

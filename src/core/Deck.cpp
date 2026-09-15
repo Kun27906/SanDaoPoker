@@ -3,13 +3,9 @@
 #include <random>
 #include <stdexcept>
 
-// ====== 构造函数：生成一副完整54张牌 ======
-
 Deck::Deck() {
     reset();
 }
-
-// ====== 重置为一副新牌 ======
 
 void Deck::reset() {
     cards_.clear();
@@ -30,7 +26,6 @@ void Deck::reset() {
     cards_.emplace_back(Rank::BigJoker);
 }
 
-// ====== 洗牌 ======
 // 用 Mersenne Twister (mt19937) 随机数引擎
 // seed=0 → 用随机设备生成种子（每次不同）
 // seed!=0 → 用固定种子（方便测试复现）
@@ -52,7 +47,6 @@ void Deck::shuffle(unsigned seed) {
     std::shuffle(cards_.begin(), cards_.end(), rng);
 }
 
-// ====== 发牌 ======
 // 给 numPlayers 个人每人发 9 张
 // 逆时针 = 从第0个人开始，轮流发牌，每人每次1张，发9轮
 // 总共需要 numPlayers × 9 张牌
@@ -85,8 +79,6 @@ std::vector<std::vector<Card>> Deck::deal(int numPlayers) const {
 
     return hands;
 }
-
-// ====== 获取牌堆张数 ======
 
 int Deck::size() const {
     return static_cast<int>(cards_.size());

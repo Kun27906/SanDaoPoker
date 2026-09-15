@@ -1,7 +1,6 @@
 #include "core/Round.h"
 #include <sstream>
 
-// ====== 发牌 ======
 // 洗牌之后，给每个玩家发 9 张牌
 
 void Round::deal(Player* players, int playerCount, Deck& deck) {
@@ -18,7 +17,6 @@ void Round::deal(Player* players, int playerCount, Deck& deck) {
     }
 }
 
-// ====== 收底注（三小池） ======
 // 每人扣 3 份底注（头/中/尾道各 1 份），放进三个池子
 
 void Round::collectAnte(Player* players, int playerCount, int ante, int pools[3]) {
@@ -38,7 +36,6 @@ void Round::collectAnte(Player* players, int playerCount, int ante, int pools[3]
     pools[2] = base + (total % 3);
 }
 
-// ====== 交牌锁定检查 ======
 // 所有人都摆好牌（hasArranged = true）才能开始比牌
 
 bool Round::allArranged(const Player* players, int playerCount) {
@@ -50,7 +47,6 @@ bool Round::allArranged(const Player* players, int playerCount) {
     return true;
 }
 
-// ====== 找出某一道的并列最大者 ======
 // 例：4 人比头道，第 2、第 4 名都是豹子K → winners = {1, 3}，返回 2
 
 int Round::findWinners(const Player* players, int playerCount, int lineId, int* winners) {
@@ -86,7 +82,6 @@ int Round::findWinners(const Player* players, int playerCount, int lineId, int* 
     return count;
 }
 
-// ====== 比牌结算 ======
 // 按 头道 → 中道 → 尾道 的顺序逐道比：
 //   唯一赢家：拿走整个池子
 //   并列最大：池子平分（除不尽的余数作废）
@@ -104,7 +99,6 @@ std::string Round::settle(Player* players, int playerCount, int pools[3]) {
         int count = findWinners(players, playerCount, line, winners);
 
         if (count == 1) {
-            // ---- 唯一赢家：拿走整个池 ----
             int w = winners[0];
             players[w].chips += pools[line];   // 赢家收下池子
             players[w].score++;                // 统计：赢一道 +1
@@ -118,7 +112,6 @@ std::string Round::settle(Player* players, int playerCount, int pools[3]) {
                 << " 赢（" << r.name() << "），拿走 " << pools[line]
                 << " 筹码" << std::endl;
         } else {
-            // ---- 并列：平分赔付 ----
             int share = pools[line] / count;   // 每人分多少（整数除法，余数作废）
             for (int i = 0; i < count; i++) {
                 players[winners[i]].chips += share;
