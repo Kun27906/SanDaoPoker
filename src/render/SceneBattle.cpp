@@ -9,33 +9,31 @@ namespace {
 constexpr unsigned WW = layout::WINDOW_W;
 constexpr unsigned WH = layout::WINDOW_H;
 
-// 1=你 2=右中下 3=右中上 4=上方靠右 5=上方靠左 6=左中
-// 每人一座: 牌组 + 头像昵称位
-// 约束: 所有座位的牌组顶边与头像顶边都不得高于标题下边沿 TITLE_BOTTOM
+// 座位号 1 你 2 右中下 3 右中上 4 上方靠右 5 上方靠左 6 左中
 struct Seat {
-    float cx, cy, dx, s;   // 牌组: 中张左缘 x / 中线 y / 张间距 / 缩放
-    float ax, ay;          // 头像圆心
+    float cx, cy, dx, s;
+    float ax, ay;
 };
-constexpr float TITLE_BOTTOM = 50.f;   // 标题下边沿 + 余量
-constexpr float CARD_UNIT_W = layout::CARD_UNIT_W;   // 单张牌素材宽
-constexpr float CARD_UNIT_H = layout::CARD_UNIT_H;   // 单张牌素材高
+constexpr float TITLE_BOTTOM = 50.f;
+constexpr float CARD_UNIT_W = layout::CARD_UNIT_W;
+constexpr float CARD_UNIT_H = layout::CARD_UNIT_H;
 
-constexpr Seat SEATS[7] = {            // 下标 = 座位号
-    { 0.f,     0.f,    0.f,   0.f,    0.f,    0.f    },   // 0 占位
-    { 588.f,   660.f,  100.f, 0.52f,  300.f,  700.f  },   // 1 你
-    { 1060.f,  480.f,  58.f,  0.40f,  1010.f, 575.f  },   // 2 右中下
-    { 1060.f,  300.f,  58.f,  0.40f,  1010.f, 388.f  },   // 3 右中上
-    { 700.f,   150.f,  58.f,  0.40f,  880.f,  150.f  },   // 4 上方靠右
-    { 330.f,   150.f,  58.f,  0.40f,  180.f,  150.f  },   // 5 上方靠左
-    { 180.f,   340.f,  58.f,  0.40f,  135.f,  432.f  },   // 6 左中
+constexpr Seat SEATS[7] = {
+    { 0.f,     0.f,    0.f,   0.f,    0.f,    0.f    },
+    { 588.f,   660.f,  100.f, 0.52f,  300.f,  700.f  },
+    { 1060.f,  480.f,  58.f,  0.40f,  1010.f, 575.f  },
+    { 1060.f,  300.f,  58.f,  0.40f,  1010.f, 388.f  },
+    { 700.f,   150.f,  58.f,  0.40f,  880.f,  150.f  },
+    { 330.f,   150.f,  58.f,  0.40f,  180.f,  150.f  },
+    { 180.f,   340.f,  58.f,  0.40f,  135.f,  432.f  },
 };
 
-// 编译期护栏: 任何座位的牌组顶 / 头像顶 都不得高于标题下边沿
+// 编译期护栏: 座位牌组顶与头像顶不得高于标题下边沿
 constexpr bool layoutBelowTitle() {
     for (int i = 1; i <= 6; ++i) {
         const Seat& st = SEATS[i];
         if (st.cy - CARD_UNIT_H * 0.5f * st.s < TITLE_BOTTOM) return false;
-        if (st.ay - 28.f < TITLE_BOTTOM) return false;   // 28 = 头像圆环半径+边框余量
+        if (st.ay - 28.f < TITLE_BOTTOM) return false;
     }
     return true;
 }
@@ -63,9 +61,9 @@ const Seat* seatFor(int pc, int p) {
     return (n >= 1 && n <= 6) ? &SEATS[n] : nullptr;
 }
 const char* LINE_NAMES[3] = {"头道", "中道", "尾道"};
-constexpr float BACK_SHOW = 0.8f;     // 全家牌背亮相时间
-constexpr float PER_HOLD = 1.0f;      // 逐家翻牌: 每家翻完停留 1 秒再翻下一家
-constexpr float HOLD_TIME = 2.5f;     // 本道结果停留时间
+constexpr float BACK_SHOW = 0.8f;
+constexpr float PER_HOLD = 1.0f;
+constexpr float HOLD_TIME = 2.5f;
 }
 
 SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
@@ -82,21 +80,19 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
     title_.centerOrigin();
     title_.setPosition(sf::Vector2f(WW / 2.f, 22.f));
 
-    // 头像昵称系统: 每人一座, 与牌组同座
     for (int p = 0; p < playerCount_; p++) {
         const Seat* st = seatFor(playerCount_, p);
         if (!st) continue;
         Avatar& av = seatAvatars_[p];
         const bool isSelf = (p == 0);
         av.setRadius(isSelf ? 26.f : 22.f);
-        av.setSelfStyle(isSelf);                 // 本人: 名牌与圆心共线; 他人: 名牌在圆环右下
-        if (isSelf) av.setMinPlateWidth(150.f);  // 本人: 预留更长昵称空间
-        av.setTexture(AssetManager::instance().avatarTexture(p));   // 各玩家不同头像
+        av.setSelfStyle(isSelf);
+        if (isSelf) av.setMinPlateWidth(150.f);
+        av.setTexture(AssetManager::instance().avatarTexture(p));
         av.setNickname(room->players[p].name);
         av.setCenter(sf::Vector2f(st->ax, st->ay));
     }
 
-    // 中央信息
     info_.setCharacterSize(32);
     info_.setColor(sf::Color(255, 200, 60));
     info_.centerOrigin();
@@ -107,9 +103,6 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
     lineTag_.centerOrigin();
     lineTag_.setPosition(sf::Vector2f(640.f, 285.f));
 
-    // 局内本人头像已由座位表统一承载, 不再单独绘制
-
-    // 牌精灵初始化位置
     for (int p = 0; p < playerCount_; p++) {
         const Seat* st = seatFor(playerCount_, p);
         if (!st) continue;
@@ -120,7 +113,6 @@ SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
         }
     }
 
-    // 从头道开始:先展示牌背
     char tag0[32];
     std::snprintf(tag0, sizeof(tag0), "%s · 1/3", LINE_NAMES[0]);
     lineTag_.setText(tag0);
@@ -141,7 +133,6 @@ void SceneBattle::loadLine(int lineId, bool faceUp) {
     }
 }
 
-// 翻开某一位玩家的当前道 3 张
 void SceneBattle::flipPlayer(int p) {
     const Seat* st = seatFor(playerCount_, p);
     if (!st) return;
@@ -150,7 +141,7 @@ void SceneBattle::flipPlayer(int p) {
     }
 }
 
-// 最后一家翻完并停留结束后: 计算并显示本道赢家 + 牌型
+// 最后一家翻完停留结束后计算本道赢家
 void SceneBattle::revealWinner() {
     Room* room = mgr_->room.get();
     int winners[MAX_PLAYERS];
@@ -176,7 +167,7 @@ void SceneBattle::revealWinner() {
 void SceneBattle::advance() {
     showLine_++;
     if (showLine_ >= 3) {
-        // 三道全部比完: 等待 3 秒后自动进入结算
+        // 三道比完, 3 秒后进结算
         info_.setText("比牌完成, 即将进入结算...");
         lineTag_.setText("三组比完");
         showNext_ = true;
@@ -188,11 +179,11 @@ void SceneBattle::advance() {
     std::snprintf(tag, sizeof(tag), "%s · %d/3", LINE_NAMES[showLine_], showLine_ + 1);
     lineTag_.setText(tag);
     info_.setText("");
-    loadLine(showLine_, false);   // 下一道先牌背
+    loadLine(showLine_, false);
 }
 
 void SceneBattle::handleEvent(const sf::Event&, const sf::RenderWindow&) {
-    // 自动流程, 无交互按钮
+    // 自动流程, 无交互
 }
 
 void SceneBattle::update(float dt) {
@@ -204,7 +195,6 @@ void SceneBattle::update(float dt) {
 
     timer_ += dt;
     if (phase_ == 0) {
-        // 全家牌背亮相 -> 从 1 号座位开始逐家翻牌
         if (timer_ >= BACK_SHOW) {
             timer_ = 0.f;
             phase_ = 1;
@@ -212,7 +202,7 @@ void SceneBattle::update(float dt) {
             flipPlayer(flipIndex_);
         }
     } else if (phase_ == 1) {
-        // 每家翻完停留 PER_HOLD再翻下一家; 最后一家停留结束 -> 宣布赢家
+        // 每家翻完停留再翻下一家, 最后一家停留结束宣布赢家
         if (timer_ >= PER_HOLD) {
             timer_ = 0.f;
             flipIndex_++;
@@ -224,7 +214,6 @@ void SceneBattle::update(float dt) {
             }
         }
     } else if (phase_ == 2) {
-        // 本道结果停留 HOLD_TIME -> 进入下一道
         if (timer_ >= HOLD_TIME) {
             timer_ = 0.f;
             phase_ = 0;
@@ -245,10 +234,9 @@ void SceneBattle::draw(sf::RenderWindow& win) {
         for (int pos = 0; pos < 3; pos++) {
             cards_[p][pos].draw(win);
         }
-        seatAvatars_[p].draw(win);   // 该玩家头像 + 昵称名牌
+        seatAvatars_[p].draw(win);
     }
 
     if (showNext_) {
-        // 比完提示文字持续显示
     }
 }
