@@ -1,27 +1,38 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <cstdlib>
 #include <string>
 
-// 提供全局唯一的默认字体。
-// 加载顺序:
-// 1) 项目自带字体 assets/fonts/SourceHanSansSC-Regular.otf
-// 3) 系统中文字体 微软雅黑 C:/Windows/Fonts/msyh.ttc
-// 4) 系统英文字体 Arial
+// 提供全局唯一的默认字体
+// 加载顺序: 项目自带字体 -> Windows 系统字体目录, 系统目录由 WINDIR 环境变量定位
 
 namespace font_util {
+
+inline std::string systemFontsDir() {
+    char* buf = nullptr;
+    size_t len = 0;
+    if (_dupenv_s(&buf, &len, "WINDIR") != 0 || buf == nullptr) {
+        return {};
+    }
+    std::string dir(buf);
+    free(buf);
+    return dir + "/Fonts/";
+}
+
 inline const sf::Font& defaultFont() {
     static sf::Font font;
     static bool loaded = false;
     if (!loaded) {
         loaded = true;
-        const char* candidates[] = {
-            "assets/fonts/SourceHanSansSC-Regular.otf",  // 思源黑体
+        const std::string sysFonts = systemFontsDir();
+        const std::string candidates[] = {
+            "assets/fonts/SourceHanSansSC-Regular.otf",
             "assets/fonts/font.ttf",
             "assets/fonts/msyh.ttf",
-            "C:/Windows/Fonts/msyh.ttc",                 // 系统中文字体
-            "C:/Windows/Fonts/arial.ttf"                 // 系统英文字体
+            sysFonts + "msyh.ttc",
+            sysFonts + "arial.ttf"
         };
-        for (const char* path : candidates) {
+        for (const std::string& path : candidates) {
             if (font.loadFromFile(path)) {
                 break;
             }

@@ -11,10 +11,12 @@ RED = (192, 46, 46)
 
 
 def font(size, bold=False):
-    for name in (["arialbd.ttf", "arial.ttf"] if bold else ["arial.ttf"]):
-        p = os.path.join(os.environ.get("WINDIR", "C:/Windows"), "Fonts", name)
-        if os.path.exists(p):
-            return ImageFont.truetype(p, size)
+    win_dir = os.environ.get("WINDIR")
+    if win_dir:
+        for name in (["arialbd.ttf", "arial.ttf"] if bold else ["arial.ttf"]):
+            p = os.path.join(win_dir, "Fonts", name)
+            if os.path.exists(p):
+                return ImageFont.truetype(p, size)
     return ImageFont.load_default()
 
 
