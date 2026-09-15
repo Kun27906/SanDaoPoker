@@ -4,7 +4,7 @@
 #include "render/GameApp.h"
 
 int main() {
-    Account::instance().load();  // 读取/初始化玩家账号存档
+    Account::instance().load();      // 读取/初始化玩家账号存档
     AssetManager::instance().loadAll();
     GameApp app;
     app.run();

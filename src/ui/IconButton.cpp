@@ -31,7 +31,7 @@ void IconButton::draw(sf::RenderWindow& win) {
     if (!visible_ || !tex_) return;
     const sf::Texture& t = *tex_;
     const float s = size_;
-  // hover: 图标下方衬一圈半透明白底, 提示可点
+    // hover: 图标下方衬一圈半透明白底, 提示可点
     if (hovered_) {
         sf::RectangleShape back(sf::Vector2f(s, s));
         back.setPosition(pos_);
@@ -43,7 +43,7 @@ void IconButton::draw(sf::RenderWindow& win) {
     sp.setScale(scale, scale);
     sp.setPosition(pos_);
     if (pressed_) {
-  // 按下: 轻微缩小提反馈
+        // 按下: 轻微缩小提反馈
         sp.setScale(scale * 0.9f, scale * 0.9f);
         sp.setPosition(pos_.x + s * 0.05f, pos_.y + s * 0.05f);
     }

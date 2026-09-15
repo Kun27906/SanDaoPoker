@@ -11,33 +11,33 @@
 
 class Player {
 public:
-    std::string name;  // 名字
-    bool isAI = false;  // 是不是电脑
-    Card hand[CARDS_PER_HAND];  // 9 张手牌
+    std::string name;              // 名字
+    bool isAI = false;             // 是不是电脑
+    Card hand[CARDS_PER_HAND];     // 9 张手牌
     Card lines[LINES_PER_HAND][CARDS_PER_LINE];  // 摆好的 3 道牌
-    int chips = START_CHIPS;  // 筹码
-    int score = 0;  // 赢道数
-    bool hasArranged = false;  // 是否已经摆好牌
+    int chips = START_CHIPS;       // 筹码
+    int score = 0;                 // 赢道数
+    bool hasArranged = false;      // 是否已经摆好牌
 
-  // 构造函数：名字 + 是不是电脑
+    // 构造函数：名字 + 是不是电脑
     Player();
     Player(const std::string& playerName, bool ai);
 
-  // 发牌时调用：把 9 张牌放进 hand
+    // 发牌时调用：把 9 张牌放进 hand
     void setHand(const Card* cards, int count);
 
-  // 摆牌：把 9 张手牌按给定顺序摆成 3 道
-  // order 是一个 9 长度的数组，order[0..2] 是头道、order[3..5] 是中道、order[6..8] 是尾道
-  // 每个数字是 hand 里的下标，不能重复
+    // 摆牌：把 9 张手牌按给定顺序摆成 3 道
+    // order 是一个 9 长度的数组，order[0..2] 是头道、order[3..5] 是中道、order[6..8] 是尾道
+    // 每个数字是 hand 里的下标，不能重复
     void arrangeByOrder(const int* order);
 
-  // 摆牌：直接指定每张牌放进哪一道
+    // 摆牌：直接指定每张牌放进哪一道
     void putCard(int handIndex, int lineId, int pos);
 
-  // 清空本局数据
+    // 清空本局数据
     void clearRound();
 
-  // 拿某一道的 3 张牌
+    // 拿某一道的 3 张牌
     const Card* getLine(int lineId) const;
 };
 

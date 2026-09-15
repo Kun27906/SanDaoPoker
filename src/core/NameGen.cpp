@@ -37,14 +37,14 @@ std::string makeNickname() {
     std::uniform_int_distribution<int> ds(0, SUF_N - 1);
     std::uniform_int_distribution<int> ap(0, ADJ_PRE_N - 1);
     std::uniform_int_distribution<int> as(0, ADJ_SUF_N - 1);
-    std::uniform_int_distribution<int> dmid(0, 99);  // 40% 不加"的"
+    std::uniform_int_distribution<int> dmid(0, 99);   // 40% 不加"的"
     const std::string adj = std::string(ADJ_PRE[ap(rng())]) + ADJ_SUF[as(rng())];
     const std::string ctr = std::string(PRE[dp(rng())]) + SUF[ds(rng())];
-    return (dmid(rng()) < 40) ? (adj + ctr): (adj + "的" + ctr);
+    return (dmid(rng()) < 40) ? (adj + ctr) : (adj + "的" + ctr);
 }
 
 std::string makeUniqueNickname(const std::string* used, int usedCount) {
-    for (int t = 0; t < 64; t++) {  // 随机重试
+    for (int t = 0; t < 64; t++) {           // 随机重试
         std::string nm = makeNickname();
         bool dup = false;
         for (int i = 0; i < usedCount; i++) {
@@ -52,7 +52,7 @@ std::string makeUniqueNickname(const std::string* used, int usedCount) {
         }
         if (!dup) return nm;
     }
-  // 兜底: 组合已用尽时追加序号
+    // 兜底: 组合已用尽时追加序号
     std::string base = makeNickname();
     for (int k = 2; k < 9999; k++) {
         std::string nm = base + std::to_string(k);

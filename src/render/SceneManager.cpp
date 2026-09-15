@@ -9,7 +9,7 @@
 #include "render/SceneBattle.h"
 #include "render/SceneResult.h"
 
-SceneManager::SceneManager(sf::RenderWindow& window): window_(window) {
+SceneManager::SceneManager(sf::RenderWindow& window) : window_(window) {
     hud_ = std::make_unique<GlobalHud>(this);
     current_ = createScene(currentId_);
 }
@@ -17,7 +17,7 @@ SceneManager::SceneManager(sf::RenderWindow& window): window_(window) {
 void SceneManager::changeTo(SceneId id) {
     current_ = createScene(id);
     currentId_ = id;
-  // 背景音乐随场景切换
+    // 背景音乐随场景切换
     switch (id) {
         case SceneId::Deal:
         case SceneId::Arrange:
@@ -32,23 +32,23 @@ void SceneManager::changeTo(SceneId id) {
 }
 
 void SceneManager::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
-  // 全局工具栏先处理;弹窗打开时返回 true 拦截
+    // 全局工具栏先处理;弹窗打开时返回 true 拦截
     if (hud_ && hud_->handleEvent(e, win)) return;
     if (current_) current_->handleEvent(e, win);
 }
 
 void SceneManager::update(float dt) {
-    if (hud_) hud_->update(dt);  // 全局 UI
+    if (hud_) hud_->update(dt);   // 全局 UI
     if (current_) current_->update(dt);
 }
 
 void SceneManager::draw(sf::RenderWindow& win) {
     if (current_) current_->draw(win);
-    if (hud_) hud_->draw(win);  // 全局工具栏+弹窗在最上层
+    if (hud_) hud_->draw(win);   // 全局工具栏+弹窗在最上层
 }
 
 bool SceneManager::homeVisible() const {
-  // 启动页/组牌/比牌/发牌隐藏 home; 大厅/选房/结算显示
+    // 启动页/组牌/比牌/发牌隐藏 home; 大厅/选房/结算显示
     return currentId_ != SceneId::Title &&
            currentId_ != SceneId::Deal &&
            currentId_ != SceneId::Arrange &&

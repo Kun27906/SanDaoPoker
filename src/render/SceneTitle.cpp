@@ -6,7 +6,7 @@ constexpr unsigned WW = layout::WINDOW_W;
 constexpr unsigned WH = layout::WINDOW_H;
 }
 
-SceneTitle::SceneTitle(SceneManager* mgr): mgr_(mgr) {
+SceneTitle::SceneTitle(SceneManager* mgr) : mgr_(mgr) {
     scene_setup::background(bg_, AssetManager::instance().menuBackground(), WW, WH);
 
     title_.setText("炸金花三道");
@@ -17,7 +17,7 @@ SceneTitle::SceneTitle(SceneManager* mgr): mgr_(mgr) {
 
     subtitle_.setText("经典比牌 · 2~6人 · 本地账号");
     subtitle_.setCharacterSize(22);
-    subtitle_.setColor(sf::Color(255, 240, 170));  // 亮浅金
+    subtitle_.setColor(sf::Color(255, 240, 170));   // 亮浅金
     subtitle_.centerOrigin();
     subtitle_.setPosition(sf::Vector2f(WW / 2.f, 310.f));
 

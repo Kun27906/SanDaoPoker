@@ -8,8 +8,8 @@
 namespace {
 constexpr float WW = static_cast<float>(layout::WINDOW_W);
 constexpr float WH = static_cast<float>(layout::WINDOW_H);
-constexpr float PW = 700.f;  // 弹窗宽
-constexpr float PH = 320.f;  // 弹窗高
+constexpr float PW = 700.f;        // 弹窗宽
+constexpr float PH = 320.f;        // 弹窗高
 const sf::Color C_PANEL(28, 36, 62);
 const sf::Color C_GOLD(255, 215, 0);
 const sf::Color C_HINT(200, 205, 225);
@@ -17,7 +17,7 @@ const sf::Color C_HINT(200, 205, 225);
 // 统计 UTF-8 字符数
 int utf8Count(const std::string& s) {
     int n = 0;
-    for (unsigned char c: s) {
+    for (unsigned char c : s) {
         if ((c & 0xC0) != 0x80) n++;
     }
     return n;
@@ -119,7 +119,7 @@ bool NicknameDialog::acceptCp(unsigned cp) const {
     if (cp >= 'A' && cp <= 'Z') return true;
     if (cp >= 'a' && cp <= 'z') return true;
     if (cp == '_') return true;
-    if (cp >= 0x4E00 && cp <= 0x9FFF) return true;  // CJK 统一表意文字
+    if (cp >= 0x4E00 && cp <= 0x9FFF) return true;   // CJK 统一表意文字
     return false;
 }
 
@@ -144,11 +144,11 @@ void NicknameDialog::handleEvent(const sf::Event& e, const sf::RenderWindow& win
 
     if (e.type == sf::Event::TextEntered) {
         const unsigned cp = e.text.unicode;
-        if (cp == 13) {  // 回车 = 确定
+        if (cp == 13) {                       // 回车 = 确定
             commit();
-        } else if (cp == 27) {  // Esc = 取消
+        } else if (cp == 27) {                // Esc = 取消
             open_ = false;
-        } else if (cp == 8) {  // 退格
+        } else if (cp == 8) {                 // 退格
             utf8PopBack(text_);
             warn_.setString(sf::String());
             refreshInput();
@@ -179,11 +179,11 @@ void NicknameDialog::draw(sf::RenderWindow& win) {
     if (!open_) return;
     win.draw(overlay_);
     win.draw(panel_);
-    panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));  // 装饰边框
+    panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));   // 装饰边框
     win.draw(title_);
     win.draw(inputBox_);
     win.draw(inputText_);
-    if (std::fmod(caretT_, 1.0f) < 0.55f) win.draw(caret_);  // 插入符闪烁
+    if (std::fmod(caretT_, 1.0f) < 0.55f) win.draw(caret_);   // 插入符闪烁
     win.draw(hint_);
     win.draw(warn_);
     btnOk_.draw(win);

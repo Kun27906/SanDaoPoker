@@ -1,9 +1,9 @@
 #include "core/Player.h"
 
-Player::Player(): Player("玩家", false) {}
+Player::Player() : Player("玩家", false) {}
 
 Player::Player(const std::string& playerName, bool ai)
-: name(playerName), isAI(ai) {
+    : name(playerName), isAI(ai) {
     clearRound();
 }
 

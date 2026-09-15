@@ -14,7 +14,7 @@
 // · 每 3 张牌耗时 1 秒; 用发牌音效
 // · 非 6 人时牌堆缩短到一定程度后淡化消失; 6 人则发完全部 54 张
 // · 发完后本人 9 张手牌统一快速翻转 -> 进入组牌
-class SceneDeal: public Scene {
+class SceneDeal : public Scene {
 public:
     explicit SceneDeal(SceneManager* mgr);
     void handleEvent(const sf::Event& e, const sf::RenderWindow& win) override;
@@ -26,8 +26,8 @@ private:
     struct Fly {
         bool active = false;
         bool toPlayer = false;
-        int  slot = 0;  // 本人: 手牌槽 0..8
-        int  who = 0;  // 他人: 玩家下标 1..
+        int  slot = 0;                  // 本人: 手牌槽 0..8
+        int  who = 0;                   // 他人: 玩家下标 1..
         sf::Vector2f from{0.f, 0.f}, to{0.f, 0.f};
         float t = 0.f, dur = 0.22f;
         float fromS = 0.5f, toS = 0.5f; // 均匀缩放
@@ -43,7 +43,7 @@ private:
     sf::Sprite bg_;
     sf::Sprite pile_;
     ChipBar chipBar_;
-    std::array<Avatar, MAX_PLAYERS> avatars_;  // [0]=本人, [1..]=他人
+    std::array<Avatar, MAX_PLAYERS> avatars_;   // [0]=本人, [1..]=他人
     std::array<Card, 9> handCards_{};
     std::array<bool, 9> arrived_{};
     std::vector<Fly> flies_;

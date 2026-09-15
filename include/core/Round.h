@@ -20,20 +20,20 @@
 
 class Round {
 public:
-  // 发牌：给 players每人发 9 张
+    // 发牌：给 players每人发 9 张
     static void deal(Player* players, int playerCount, Deck& deck);
 
-  // 收底注：每人扣 3 × ante 筹码，分到三个池
+    // 收底注：每人扣 3 × ante 筹码，分到三个池
     static void collectAnte(Player* players, int playerCount, int ante, int pools[3]);
 
-  // 交牌锁定检查：所有人都摆好牌了吗？
+    // 交牌锁定检查：所有人都摆好牌了吗？
     static bool allArranged(const Player* players, int playerCount);
 
-  // 找出某一道并列最大的人，下标放进 winners
-  // 返回并列人数
+    // 找出某一道并列最大的人，下标放进 winners
+    // 返回并列人数
     static int findWinners(const Player* players, int playerCount, int lineId, int* winners);
 
-  // 比牌结算：按头→中→尾逐道比，赢家拿池 / 平局平分，返回结果文字
+    // 比牌结算：按头→中→尾逐道比，赢家拿池 / 平局平分，返回结果文字
     static std::string settle(Player* players, int playerCount, int pools[3]);
 };
 

@@ -18,36 +18,36 @@
 class Room {
 public:
     Player players[MAX_PLAYERS];  // 玩家列表
-    int playerCount = 0;  // 当前有几个人
-    Deck deck;  // 牌堆
-    RoomConfig config;  // 当前房间配置
-    int pools[3] = {0, 0, 0};  // 三个小池
-    int currentRound = 0;  // 第几局
+    int playerCount = 0;          // 当前有几个人
+    Deck deck;                    // 牌堆
+    RoomConfig config;            // 当前房间配置
+    int pools[3] = {0, 0, 0};     // 三个小池
+    int currentRound = 0;         // 第几局
 
-    int roundStartChips[MAX_PLAYERS] = {0};  // 本局开始前筹码快照
+    int roundStartChips[MAX_PLAYERS] = {0};    // 本局开始前筹码快照
     int roundHistory[32][MAX_PLAYERS] = {{0}};
-    int historyCount = 0;  // 已结算局数
+    int historyCount = 0;                      // 已结算局数
 
-  // 构造函数：默认选 "4人·休闲房"
+    // 构造函数：默认选 "4人·休闲房"
     Room();
 
-  // 选房间：configIndex 是 0~15
-  // 换房会清空玩家和筹码，重新开始
+    // 选房间：configIndex 是 0~15
+    // 换房会清空玩家和筹码，重新开始
     bool setRoomConfig(int configIndex);
 
-  // 加一个玩家，成功返回 true；人满了返回 false
+    // 加一个玩家，成功返回 true；人满了返回 false
     bool addPlayer(const std::string& name, bool isAI);
 
-  // 开始新一局：人数满员才发牌 + 收底注，返回是否成功
+    // 开始新一局：人数满员才发牌 + 收底注，返回是否成功
     bool startNewRound();
 
-  // 结算本局：先检查所有人都交牌，再比牌；返回结果文字
+    // 结算本局：先检查所有人都交牌，再比牌；返回结果文字
     std::string settleRound();
 
-  // 轮次打完了吗？
+    // 轮次打完了吗？
     bool isFinished() const;
 
-  // 看总账，返回排名文字
+    // 看总账，返回排名文字
     std::string getRanking() const;
 };
 

@@ -19,34 +19,34 @@ class AssetManager {
 public:
     static AssetManager& instance();
 
-  // 加载全部素材
+    // 加载全部素材
     bool loadAll();
 
-  // 按 A 成员 Card 枚举取牌面纹理;大小王或加载失败返回 nullptr
+    // 按 A 成员 Card 枚举取牌面纹理;大小王或加载失败返回 nullptr
     const sf::Texture* cardTexture(Suit s, Rank r) const;
-  // 牌背纹理:0=红 1=蓝 2=黑
+    // 牌背纹理:0=红 1=蓝 2=黑
     const sf::Texture* backTexture(int index = 0) const;
-  // 桌面背景
+    // 桌面背景
     const sf::Texture* background() const;
-  // 主菜单背景,加载失败时回退到桌面背景
+    // 主菜单背景,加载失败时回退到桌面背景
     const sf::Texture* menuBackground() const;
-  // 按钮四态图:0=normal 1=hover 2=pressed 3=disabled
+    // 按钮四态图:0=normal 1=hover 2=pressed 3=disabled
     const sf::Texture* buttonTexture(int state) const;
     const sf::Texture* chipForAmount(int amount) const;
-  // 牌背:当前局随机颜色
-    void rollBack();  // 每局开局调用:随机选一种牌背颜色
+    // 牌背:当前局随机颜色
+    void rollBack();                 // 每局开局调用:随机选一种牌背颜色
     int currentBack() const { return backRoll_; }
-  // 界面图标:按文件名取,如 "menuList"/"musicOn"/"slider"
+    // 界面图标:按文件名取,如 "menuList"/"musicOn"/"slider"
     const sf::Texture* icon(const std::string& name) const;
-  // 牌堆素材: 按牌背色 0=红 1=蓝 2=黑 取 689x292 堆叠图
+    // 牌堆素材: 按牌背色 0=红 1=蓝 2=黑 取 689x292 堆叠图
     const sf::Texture* deckPile(int backIndex) const;
-  // 头像素材: 按序号取
-  // 注: 0 号位 = 本人 -> 若玩家已设自定义头像则优先返回它
+    // 头像素材: 按序号取
+    // 注: 0 号位 = 本人 -> 若玩家已设自定义头像则优先返回它
     const sf::Texture* avatarTexture(int idx) const;
-  // 本人自定义头像
-    const sf::Texture* customAvatar() const;  // 已设置则返回纹理, 否则 nullptr
-    bool reloadCustomAvatar();  // 重新读取 game_data/avatar.png
-  // 桌面小贴图: "countdown_bar_bg"/"countdown_fill_green|yellow|red"
+    // 本人自定义头像
+    const sf::Texture* customAvatar() const;   // 已设置则返回纹理, 否则 nullptr
+    bool reloadCustomAvatar();                 // 重新读取 game_data/avatar.png
+    // 桌面小贴图: "countdown_bar_bg"/"countdown_fill_green|yellow|red"
     const sf::Texture* tableTexture(const std::string& name) const;
 
 private:
@@ -54,22 +54,22 @@ private:
     bool loadCardTextures();
     bool loadMiscTextures();
 
-  // [花色][下标0..12]
+    // [花色][下标0..12]
     sf::Texture cardTex_[4][13];
-    sf::Texture jokerTex_[2];  // 大小王: [0]=small [1]=big
-    std::vector<sf::Texture> backTex_;  // 3 张牌背
-    sf::Texture bgTex_;  // 桌面背景
-    sf::Texture menuTex_;  // 主菜单背景
-    sf::Texture btnTex_[4];  // 按钮四态
-  // 筹码素材:区间命名 chip_<min>-<max> / chip_-<max> / chip_<min>-
+    sf::Texture jokerTex_[2];          // 大小王: [0]=small [1]=big
+    std::vector<sf::Texture> backTex_;   // 3 张牌背
+    sf::Texture bgTex_;                  // 桌面背景
+    sf::Texture menuTex_;                // 主菜单背景
+    sf::Texture btnTex_[4];              // 按钮四态
+    // 筹码素材:区间命名 chip_<min>-<max> / chip_-<max> / chip_<min>-
     struct ChipDef { int lo; int hi; sf::Texture tex; };
     std::vector<ChipDef> chipDefs_;
-  // 界面图标:文件名 -> 纹理
+    // 界面图标:文件名 -> 纹理
     std::map<std::string, sf::Texture> icons_;
-    sf::Texture pileTex_[3];  // 牌堆堆叠图
+    sf::Texture pileTex_[3];             // 牌堆堆叠图
     std::vector<sf::Texture> avatarTex_; // 头像图
-    sf::Texture customTex_;  // 本人自定义头像
-    std::map<std::string, sf::Texture> tableTex_;  // 桌面小贴图
-    int backRoll_ = 0;  // 当前局牌背颜色
+    sf::Texture customTex_;              // 本人自定义头像
+    std::map<std::string, sf::Texture> tableTex_;   // 桌面小贴图
+    int backRoll_ = 0;                   // 当前局牌背颜色
     bool loaded_ = false;
 };

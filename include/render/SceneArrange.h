@@ -15,7 +15,7 @@
 // - 限时 40 秒, 归零自动摆完并交牌。
 // 交牌后:AI 玩家按难度自动组牌, 切到比牌界面。
 
-class SceneArrange: public Scene {
+class SceneArrange : public Scene {
 public:
     explicit SceneArrange(SceneManager* mgr);
 
@@ -24,54 +24,54 @@ public:
     void draw(sf::RenderWindow& win) override;
 
 private:
-    void placeCard(int handIdx);  // 点击手牌 -> 放入当前道空槽
+    void placeCard(int handIdx);           // 点击手牌 -> 放入当前道空槽
     void placeAt(int handIdx, int line, int pos);  // 把某张手牌放到指定槽
     void returnToHand(int line, int pos);  // 单击已放置牌 -> 飞回手牌
-    void resetArrange();  // 清空重摆
-    void submit();  // 交牌 -> 比牌
-    void autoSubmit();  // 超时自动摆完并交牌
-    bool allPlaced() const;  // 9 张是否全部摆完
-    void refreshSlotSprites();  // 依据 slotHand_ 刷新三道牌面
-    void rebuildLines();  // slotHand_ -> 房间真人的 lines
+    void resetArrange();                   // 清空重摆
+    void submit();                         // 交牌 -> 比牌
+    void autoSubmit();                     // 超时自动摆完并交牌
+    bool allPlaced() const;                // 9 张是否全部摆完
+    void refreshSlotSprites();             // 依据 slotHand_ 刷新三道牌面
+    void rebuildLines();                   // slotHand_ -> 房间真人的 lines
     sf::Vector2f slotPos(int line, int pos) const;
     int  nearestSlot(const sf::Vector2f& cardTopLeft, float maxDist) const;  // -> line*3+pos, -1 无
     void beginDrag(int handIdx, int fromLine, int fromPos, const sf::Vector2f& mouse);
-    void dropDrag();  // 松开鼠标: 落位/吸附/交换/回位
-    void startFlyBack(int handIdx);  // 启动"飞回手牌"动画
+    void dropDrag();                       // 松开鼠标: 落位/吸附/交换/回位
+    void startFlyBack(int handIdx);        // 启动"飞回手牌"动画
 
     SceneManager* mgr_;
     sf::Sprite bg_;
     TextBox title_;
-    std::array<CardSprite, 9> handSprites_;  // 手牌区
+    std::array<CardSprite, 9> handSprites_;            // 手牌区
     std::array<std::array<CardSprite, 3>, 3> lineSprites_;  // 三道已摆牌
-    std::array<sf::RectangleShape, 9> handSlotRects_;  // 手牌空位框
+    std::array<sf::RectangleShape, 9> handSlotRects_;       // 手牌空位框
     std::array<std::array<sf::RectangleShape, 3>, 3> lineSlotRects_;  // 槽位框
-    std::array<Button, 3> lineBtns_;  // 头/中/尾道选择
-    Button btnReset_;  // 重置
-    Button btnSubmit_;  // 交牌
-    CountdownBar countdown_;  // 40 秒倒计时
-    std::array<bool, 9> handUsed_{};  // 手牌是否已放置
-    std::array<std::array<int, 3>, 3> slotHand_;  // 每槽的手牌下标
-    int currentLine_ = 0;  // 当前选中的道
-    bool submitted_ = false;  // 已交牌
-    bool timeoutFired_ = false;  // 超时自动交牌只触发一次
-    ChipBar chipBar_;  // 右上角账号筹码
+    std::array<Button, 3> lineBtns_;   // 头/中/尾道选择
+    Button btnReset_;                  // 重置
+    Button btnSubmit_;                 // 交牌
+    CountdownBar countdown_;           // 40 秒倒计时
+    std::array<bool, 9> handUsed_{};   // 手牌是否已放置
+    std::array<std::array<int, 3>, 3> slotHand_;     // 每槽的手牌下标
+    int currentLine_ = 0;              // 当前选中的道
+    bool submitted_ = false;           // 已交牌
+    bool timeoutFired_ = false;        // 超时自动交牌只触发一次
+    ChipBar chipBar_;                  // 右上角账号筹码
     std::array<Avatar, MAX_PLAYERS> avatars_;  // 局内头像: [0]本人左下, [1..]他人右侧居中
 
-    CardSprite dragSprite_;  // 拖动中的牌
-    bool pendingDrag_ = false;  // 已按下某张牌
-    bool dragging_ = false;  // 正在拖动
-    int  dragHand_ = -1;  // 被拖动的手牌下标
-    int  dragFromLine_ = -1;  // 拖拽来源槽
+    CardSprite dragSprite_;            // 拖动中的牌
+    bool pendingDrag_ = false;         // 已按下某张牌
+    bool dragging_ = false;            // 正在拖动
+    int  dragHand_ = -1;               // 被拖动的手牌下标
+    int  dragFromLine_ = -1;           // 拖拽来源槽
     int  dragFromPos_ = -1;
-    sf::Vector2f dragPos_{0.f, 0.f};  // 拖动牌左上角当前位置
+    sf::Vector2f dragPos_{0.f, 0.f};   // 拖动牌左上角当前位置
     sf::Vector2f dragGrab_{0.f, 0.f};  // 鼠标相对牌左上角的抓取偏移
     sf::Vector2f pressPos_{0.f, 0.f};  // 按下点
-    int  snapSlot_ = -1;  // 当前吸附到的高亮槽
+    int  snapSlot_ = -1;               // 当前吸附到的高亮槽
 
     CardSprite flySprite_;
     bool flying_ = false;
-    int  flyHand_ = -1;  // 飞回的手牌下标
+    int  flyHand_ = -1;                // 飞回的手牌下标
     sf::Vector2f flyFrom_{0.f, 0.f};
     sf::Vector2f flyTo_{0.f, 0.f};
     float flyT_ = 0.f;

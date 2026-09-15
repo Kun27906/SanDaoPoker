@@ -19,7 +19,7 @@ public:
     void setPosition(const sf::Vector2f& p);
     void setCharacterSize(unsigned s);
     void setColor(const sf::Color& c);
-    void centerOrigin();  // 进入居中模式
+    void centerOrigin();   // 进入居中模式
 
     sf::FloatRect getBounds() const { return text_.getLocalBounds(); }
     const sf::String& getString() const { return text_.getString(); }
@@ -27,8 +27,8 @@ public:
     void draw(sf::RenderWindow& win) const;
 
 private:
-    void recenter();  // 按当前文本重新计算居中原点
+    void recenter();   // 按当前文本重新计算居中原点
 
     sf::Text text_;
-    bool centered_ = false;  // 是否处于居中模式
+    bool centered_ = false;   // 是否处于居中模式
 };

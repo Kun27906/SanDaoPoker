@@ -8,26 +8,26 @@ std::string HandResult::name() const {
         case HandType::Flush:         return "金花";
         case HandType::Straight:      return "顺子";
         case HandType::Pair:          return "对子";
-        default:                      return is235 ? "异花235": "散牌";
+        default:                      return is235 ? "异花235" : "散牌";
     }
 }
 
 HandResult HandEvaluator::evaluate(const std::vector<Card>& three) {
-  // 复制一份，因为枚举王的时候要改牌
+    // 复制一份，因为枚举王的时候要改牌
     std::vector<Card> cards = three;
 
-  // 先数一数有几个王
+    // 先数一数有几个王
     int jokerCount = 0;
-    for (const Card& c: cards) {
+    for (const Card& c : cards) {
         if (c.isJoker()) jokerCount++;
     }
 
-  // 没有王：直接判断
+    // 没有王：直接判断
     if (jokerCount == 0) {
         return evaluateNormal(cards[0], cards[1], cards[2]);
     }
 
-  // 有王：枚举王变成各种牌，找最大的牌型
+    // 有王：枚举王变成各种牌，找最大的牌型
     HandResult best;  // 初始是最小的散牌
     enumerateJokers(cards, 0, best);
     return best;
@@ -40,12 +40,12 @@ HandResult HandEvaluator::evaluate(const std::vector<Card>& three) {
 // 最多 2 个王，枚举量 26 × 26 种，电脑算得飞快
 
 void HandEvaluator::enumerateJokers(std::vector<Card>& cards, int idx, HandResult& best) {
-  // 从 idx 开始找第一张王
+    // 从 idx 开始找第一张王
     while (idx < 3 && !cards[idx].isJoker()) {
         idx++;
     }
 
-  // 没有王了：判断当前这手牌，和最好的比一比
+    // 没有王了：判断当前这手牌，和最好的比一比
     if (idx >= 3) {
         HandResult r = evaluateNormal(cards[0], cards[1], cards[2]);
         if (compare(r, best) > 0) {
@@ -54,13 +54,13 @@ void HandEvaluator::enumerateJokers(std::vector<Card>& cards, int idx, HandResul
         return;
     }
 
-  // 这张王能变成哪些花色？
-    bool isBig = cards[idx].isBigJoker();  // 是大王吗
+    // 这张王能变成哪些花色？
+    bool isBig = cards[idx].isBigJoker();   // 是大王吗
     Card original = cards[idx];
 
-  // 点数 2~A 都能变
+    // 点数 2~A 都能变
     for (int r = 2; r <= 14; r++) {
-  // 花色：大王只能变红，小王只能变黑
+        // 花色：大王只能变红，小王只能变黑
         for (int s = 0; s < 4; s++) {
             if (isBig && (s == 0 || s == 2)) continue;  // 大王不能变黑色
             if (!isBig && (s == 1 || s == 3)) continue; // 小王不能变红色
@@ -69,12 +69,12 @@ void HandEvaluator::enumerateJokers(std::vector<Card>& cards, int idx, HandResul
         }
     }
 
-  // 重要！把王变回来，否则后面的组合会乱套
+    // 重要！把王变回来，否则后面的组合会乱套
     cards[idx] = original;
 }
 
 HandResult HandEvaluator::evaluateNormal(const Card& c1, const Card& c2, const Card& c3) {
-  // 先按点数从小到大排序
+    // 先按点数从小到大排序
     Card cards[3] = { c1, c2, c3 };
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 2 - i; j++) {
@@ -84,26 +84,26 @@ HandResult HandEvaluator::evaluateNormal(const Card& c1, const Card& c2, const C
         }
     }
 
-  // 取出三个点数
+    // 取出三个点数
     int v1 = cards[0].getRankValue();
     int v2 = cards[1].getRankValue();
     int v3 = cards[2].getRankValue();
 
-  // 是不是同花色
+    // 是不是同花色
     bool sameSuit = (cards[0].getSuitValue() == cards[1].getSuitValue())
                  && (cards[1].getSuitValue() == cards[2].getSuitValue());
 
     HandResult r;  // 结果
 
-  // ① 豹子：三张点数一样
+    // ① 豹子：三张点数一样
     if (v1 == v2 && v2 == v3) {
         r.type = HandType::ThreeOfAKind;
         r.keys[0] = v1;  // 比大小就看点数
         return r;
     }
 
-  // ② 判断是不是顺子
-  // 特殊：A-2-3 也算顺子，它是顺子里最小的
+    // ② 判断是不是顺子
+    // 特殊：A-2-3 也算顺子，它是顺子里最小的
     bool isStraight = false;
     int straightKey = v3;  // 顺子比大小看最大点数
     if (v2 == v1 + 1 && v3 == v2 + 1) {
@@ -113,26 +113,26 @@ HandResult HandEvaluator::evaluateNormal(const Card& c1, const Card& c2, const C
         straightKey = 3;  // A23：A 当 1，所以最大是 3
     }
 
-  // ③ 同花色：可能是同花顺，也可能是金花
+    // ③ 同花色：可能是同花顺，也可能是金花
     if (sameSuit) {
         if (isStraight) {
             r.type = HandType::StraightFlush;  // 又同花又连续 = 同花顺
             r.keys[0] = straightKey;
             return r;
         }
-        r.type = HandType::Flush;  // 只同花不连续 = 金花
+        r.type = HandType::Flush;              // 只同花不连续 = 金花
         r.keys[0] = v3; r.keys[1] = v2; r.keys[2] = v1;
         return r;
     }
 
-  // ④ 顺子
+    // ④ 顺子
     if (isStraight) {
         r.type = HandType::Straight;
         r.keys[0] = straightKey;
         return r;
     }
 
-  // ⑤ 对子：两张一样
+    // ⑤ 对子：两张一样
     if (v1 == v2) {
         r.type = HandType::Pair;
         r.keys[0] = v1;  // 先比对子的点数
@@ -146,12 +146,12 @@ HandResult HandEvaluator::evaluateNormal(const Card& c1, const Card& c2, const C
         return r;
     }
 
-  // ⑥ 散牌：啥都不是
+    // ⑥ 散牌：啥都不是
     r.type = HandType::HighCard;
     r.keys[0] = v3; r.keys[1] = v2; r.keys[2] = v1;
 
-  // 特殊神牌：异花 2-3-5
-  // 它本身是最小的散牌，但能吃掉豹子！
+    // 特殊神牌：异花 2-3-5
+    // 它本身是最小的散牌，但能吃掉豹子！
     if (v1 == 2 && v2 == 3 && v3 == 5 && !sameSuit) {
         r.is235 = true;
     }
@@ -159,19 +159,19 @@ HandResult HandEvaluator::evaluateNormal(const Card& c1, const Card& c2, const C
 }
 
 int HandEvaluator::compare(const HandResult& a, const HandResult& b) {
-  // 特殊规则：异花 235 吃豹子！
+    // 特殊规则：异花 235 吃豹子！
     if (a.is235 && b.type == HandType::ThreeOfAKind) return 1;
     if (b.is235 && a.type == HandType::ThreeOfAKind) return -1;
 
-  // 先比牌型等级
+    // 先比牌型等级
     if (a.type != b.type) {
-        return (static_cast<int>(a.type) > static_cast<int>(b.type)) ? 1: -1;
+        return (static_cast<int>(a.type) > static_cast<int>(b.type)) ? 1 : -1;
     }
 
-  // 牌型一样，比点数
+    // 牌型一样，比点数
     for (int i = 0; i < 3; i++) {
         if (a.keys[i] != b.keys[i]) {
-            return (a.keys[i] > b.keys[i]) ? 1: -1;
+            return (a.keys[i] > b.keys[i]) ? 1 : -1;
         }
     }
 

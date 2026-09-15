@@ -46,12 +46,12 @@ static void sanityCheck() {
     auto wr = [](Suit s1, Rank r1, Suit s2, Rank r2, Suit s3, Rank r3) {
         return AIPlayer::winRateOf(Card(s1, r1), Card(s2, r2), Card(s3, r3));
     };
-    std::printf("  豹子 AAA: %.1f%%\n", 100.0 * wr(Suit::Spade, Rank::Ace, Suit::Heart, Rank::Ace, Suit::Club, Rank::Ace));
-    std::printf("  同花顺 AKQ: %.1f%%\n", 100.0 * wr(Suit::Spade, Rank::Ace, Suit::Spade, Rank::King, Suit::Spade, Rank::Queen));
-    std::printf("  对子 QQ8: %.1f%%\n", 100.0 * wr(Suit::Spade, Rank::Queen, Suit::Heart, Rank::Queen, Suit::Club, Rank::Eight));
-    std::printf("  散牌 2 7 K: %.1f%%\n", 100.0 * wr(Suit::Spade, Rank::Two, Suit::Heart, Rank::Seven, Suit::Club, Rank::King));
-    std::printf("  异花 2 3 5: %.1f%%\n", 100.0 * wr(Suit::Spade, Rank::Two, Suit::Heart, Rank::Three, Suit::Club, Rank::Five));
-    std::printf("  单王(小王)+AA: %.1f%%\n", 100.0 * AIPlayer::winRateOf(Card(Rank::SmallJoker), Card(Suit::Spade, Rank::Ace), Card(Suit::Heart, Rank::Ace)));
+    std::printf("  豹子 AAA        : %.1f%%\n", 100.0 * wr(Suit::Spade, Rank::Ace, Suit::Heart, Rank::Ace, Suit::Club, Rank::Ace));
+    std::printf("  同花顺 AKQ      : %.1f%%\n", 100.0 * wr(Suit::Spade, Rank::Ace, Suit::Spade, Rank::King, Suit::Spade, Rank::Queen));
+    std::printf("  对子 QQ8        : %.1f%%\n", 100.0 * wr(Suit::Spade, Rank::Queen, Suit::Heart, Rank::Queen, Suit::Club, Rank::Eight));
+    std::printf("  散牌 2 7 K      : %.1f%%\n", 100.0 * wr(Suit::Spade, Rank::Two, Suit::Heart, Rank::Seven, Suit::Club, Rank::King));
+    std::printf("  异花 2 3 5      : %.1f%%\n", 100.0 * wr(Suit::Spade, Rank::Two, Suit::Heart, Rank::Three, Suit::Club, Rank::Five));
+    std::printf("  单王(小王)+AA   : %.1f%%\n", 100.0 * AIPlayer::winRateOf(Card(Rank::SmallJoker), Card(Suit::Spade, Rank::Ace), Card(Suit::Heart, Rank::Ace)));
 }
 
 static void diversityTest() {
@@ -72,7 +72,7 @@ static void diversityTest() {
         { "稳健贪心(noise=.3)",   AIPlayer::Difficulty::Greedy, AIPlayer::Style::Conservative, 0.3f },
         { "纯随机",               AIPlayer::Difficulty::Random, AIPlayer::Style::Balanced, 1.0f },
     };
-    for (auto& c: cfgs) {
+    for (auto& c : cfgs) {
         int n = AIPlayer::diversityOf(hand, 4, c.d, c.s, c.noise, 200);
         std::printf("  %-22s: %d 种方案\n", c.name, n);
     }
@@ -114,7 +114,7 @@ static void styleBattle(int rounds) {
                 else if (sc[1] > sc[0]) wins[1]++;
                 else draws++;
             }
-            std::printf("  %s vs %s: %d-%d-%d (%.1f%%:%.1f%%)  平均道数 %.3f:%.3f\n",
+            std::printf("  %s vs %s : %d-%d-%d (%.1f%%:%.1f%%)  平均道数 %.3f:%.3f\n",
                 names[i], names[j], wins[0], draws, wins[1],
                 100.0 * wins[0] / rounds, 100.0 * wins[1] / rounds,
                 (double)lines[0] / rounds, (double)lines[1] / rounds);
@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
         { AIPlayer::Difficulty::Random,     AIPlayer::Difficulty::MonteCarlo },
     };
     std::printf("\n===== 2人单挑 (%d 局) =====\n", rounds);
-    for (auto& pair: pairs) {
+    for (auto& pair : pairs) {
         int wins[2] = {0, 0}, draws = 0;
         long long lines[2] = {0, 0};
         for (int r = 0; r < rounds; r++) {
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
             else if (sc[1] > sc[0]) wins[1]++;
             else draws++;
         }
-        std::printf("  %-6s vs %-6s: %d-%d-%d (%.1f%%:%.1f%%)  平均道数 %.3f:%.3f\n",
+        std::printf("  %-6s vs %-6s : %d-%d-%d (%.1f%%:%.1f%%)  平均道数 %.3f:%.3f\n",
             diffName(pair[0]), diffName(pair[1]),
             wins[0], draws, wins[1],
             100.0 * wins[0] / rounds, 100.0 * wins[1] / rounds,

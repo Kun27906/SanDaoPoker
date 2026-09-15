@@ -16,13 +16,13 @@ public:
     CountdownBar() = default;
     CountdownBar(float maxSeconds, const sf::Vector2f& pos, const sf::Vector2f& size);
 
-    void start();  // 从满时间开始倒计时
-    void reset();  // 复位到满时间
+    void start();   // 从满时间开始倒计时
+    void reset();   // 复位到满时间
     void update(float dt);
 
     bool isFinished() const { return finished_; }
-    float getRemaining() const { return remaining_; }  // 剩余秒数
-    float getMax() const { return maxSeconds_; }  // 总时长
+    float getRemaining() const { return remaining_; }   // 剩余秒数
+    float getMax() const { return maxSeconds_; }        // 总时长
 
     void draw(sf::RenderWindow& win);
 
@@ -31,12 +31,12 @@ private:
 
     float maxSeconds_ = 10.f;
     float remaining_ = 10.f;
-    float fillWidth_ = 0.f;  // 填充条初始满宽
+    float fillWidth_ = 0.f;    // 填充条初始满宽
     bool running_ = false;
     bool finished_ = false;
     sf::Vector2f pos_{0.f, 0.f};
     sf::Vector2f size_{300.f, 30.f};
-    sf::RectangleShape bg_;  // 背景槽
+    sf::RectangleShape bg_;    // 背景槽
     sf::RectangleShape fill_;  // 填充条
-    sf::Text label_;  // 剩余秒数文字
+    sf::Text label_;           // 剩余秒数文字
 };

@@ -10,13 +10,13 @@
 
 // 从大厅按人数进入后, 只显示该人数对应的房间,
 // 按钮居中; 点[开始游戏]创建 Room进入组牌。
-class SceneRoomSelect: public Scene {
+class SceneRoomSelect : public Scene {
 public:
     explicit SceneRoomSelect(SceneManager* mgr);
     void handleEvent(const sf::Event& e, const sf::RenderWindow& win) override;
     void update(float dt) override;
     void draw(sf::RenderWindow& win) override;
-    void onHomePressed() override;  // home 键 = 返回大厅
+    void onHomePressed() override;   // home 键 = 返回大厅
 
 private:
     void refreshColors();
@@ -29,14 +29,14 @@ private:
     int roomIndex_[6] = {-1, -1, -1, -1, -1, -1};  // 全局配置下标
     int roomCount_ = 0;
     int selected_ = 0;
-    int lastBalance_ = 0;  // 上次余额
+    int lastBalance_ = 0;   // 上次余额
     Button btnStart_;
     ChipBar chipBar_;
-    Avatar  selfAvatar_;  // 局外: 本人头像
-    ProfileEditor profile_;  // 点击本人昵称名牌改名 / 点击本人头像圆上传图片并裁剪
+    Avatar  selfAvatar_;              // 局外: 本人头像
+    ProfileEditor profile_;           // 点击本人昵称名牌改名 / 点击本人头像圆上传图片并裁剪
     VersionBadge versionBadge_{true};
 
-  // 入场资格提示弹窗
+    // 入场资格提示弹窗
     bool notEnough_ = false;
     bool betting_ = false;
     sf::RectangleShape overlay_;

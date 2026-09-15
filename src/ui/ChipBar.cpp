@@ -39,7 +39,7 @@ void ChipBar::rollTo(int v, float seconds) {
     from_ = shown_;
     target_ = v;
     t_ = 0.f;
-    dur_ = seconds > 0.05f ? seconds: 0.05f;
+    dur_ = seconds > 0.05f ? seconds : 0.05f;
     rolling_ = true;
 }
 
@@ -52,7 +52,7 @@ void ChipBar::update(float dt) {
         shown_ = target_;
         return;
     }
-    float e = 1.f - (1.f - t_) * (1.f - t_);  // 二次缓出
+    float e = 1.f - (1.f - t_) * (1.f - t_);   // 二次缓出
     shown_ = from_ + static_cast<int>((target_ - from_) * e);
 }
 
@@ -75,7 +75,7 @@ bool ChipBar::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
 void ChipBar::draw(sf::RenderWindow& win) {
     sf::FloatRect box(pos_, sf::Vector2f(W, H));
 
-  // 1. 渐变背景
+    // 1. 渐变背景
     sf::VertexArray grad(sf::Quads, 4);
     grad[0].position = sf::Vector2f(box.left, box.top);
     grad[1].position = sf::Vector2f(box.left + box.width, box.top);
@@ -87,16 +87,16 @@ void ChipBar::draw(sf::RenderWindow& win) {
     grad[3].color = sf::Color(70, 110, 200, 235);
     win.draw(grad);
 
-  // 2. 外边框
+    // 2. 外边框
     sf::RectangleShape border(sf::Vector2f(box.width, box.height));
     border.setPosition(box.left, box.top);
     border.setFillColor(sf::Color::Transparent);
-    border.setOutlineColor(rolling_ ? sf::Color(255, 245, 160): sf::Color(255, 215, 0));
-    border.setOutlineThickness(rolling_ ? 3.f: 2.f);
+    border.setOutlineColor(rolling_ ? sf::Color(255, 245, 160) : sf::Color(255, 215, 0));
+    border.setOutlineThickness(rolling_ ? 3.f : 2.f);
     win.draw(border);
 
-  // 3. 左端筹码图标
-    int shownForIcon = rolling_ ? shown_: target_;
+    // 3. 左端筹码图标
+    int shownForIcon = rolling_ ? shown_ : target_;
     if (const sf::Texture* t = AssetManager::instance().chipForAmount(shownForIcon)) {
         sf::Sprite chip(*t);
         float scale = 36.f / t->getSize().x;
@@ -105,13 +105,13 @@ void ChipBar::draw(sf::RenderWindow& win) {
         win.draw(chip);
     }
 
-  // 4. 分隔竖线
+    // 4. 分隔竖线
     sf::RectangleShape sep(sf::Vector2f(2.f, box.height - 14.f));
     sep.setPosition(box.left + 52.f, box.top + 7.f);
     sep.setFillColor(sf::Color(255, 255, 255, 160));
     win.draw(sep);
 
-  // 5. 数字
+    // 5. 数字
     if (shown_ != cachedShown_) {
         char buf[24];
         std::snprintf(buf, sizeof(buf), "%d", shown_);

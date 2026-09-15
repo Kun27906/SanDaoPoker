@@ -12,14 +12,14 @@
 // profile_.update; profile_.draw;
 class ProfileEditor {
 public:
-    void bind(Avatar* selfAvatar);  // 绑定本人头像
-    bool handleEvent(const sf::Event& e, const sf::RenderWindow& win);  // true = 已消费
+    void bind(Avatar* selfAvatar);      // 绑定本人头像
+    bool handleEvent(const sf::Event& e, const sf::RenderWindow& win);   // true = 已消费
     void update(float dt);
     void draw(sf::RenderWindow& win);
     bool isOpen() const { return nick_.isOpen() || crop_.isOpen(); }
 
 private:
-    NicknameDialog   nick_;  // 自设昵称弹窗
-    AvatarCropDialog crop_;  // 自设头像弹窗
-    Avatar* self_ = nullptr;  // 本人头像控件
+    NicknameDialog   nick_;             // 自设昵称弹窗
+    AvatarCropDialog crop_;             // 自设头像弹窗
+    Avatar* self_ = nullptr;            // 本人头像控件
 };

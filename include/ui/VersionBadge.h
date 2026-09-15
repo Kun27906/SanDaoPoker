@@ -13,8 +13,8 @@ class VersionBadge {
 public:
     explicit VersionBadge(bool clickable);
 
-    void setPosition(const sf::Vector2f& p);  // 文字左上角
-  // 返回 true 表示事件已被弹窗消费
+    void setPosition(const sf::Vector2f& p);   // 文字左上角
+    // 返回 true 表示事件已被弹窗消费
     bool handleEvent(const sf::Event& e, const sf::RenderWindow& win);
     void draw(sf::RenderWindow& win);
 

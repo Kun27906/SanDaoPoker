@@ -17,14 +17,14 @@ class CardSprite {
 public:
     CardSprite() = default;
 
-  // 设置要显示的牌
+    // 设置要显示的牌
     void setCard(const Card& card);
-  // 正面/牌背
+    // 正面/牌背
     void setFaceUp(bool up) { faceUp_ = up; }
 
     void setPosition(const sf::Vector2f& p);
-    void setScale(float s);  // 整体缩放
-    sf::Vector2f getSize() const;  // 当前缩放后的尺寸
+    void setScale(float s);          // 整体缩放
+    sf::Vector2f getSize() const;    // 当前缩放后的尺寸
     sf::FloatRect getBounds() const; // 点击检测/布局用
 
     bool isJoker() const { return joker_; }
@@ -34,7 +34,7 @@ public:
 private:
     void updateTexture();
 
-    Card card_{};  // A 成员的牌对象
+    Card card_{};              // A 成员的牌对象
     bool joker_ = false;
     bool faceUp_ = true;
     float scale_ = 1.f;

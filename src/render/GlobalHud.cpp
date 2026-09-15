@@ -10,40 +10,40 @@
 namespace {
 constexpr float WW = static_cast<float>(layout::WINDOW_W);
 constexpr float WH = static_cast<float>(layout::WINDOW_H);
-constexpr float BTN = 40.f;  // 左上角键尺寸
-constexpr float PAD = 48.f;  // 键间距
+constexpr float BTN = 40.f;          // 左上角键尺寸
+constexpr float PAD = 48.f;          // 键间距
 
 // 弹窗几何
 constexpr float PW = 680.f;
 constexpr float PH = 560.f;
-constexpr float PL = (WW - PW) / 2.f;  // 300
-constexpr float PT = (WH - PH) / 2.f;  // 120
+constexpr float PL = (WW - PW) / 2.f;   // 300
+constexpr float PT = (WH - PH) / 2.f;   // 120
 
 // 退出确认弹窗几何
 constexpr float EXIT_W = 720.f;
 constexpr float EXIT_H = 260.f;
-constexpr float EXIT_L = (WW - EXIT_W) / 2.f;  // 280
-constexpr float EXIT_T = (WH - EXIT_H) / 2.f;  // 270
-constexpr float EXIT_TEXT_DY = 84.f;  // 正文相对面板顶的 y
-constexpr float EXIT_BTN_DY = 78.f;  // 按钮中心相对面板底的 y
+constexpr float EXIT_L = (WW - EXIT_W) / 2.f;   // 280
+constexpr float EXIT_T = (WH - EXIT_H) / 2.f;   // 270
+constexpr float EXIT_TEXT_DY = 84.f;            // 正文相对面板顶的 y
+constexpr float EXIT_BTN_DY = 78.f;             // 按钮中心相对面板底的 y
 constexpr float EXIT_BTN_W = 180.f;
 constexpr float EXIT_BTN_H = 52.f;
 
 // 主菜单页布局
-constexpr float ROW_Y = PT + 200.f;  // 音量行中心 y
-constexpr float VOL_X = PL + 64.f;  // soundSetting 图标中心 x
-constexpr float TRACK_L = PL + 150.f;  // 滑轨左端
-constexpr float TRACK_W = 410.f;  // 滑轨长度
-constexpr float KNOB = 34.f;  // slider 显示尺寸
+constexpr float ROW_Y = PT + 200.f;          // 音量行中心 y
+constexpr float VOL_X = PL + 64.f;           // soundSetting 图标中心 x
+constexpr float TRACK_L = PL + 150.f;        // 滑轨左端
+constexpr float TRACK_W = 410.f;             // 滑轨长度
+constexpr float KNOB = 34.f;                 // slider 显示尺寸
 
 // 开发者模式弹窗布局
-constexpr float DEV_BTN_Y = PT + 250.f;  // 未启用: [启用开发者模式] 按钮中心 y
-constexpr float DEV_BTN_Y_ON = PT + PH - 74.f;  // 已启用: [关闭开发者模式] 按钮下移居中
-constexpr float DEV_INPUT_Y = PT + 165.f;  // 输入框中心 y
+constexpr float DEV_BTN_Y = PT + 250.f;           // 未启用: [启用开发者模式] 按钮中心 y
+constexpr float DEV_BTN_Y_ON = PT + PH - 74.f;    // 已启用: [关闭开发者模式] 按钮下移居中
+constexpr float DEV_INPUT_Y = PT + 165.f;         // 输入框中心 y
 constexpr float DEV_INPUT_W = 380.f;
 constexpr float DEV_INPUT_H = 54.f;
-constexpr float DEV_ROW_Y = PT + 280.f;  // dev 滑条行中心 y
-constexpr float DEV_MAX = 100000.f;  // 可调筹码上限
+constexpr float DEV_ROW_Y = PT + 280.f;           // dev 滑条行中心 y
+constexpr float DEV_MAX = 100000.f;               // 可调筹码上限
 
 // 游戏规则速览
 const char* RULES_TEXT =
@@ -61,7 +61,7 @@ const char* RULES_TEXT =
     "【破产】余额低于 100 判定破产，返回大厅时自动补足至 500。";
 }
 
-GlobalHud::GlobalHud(SceneManager* mgr): mgr_(mgr) {
+GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     AssetManager& am = AssetManager::instance();
 
     btnMenu_.setTexture(am.icon("menuList"));
@@ -73,16 +73,16 @@ GlobalHud::GlobalHud(SceneManager* mgr): mgr_(mgr) {
     btnMusic_.setPosition(sf::Vector2f(12.f + PAD, 12.f));
     btnMusic_.setSize(BTN);
     btnMusic_.setCallback([this]() {
-        SoundManager::instance().toggleBgm();  // 只开关背景音乐,音效不受影响
+        SoundManager::instance().toggleBgm();   // 只开关背景音乐,音效不受影响
         btnMusic_.setTexture(AssetManager::instance().icon(
-            SoundManager::instance().bgmOn() ? "musicOn": "musicOff"));
+            SoundManager::instance().bgmOn() ? "musicOn" : "musicOff"));
     });
 
     btnWrench_.setTexture(am.icon("wrench"));
     btnWrench_.setPosition(sf::Vector2f(12.f + PAD * 2.f, 12.f));
     btnWrench_.setSize(BTN);
     btnWrench_.setCallback([this]() {
-  // 发牌/组牌/比牌界面禁用开发者模式: 播 error 音效, 不弹窗
+        // 发牌/组牌/比牌界面禁用开发者模式: 播 error 音效, 不弹窗
         if (mgr_) {
             SceneId id = mgr_->currentId();
             if (id == SceneId::Deal || id == SceneId::Arrange || id == SceneId::Battle) {
@@ -107,7 +107,7 @@ GlobalHud::GlobalHud(SceneManager* mgr): mgr_(mgr) {
     exitText_.setText("本局还未结束，您想要退出吗？\n如果退出，将按逃跑提前结算。");
     exitText_.setCharacterSize(22);
     exitText_.setColor(sf::Color(235, 235, 235));
-    exitText_.centerOrigin();  // 居中模式: 换文本自动重新居中
+    exitText_.centerOrigin();   // 居中模式: 换文本自动重新居中
     exitText_.setPosition(sf::Vector2f(WW / 2.f, EXIT_T + EXIT_TEXT_DY));
 
     btnExitOk_.setText("确定");
@@ -179,16 +179,16 @@ GlobalHud::GlobalHud(SceneManager* mgr): mgr_(mgr) {
     btnDevToggle_.setSize(sf::Vector2f(380.f, 60.f));
     btnDevToggle_.setCallback([this]() {
         if (devOn_) {
-  // 已启用: 点一下即关闭
+            // 已启用: 点一下即关闭
             devOn_ = false;
             devArm_ = false;
             devInputFocus_ = false;
         } else if (!devArm_) {
-  // 两段确认: 第一次进入确认态, 5 秒内再点一次才真正启用
+            // 两段确认: 第一次进入确认态, 5 秒内再点一次才真正启用
             devArm_ = true;
             devArmTimer_ = 0.f;
         } else {
-  // 第二次: 真正启用
+            // 第二次: 真正启用
             devArm_ = false;
             devOn_ = true;
             devInputStr_.clear();
@@ -197,7 +197,7 @@ GlobalHud::GlobalHud(SceneManager* mgr): mgr_(mgr) {
         refreshDevToggle();
     });
 
-  // dev 滑条
+    // dev 滑条
     devTrackRect_ = sf::FloatRect(TRACK_L, DEV_ROW_Y - 5.f, TRACK_W, 10.f);
     devTrack_.setSize(sf::Vector2f(TRACK_W, 10.f));
     devTrack_.setPosition(sf::Vector2f(TRACK_L, DEV_ROW_Y - 5.f));
@@ -210,77 +210,77 @@ GlobalHud::GlobalHud(SceneManager* mgr): mgr_(mgr) {
     devKnob_.setTexture(am.icon("slider"));
     devKnob_.setSize(KNOB);
 
-  // 输入框
+    // 输入框
     devInputBox_.setSize(sf::Vector2f(DEV_INPUT_W, DEV_INPUT_H));
     devInputBox_.setPosition(sf::Vector2f(WW / 2.f - DEV_INPUT_W / 2.f, DEV_INPUT_Y - DEV_INPUT_H / 2.f));
     devInputBox_.setFillColor(sf::Color(20, 26, 46));
     devInputBox_.setOutlineColor(sf::Color(140, 160, 210));
     devInputBox_.setOutlineThickness(2.f);
 
-  // 初始音量
+    // 初始音量
     vol_ = static_cast<float>(SoundManager::instance().volume());
     savedVol_ = vol_;
     updateKnob();
 }
 
 bool GlobalHud::onCloseRequested(bool isEscape) {
-  // 确认窗已打开: Esc = 取消; 再点窗口 X = 维持确认窗
+    // 确认窗已打开: Esc = 取消; 再点窗口 X = 维持确认窗
     if (exitPopupOpen_) {
         if (isEscape) exitPopupOpen_ = false;
         return true;
     }
     if (!mgr_) return false;
     Room* room = mgr_->room.get();
-  // 1) 局内: 本局还没打完
-  // 2) 结算界面: 本局已结算, 但本场还有下一局 -> 同样按逃跑提前结算
+    // 1) 局内: 本局还没打完
+    // 2) 结算界面: 本局已结算, 但本场还有下一局 -> 同样按逃跑提前结算
     const SceneId id = mgr_->currentId();
     const bool inRound = (id == SceneId::Deal || id == SceneId::Arrange || id == SceneId::Battle);
     const bool inMatch = (id == SceneId::Result) && room && !room->isFinished();
     if (!inRound && !inMatch) return false;
-    if (!room) return false;  // 没有进行中的房间 -> 直接退出
+    if (!room) return false;            // 没有进行中的房间 -> 直接退出
     openExitPopup(inRound);
     return true;
 }
 
 void GlobalHud::openExitPopup(bool inRound) {
-  // 与其它全局弹窗互斥
+    // 与其它全局弹窗互斥
     popupOpen_ = false;
     devPopupOpen_ = false;
     dragging_ = false;
     devDrag_ = false;
-  // 文案主语区分: 局内是"本局"未结束; 结算界面是"本场"未打完
+    // 文案主语区分: 局内是"本局"未结束; 结算界面是"本场"未打完
     exitText_.setText(inRound
         ? "本局还未结束，您想要退出吗？\n如果退出，将按逃跑提前结算。"
-: "本场还未结束，您想要退出吗？\n如果退出，将按逃跑提前结算。");
+        : "本场还未结束，您想要退出吗？\n如果退出，将按逃跑提前结算。");
     exitPopupOpen_ = true;
 }
 
 void GlobalHud::confirmExit() {
-    Room* room = (mgr_ ? mgr_->room.get(): nullptr);
+    Room* room = (mgr_ ? mgr_->room.get() : nullptr);
     if (room) {
-  // 逃跑提前结算: 梯度罚金 = 倍数 × 本场底注
-  // 直接改筹码、无动画; Account::add 内部立即存档 -> 下次启动即为扣除后的数值
+        // 逃跑提前结算: 梯度罚金 = 倍数 × 本场底注
+        // 直接改筹码、无动画; Account::add 内部立即存档 -> 下次启动即为扣除后的数值
         const int penalty = escapePenaltyFor(room->historyCount, room->config.ante);
         Account::instance().add(-penalty);
     }
     exitPopupOpen_ = false;
-    exitConfirmed_ = true;  // GameApp 检测到后关闭窗口
+    exitConfirmed_ = true;   // GameApp 检测到后关闭窗口
 }
 
 bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     if (mgr_) btnHome_.setVisible(mgr_->homeVisible());
 
-  // 退出确认弹窗优先级最高: 只响应[确定]/[取消]
+    // 退出确认弹窗优先级最高: 只响应[确定]/[取消]
     if (exitPopupOpen_) {
         btnExitOk_.handleEvent(e, win);
         btnExitCancel_.handleEvent(e, win);
         return true;
     }
 
-  // dev 弹窗优先于菜单弹窗
+    // dev 弹窗优先于菜单弹窗
     bool devPopup = devPopupOpen_;
     if (!devPopup && !popupOpen_) {
-  // 常态: 四键 -> 场景
+        // 常态: 四键 -> 场景
         btnMenu_.handleEvent(e, win);
         btnMusic_.handleEvent(e, win);
         btnWrench_.handleEvent(e, win);
@@ -289,7 +289,7 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     }
 
     if (devPopup) {
-  // 键盘输入
+        // 键盘输入
         if (devOn_ && devInputFocus_) {
             handleDevText(e);
         }
@@ -297,7 +297,7 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
             e.mouseButton.button == sf::Mouse::Left) {
             sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseButton.x,
                                                                 e.mouseButton.y));
-  // 输入框聚焦判定
+            // 输入框聚焦判定
             sf::FloatRect ib(devInputBox_.getPosition(), devInputBox_.getSize());
             devInputFocus_ = ib.contains(mp);
             if (devInputFocus_ && devInputStr_.empty()) {
@@ -306,7 +306,7 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
             if (!devInputFocus_ && devInputStr_.empty()) {
                 devInputStr_.clear();
             }
-  // dev 滑条拖动
+            // dev 滑条拖动
             if (devOn_) {
                 float hw = KNOB / 2.f + 8.f;
                 sf::FloatRect hit(devTrackRect_.left - hw, DEV_ROW_Y - hw,
@@ -361,7 +361,7 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
 }
 
 void GlobalHud::update(float dt) {
-  // 两段确认 5 秒未二次点击则复原
+    // 两段确认 5 秒未二次点击则复原
     if (devArm_) {
         devArmTimer_ += dt;
         if (devArmTimer_ >= 5.f) {
@@ -378,7 +378,7 @@ void GlobalHud::draw(sf::RenderWindow& win) {
     btnWrench_.draw(win);
     btnHome_.draw(win);
 
-  // 退出确认弹窗
+    // 退出确认弹窗
     if (exitPopupOpen_) {
         win.draw(overlay_);
         win.draw(exitDialog_);
@@ -390,7 +390,7 @@ void GlobalHud::draw(sf::RenderWindow& win) {
     }
 
     if (!devPopupOpen_ && !popupOpen_) return;
-  // 弹窗层
+    // 弹窗层
     win.draw(overlay_);
     win.draw(panel_);
     panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));  // 装饰边框
@@ -413,13 +413,13 @@ void GlobalHud::draw(sf::RenderWindow& win) {
         btnRulesBack_.draw(win);
         return;
     }
-  // 主菜单页
+    // 主菜单页
     TextBox ttl("菜单", sf::Vector2f(WW / 2.f, PT + 52.f), 28);
     ttl.setColor(sf::Color(255, 220, 130));
     ttl.centerOrigin();
     ttl.draw(win);
     btnVolIcon_.setTexture(AssetManager::instance().icon(
-        vol_ <= 0.f ? "soundOff": "soundSetting"));
+        vol_ <= 0.f ? "soundOff" : "soundSetting"));
     btnVolIcon_.draw(win);
     win.draw(track_);
     trackFill_.setSize(sf::Vector2f(vol_ / 100.f * TRACK_W, 10.f));
@@ -461,20 +461,20 @@ void GlobalHud::drawDevPopup(sf::RenderWindow& win) {
     badge.centerOrigin();
     badge.draw(win);
 
-  // 输入框
+    // 输入框
     win.draw(devInputBox_);
     TextBox label("直接输入筹码数（0 ~ 100000）", sf::Vector2f(WW / 2.f, DEV_INPUT_Y - DEV_INPUT_H / 2.f - 18.f), 16);
     label.setColor(sf::Color(180, 190, 220));
     label.centerOrigin();
     label.draw(win);
-    std::string shown = devInputFocus_ ? devInputStr_: std::to_string(Account::instance().balance());
-    if (devInputFocus_) shown += "|";  // 简易光标
+    std::string shown = devInputFocus_ ? devInputStr_ : std::to_string(Account::instance().balance());
+    if (devInputFocus_) shown += "|";   // 简易光标
     TextBox inputText(shown, sf::Vector2f(WW / 2.f, DEV_INPUT_Y), 24);
     inputText.setColor(sf::Color(255, 255, 255));
     inputText.centerOrigin();
     inputText.draw(win);
 
-  // 筹码图标 + 滑条
+    // 筹码图标 + 滑条
     int bal = Account::instance().balance();
     if (const sf::Texture* ct = AssetManager::instance().chipForAmount(bal)) {
         sf::Sprite chip(*ct);
@@ -484,7 +484,7 @@ void GlobalHud::drawDevPopup(sf::RenderWindow& win) {
         win.draw(chip);
     }
     win.draw(devTrack_);
-    float t = (bal > DEV_MAX ? DEV_MAX: (bal < 0 ? 0.f: static_cast<float>(bal))) / DEV_MAX;
+    float t = (bal > DEV_MAX ? DEV_MAX : (bal < 0 ? 0.f : static_cast<float>(bal))) / DEV_MAX;
     devFill_.setSize(sf::Vector2f(t * TRACK_W, 10.f));
     win.draw(devFill_);
     updateDevKnob();
@@ -498,13 +498,13 @@ void GlobalHud::drawDevPopup(sf::RenderWindow& win) {
 }
 
 void GlobalHud::openPopup() {
-    devPopupOpen_ = false;  // 互斥
+    devPopupOpen_ = false;   // 互斥
     popupOpen_ = true;
     showRules_ = false;
 }
 
 void GlobalHud::openDevPopup() {
-    popupOpen_ = false;  // 互斥
+    popupOpen_ = false;      // 互斥
     devPopupOpen_ = true;
     devArm_ = false;
     devArmTimer_ = 0.f;
@@ -520,14 +520,14 @@ void GlobalHud::refreshDevToggle() {
         btnDevToggle_.setTint(sf::Color::White);
     } else if (devArm_) {
         btnDevToggle_.setText("再点一次确认启用");
-        btnDevToggle_.setTint(sf::Color(255, 140, 140));  // 警告态: 红色着色
+        btnDevToggle_.setTint(sf::Color(255, 140, 140));   // 警告态: 红色着色
     } else {
         btnDevToggle_.setText("启用开发者模式");
         btnDevToggle_.setTint(sf::Color::White);
     }
-  // 启用态按钮在下方居中
+    // 启用态按钮在下方居中
     btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f,
-                                           (devOn_ ? DEV_BTN_Y_ON: DEV_BTN_Y) - 30.f));
+                                           (devOn_ ? DEV_BTN_Y_ON : DEV_BTN_Y) - 30.f));
 }
 
 void GlobalHud::closePopup() {
@@ -571,14 +571,14 @@ void GlobalHud::toggleMute() {
         savedVol_ = vol_;
         setVolume(0);
     } else {
-        int restore = static_cast<int>(savedVol_ > 0.f ? savedVol_: 100.f);
+        int restore = static_cast<int>(savedVol_ > 0.f ? savedVol_ : 100.f);
         setVolume(restore);
     }
 }
 
 void GlobalHud::updateDevKnob() {
     int bal = Account::instance().balance();
-    float t = (bal > DEV_MAX ? DEV_MAX: (bal < 0 ? 0.f: static_cast<float>(bal))) / DEV_MAX;
+    float t = (bal > DEV_MAX ? DEV_MAX : (bal < 0 ? 0.f : static_cast<float>(bal))) / DEV_MAX;
     float x = TRACK_L + t * TRACK_W - KNOB / 2.f;
     devKnob_.setPosition(sf::Vector2f(x, DEV_ROW_Y - KNOB / 2.f));
 }
@@ -618,11 +618,11 @@ void GlobalHud::handleDevText(const sf::Event& e) {
     if (e.type == sf::Event::TextEntered) {
         sf::Uint32 c = e.text.unicode;
         if (c >= '0' && c <= '9') {
-            if (devInputStr_.size() < 6) {  // 上限 100000
+            if (devInputStr_.size() < 6) {   // 上限 100000
                 devInputStr_.push_back(static_cast<char>(c));
             }
             applyDevInput();
-        } else if (c == 8) {  // Backspace
+        } else if (c == 8) {                 // Backspace
             if (!devInputStr_.empty()) {
                 devInputStr_.pop_back();
             }

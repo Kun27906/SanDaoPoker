@@ -5,8 +5,8 @@
 constexpr const char* GAME_VERSION = "v1.4.2";
 
 struct VersionEntry {
-    const char* ver;  // 版本号
-    const char* desc;  // 主要更新
+    const char* ver;    // 版本号
+    const char* desc;   // 主要更新
 };
 
 constexpr VersionEntry VERSION_HISTORY[] = {

@@ -66,31 +66,31 @@ int main() {
     }
 
     {
-  // 豹子 > 同花顺
+        // 豹子 > 同花顺
         std::vector<Card> trio = make3(Suit::Spade, Rank::King, Suit::Heart, Rank::King, Suit::Club, Rank::King);
         std::vector<Card> sfl = make3(Suit::Spade, Rank::Seven, Suit::Spade, Rank::Eight, Suit::Spade, Rank::Nine);
         check("豹子 > 同花顺", HandEvaluator::compare(HandEvaluator::evaluate(trio), HandEvaluator::evaluate(sfl)) > 0);
     }
     {
-  // 同花顺 > 金花
+        // 同花顺 > 金花
         std::vector<Card> sfl = make3(Suit::Spade, Rank::Seven, Suit::Spade, Rank::Eight, Suit::Spade, Rank::Nine);
         std::vector<Card> fl = make3(Suit::Spade, Rank::Two, Suit::Spade, Rank::Five, Suit::Spade, Rank::Nine);
         check("同花顺 > 金花", HandEvaluator::compare(HandEvaluator::evaluate(sfl), HandEvaluator::evaluate(fl)) > 0);
     }
     {
-  // 金花 > 顺子
+        // 金花 > 顺子
         std::vector<Card> fl = make3(Suit::Spade, Rank::Two, Suit::Spade, Rank::Five, Suit::Spade, Rank::Nine);
         std::vector<Card> st = make3(Suit::Heart, Rank::Four, Suit::Spade, Rank::Five, Suit::Diamond, Rank::Six);
         check("金花 > 顺子", HandEvaluator::compare(HandEvaluator::evaluate(fl), HandEvaluator::evaluate(st)) > 0);
     }
     {
-  // 顺子 > 对子
+        // 顺子 > 对子
         std::vector<Card> st = make3(Suit::Heart, Rank::Four, Suit::Spade, Rank::Five, Suit::Diamond, Rank::Six);
         std::vector<Card> pr = make3(Suit::Spade, Rank::Five, Suit::Heart, Rank::Five, Suit::Club, Rank::Nine);
         check("顺子 > 对子", HandEvaluator::compare(HandEvaluator::evaluate(st), HandEvaluator::evaluate(pr)) > 0);
     }
     {
-  // 对子 > 散牌
+        // 对子 > 散牌
         std::vector<Card> pr = make3(Suit::Spade, Rank::Five, Suit::Heart, Rank::Five, Suit::Club, Rank::Nine);
         std::vector<Card> hc = make3(Suit::Spade, Rank::Two, Suit::Heart, Rank::Seven, Suit::Club, Rank::King);
         check("对子 > 散牌", HandEvaluator::compare(HandEvaluator::evaluate(pr), HandEvaluator::evaluate(hc)) > 0);
@@ -104,7 +104,7 @@ int main() {
         check("异花235 吃豹子", HandEvaluator::compare(r235, HandEvaluator::evaluate(trio)) > 0);
     }
     {
-  // 同花 235 = 金花，不是特殊牌 → 打不过豹子
+        // 同花 235 = 金花，不是特殊牌 → 打不过豹子
         std::vector<Card> flush235 = make3(Suit::Spade, Rank::Two, Suit::Spade, Rank::Three, Suit::Spade, Rank::Five);
         std::vector<Card> trio = make3(Suit::Spade, Rank::King, Suit::Heart, Rank::King, Suit::Club, Rank::King);
         HandResult r = HandEvaluator::evaluate(flush235);
@@ -112,21 +112,21 @@ int main() {
         check("同花235 打不过豹子", HandEvaluator::compare(r, HandEvaluator::evaluate(trio)) < 0);
     }
     {
-  // 异花235 遇到散牌：按散牌比
+        // 异花235 遇到散牌：按散牌比
         std::vector<Card> c235 = make3(Suit::Spade, Rank::Two, Suit::Heart, Rank::Three, Suit::Club, Rank::Five);
         std::vector<Card> hc = make3(Suit::Spade, Rank::Four, Suit::Heart, Rank::Seven, Suit::Club, Rank::King);
         check("异花235 打不过大散牌", HandEvaluator::compare(HandEvaluator::evaluate(c235), HandEvaluator::evaluate(hc)) < 0);
     }
 
     {
-  // 小王 + 红桃5 + 红桃6：小王只能变黑花色 → 最多顺子
+        // 小王 + 红桃5 + 红桃6：小王只能变黑花色 → 最多顺子
         std::vector<Card> h = makeJokers(1, Suit::Heart, Rank::Five);
         h.push_back(Card(Suit::Heart, Rank::Six));
         HandResult r = HandEvaluator::evaluate(h);
         check("小王+红桃5+红桃6 = 顺子（不能变红凑同花顺）", r.type == HandType::Straight);
     }
     {
-  // 大王 + 黑桃5 + 黑桃6：大王只能变红花色 → 最多顺子
+        // 大王 + 黑桃5 + 黑桃6：大王只能变红花色 → 最多顺子
         std::vector<Card> h;
         h.push_back(Card(Rank::BigJoker));
         h.push_back(Card(Suit::Spade, Rank::Five));
@@ -135,7 +135,7 @@ int main() {
         check("大王+黑桃5+黑桃6 = 顺子（不能变黑凑同花顺）", r.type == HandType::Straight);
     }
     {
-  // 小王 + 黑桃5 + 黑桃5：小王变黑桃5 → 豹子555
+        // 小王 + 黑桃5 + 黑桃5：小王变黑桃5 → 豹子555
         std::vector<Card> h;
         h.push_back(Card(Rank::SmallJoker));
         h.push_back(Card(Suit::Spade, Rank::Five));
@@ -144,7 +144,7 @@ int main() {
         check("小王+黑桃5+黑桃5 = 豹子", r.type == HandType::ThreeOfAKind);
     }
     {
-  // 双王 + 任意牌：两个王变同点数 → 豹子
+        // 双王 + 任意牌：两个王变同点数 → 豹子
         std::vector<Card> h = makeJokers(2, Suit::Spade, Rank::Nine);
         HandResult r = HandEvaluator::evaluate(h);
         std::cout << "[diag] 双王+9 -> " << r.name() << " type=" << (int)r.type
@@ -152,7 +152,7 @@ int main() {
         check("双王+9 = 豹子", r.type == HandType::ThreeOfAKind);
     }
     {
-  // 小王 + 红桃A + 红桃2：小王变黑桃3 → 顺子 A23
+        // 小王 + 红桃A + 红桃2：小王变黑桃3 → 顺子 A23
         std::vector<Card> h;
         h.push_back(Card(Rank::SmallJoker));
         h.push_back(Card(Suit::Heart, Rank::Ace));
@@ -167,7 +167,7 @@ int main() {
         check("A23 是最小顺子", r.type == HandType::Straight);
     }
     {
-  // A23 顺子 < 234 顺子
+        // A23 顺子 < 234 顺子
         std::vector<Card> a23 = make3(Suit::Spade, Rank::Ace, Suit::Heart, Rank::Two, Suit::Club, Rank::Three);
         std::vector<Card> c234 = make3(Suit::Spade, Rank::Two, Suit::Heart, Rank::Three, Suit::Club, Rank::Four);
         check("A23 < 234", HandEvaluator::compare(HandEvaluator::evaluate(a23), HandEvaluator::evaluate(c234)) < 0);

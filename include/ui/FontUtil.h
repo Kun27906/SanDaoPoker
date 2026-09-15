@@ -18,10 +18,10 @@ inline const sf::Font& defaultFont() {
             "assets/fonts/SourceHanSansSC-Regular.otf",  // 思源黑体
             "assets/fonts/font.ttf",
             "assets/fonts/msyh.ttf",
-            "C:/Windows/Fonts/msyh.ttc",  // 系统中文字体
-            "C:/Windows/Fonts/arial.ttf"  // 系统英文字体
+            "C:/Windows/Fonts/msyh.ttc",                 // 系统中文字体
+            "C:/Windows/Fonts/arial.ttf"                 // 系统英文字体
         };
-        for (const char* path: candidates) {
+        for (const char* path : candidates) {
             if (font.loadFromFile(path)) {
                 break;
             }

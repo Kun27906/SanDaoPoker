@@ -14,13 +14,13 @@ class IconButton {
 public:
     IconButton() = default;
 
-  // 贴图; nullptr 则不画
+    // 贴图; nullptr 则不画
     void setTexture(const sf::Texture* t) { tex_ = t; }
     void setPosition(const sf::Vector2f& p) { pos_ = p; }
     sf::Vector2f getPosition() const { return pos_; }
-    void setSize(float size) { size_ = size; }  // 正方形边长
+    void setSize(float size) { size_ = size; }   // 正方形边长
     void setCallback(std::function<void()> cb) { callback_ = std::move(cb); }
-  // 是否可见
+    // 是否可见
     void setVisible(bool v) { visible_ = v; }
 
     bool contains(const sf::Vector2f& point) const {
