@@ -10,8 +10,19 @@ const char* SUF[] = {
     "影", "刃", "客", "王", "鹰", "狼", "侠", "神", "灵", "锋",
     "尘", "澜", "月", "歌", "雪", "鸿", "辰", "瑶", "冥", "羽"
 };
+// 形容词字表: 与中心词同样用"前缀字 + 后缀字"组合(20x20=400 种)
+const char* ADJ_PRE[] = {
+    "孤", "冷", "狂", "静", "幽", "沉", "灵", "疾", "烈", "玄",
+    "苍", "赤", "醉", "逍", "豪", "狡", "温", "凛", "傲", "勇"
+};
+const char* ADJ_SUF[] = {
+    "傲", "冽", "逸", "默", "猛", "锐", "勇", "烈", "静", "灵",
+    "巧", "稳", "韧", "疾", "雅", "秀", "冷", "野", "狂", "然"
+};
 const int PRE_N = static_cast<int>(sizeof(PRE) / sizeof(PRE[0]));
 const int SUF_N = static_cast<int>(sizeof(SUF) / sizeof(SUF[0]));
+const int ADJ_PRE_N = static_cast<int>(sizeof(ADJ_PRE) / sizeof(ADJ_PRE[0]));
+const int ADJ_SUF_N = static_cast<int>(sizeof(ADJ_SUF) / sizeof(ADJ_SUF[0]));
 
 std::mt19937& rng() {
     static std::mt19937 g(std::random_device{}());
@@ -19,10 +30,14 @@ std::mt19937& rng() {
 }
 }
 
+// 生成"xx的xx"格式昵称: 形容词(同法构造, 400 种) + "的" + 二字中心词(400 种)
 std::string makeNickname() {
     std::uniform_int_distribution<int> dp(0, PRE_N - 1);
     std::uniform_int_distribution<int> ds(0, SUF_N - 1);
-    return std::string(PRE[dp(rng())]) + SUF[ds(rng())];
+    std::uniform_int_distribution<int> ap(0, ADJ_PRE_N - 1);
+    std::uniform_int_distribution<int> as(0, ADJ_SUF_N - 1);
+    return std::string(ADJ_PRE[ap(rng())]) + ADJ_SUF[as(rng())] + "的" +
+           PRE[dp(rng())] + SUF[ds(rng())];
 }
 
 std::string makeUniqueNickname(const std::string* used, int usedCount) {

@@ -67,13 +67,10 @@ int Account::add(int delta) {
     return balance_;
 }
 
-void Account::setNickname(const std::string& n) {
-    nickname_ = n;
-    save();
-}
-
 std::string Account::ensureNickname() {
-    if (nickname_.empty()) {
+    // 无昵称 -> 随机生成;
+    // 旧版 2 字昵称(UTF-8 下 6 字节, 如"孤影") -> 升级为"xx的xx"新格式后重存
+    if (nickname_.empty() || nickname_.size() == 6) {
         nickname_ = makeNickname();
         save();
     }
