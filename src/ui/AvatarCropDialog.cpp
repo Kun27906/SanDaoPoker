@@ -39,12 +39,13 @@ std::wstring toWide(const std::string& u8) {
 }
 
 // 弹出系统"打开文件"对话框; 选中则返回 UTF-8 路径
-bool pickImageFile(std::string& outPath) {
+// owner: 游戏窗口句柄 —— 必须传! 否则对话框可能出现在游戏窗口之后且模态阻塞(表现为"点击无反应")
+bool pickImageFile(std::string& outPath, sf::WindowHandle owner) {
     wchar_t buf[MAX_PATH * 4] = L"";
     OPENFILENAMEW ofn;
     std::memset(&ofn, 0, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
-    ofn.hwndOwner = nullptr;
+    ofn.hwndOwner = static_cast<HWND>(owner);      // 属主 = 游戏窗口(保证置顶于游戏之上并正确归属)
     ofn.lpstrFilter = L"图片文件 (*.png;*.jpg;*.jpeg;*.bmp)\0*.png;*.jpg;*.jpeg;*.bmp\0所有文件 (*.*)\0*.*\0\0";
     ofn.lpstrFile = buf;
     ofn.nMaxFile = MAX_PATH * 4;
@@ -133,7 +134,8 @@ sf::FloatRect AvatarCropDialog::cropRect() const {
     return sf::FloatRect(left, SQUARE_TOP, RT_SIZE, RT_SIZE);
 }
 
-void AvatarCropDialog::open() {
+void AvatarCropDialog::open(sf::WindowHandle owner) {
+    owner_ = owner;
     const int r = pickFile();
     if (r == 0) return;                          // 用户取消选择 -> 不打开弹窗
     open_ = true;                                // 成功/失败都打开(失败时提示可重新选择)
@@ -156,7 +158,7 @@ void AvatarCropDialog::resetView() {
 // 系统选图: 0=用户取消 1=成功 2=加载失败(供 open() 与"选择图片"按钮共用)
 int AvatarCropDialog::pickFile() {
     std::string path;
-    if (!pickImageFile(path)) return 0;
+    if (!pickImageFile(path, owner_)) return 0;
     if (!loadImageFile(path, img_) || img_.getSize().x == 0 || img_.getSize().y == 0 ||
         !tex_.loadFromImage(img_)) {
         hasImage_ = false;
@@ -251,7 +253,7 @@ void AvatarCropDialog::handleEvent(const sf::Event& e, const sf::RenderWindow& w
     }
 
     if (e.type == sf::Event::MouseButtonPressed && e.mouseButton.button == sf::Mouse::Left) {
-        const sf::Vector2f mp(static_cast<float>(e.mouseButton.x), static_cast<float>(e.mouseButton.y));
+        const sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseButton.x, e.mouseButton.y));
         if (hasImage_ && cropRect().contains(mp)) {
             dragging_ = true;
             dragLast_ = mp;
@@ -259,7 +261,7 @@ void AvatarCropDialog::handleEvent(const sf::Event& e, const sf::RenderWindow& w
         }
     }
     if (e.type == sf::Event::MouseMoved && dragging_) {
-        const sf::Vector2f mp(static_cast<float>(e.mouseMove.x), static_cast<float>(e.mouseMove.y));
+        const sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseMove.x, e.mouseMove.y));
         pos_ += mp - dragLast_;
         dragLast_ = mp;
         clampView();

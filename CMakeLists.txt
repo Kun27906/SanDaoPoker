@@ -87,6 +87,7 @@ set(UI_SOURCES
     src/ui/VersionBadge.cpp
     src/ui/NicknameDialog.cpp
     src/ui/AvatarCropDialog.cpp
+    src/ui/ProfileEditor.cpp
 )
 
 # ------------------------------------------------------------

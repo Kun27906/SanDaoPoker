@@ -20,7 +20,8 @@ public:
     static constexpr float RT_SIZE = 340.f;      // 裁剪框边长(屏幕像素 = 预览分辨率)
 
     AvatarCropDialog();
-    void open();                                 // 选图 + 打开裁剪界面
+    // owner: 游戏窗口句柄(必须传入! 否则原生文件框可能开在窗口后面且模态阻塞 -> 表现为"点了没反应")
+    void open(sf::WindowHandle owner = nullptr);   // 选图 + 打开裁剪界面
     bool isOpen() const { return open_; }
     void setOnSaved(std::function<void()> cb) { onSaved_ = std::move(cb); }
 
@@ -38,6 +39,7 @@ private:
 
     bool open_ = false;
     bool hasImage_ = false;
+    sf::WindowHandle owner_ = nullptr;           // 游戏窗口句柄(文件对话框属主)
     sf::Image img_;
     sf::Texture tex_;
     sf::RenderTexture preview_;

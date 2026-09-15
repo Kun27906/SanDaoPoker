@@ -21,10 +21,11 @@ public:
     sf::FloatRect getBounds() const;                          // 圆环+名牌整体范围(布局用)
     // 昵称名牌区域(最近一次 draw 时记录; 点击名牌改名用)
     sf::FloatRect plateBounds() const { return plateRect_; }
-    // 头像圆内点击判定(点击圆换头像用)
-    bool hitCircle(const sf::Vector2f& p) const {
+    // 头像圆内点击判定(点击圆换头像用); margin > 0 时外扩判定半径(点击容差)
+    bool hitCircle(const sf::Vector2f& p, float margin = 0.f) const {
         const float dx = p.x - c_.x, dy = p.y - c_.y;
-        return (dx * dx + dy * dy) <= r_ * r_;
+        const float rr = r_ + margin;
+        return (dx * dx + dy * dy) <= rr * rr;
     }
     void draw(sf::RenderWindow& win);
 

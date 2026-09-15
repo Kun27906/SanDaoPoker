@@ -166,6 +166,9 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 190.f, 40.f));
     selfAvatar_.setNickname(Account::instance().ensureNickname());
     versionBadge_.setPosition(sf::Vector2f(24.f, WH - 40.f));   // 左下角版本号(可点击)
+
+    // 点击本人昵称名牌 -> 自设昵称; 点击本人头像圆 -> 上传图片并裁剪
+    profile_.bind(&selfAvatar_);
 }
 
 // ---- 难度选择(成员B) ----
@@ -266,6 +269,8 @@ void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& wi
     }
     if (versionBadge_.handleEvent(e, win)) return;   // 版本历史弹窗打开时拦截
     if (chipBar_.handleEvent(e, win)) return;        // 点击筹码图标 -> chip 音效
+    // 自设昵称/头像: 弹窗打开时独占输入; 否则处理"点击本人昵称名牌/头像圆"
+    if (profile_.handleEvent(e, win)) return;
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].handleEvent(e, win);
     btnDiffOpen_.handleEvent(e, win);
     btnStart_.handleEvent(e, win);
@@ -278,6 +283,7 @@ void SceneRoomSelect::onHomePressed() {
 
 void SceneRoomSelect::update(float dt) {
     chipBar_.update(dt);   // 筹码框数字滚动(下注扣减动画)
+    profile_.update(dt);   // 昵称弹窗输入框插入符闪烁
 
     // 余额变化(如开发者模式里改筹码) -> 立即同步: 房间禁用态 + 顶部筹码显示
     const int bal = Account::instance().balance();
@@ -301,6 +307,7 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     chipBar_.draw(win);
     selfAvatar_.draw(win);   // 局外本人头像(筹码条左侧)
     versionBadge_.draw(win); // 左下角版本号 + 版本历史弹窗
+    profile_.draw(win);      // 自设昵称 / 自设头像弹窗(最上层)
     if (notEnough_) {                  // 入场资格弹窗
         win.draw(overlay_);
         win.draw(dialog_);
