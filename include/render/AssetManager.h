@@ -11,7 +11,7 @@
 //     (命名约定见 assets/README.md:文件名即点数名,如 A.png/10.png/J.png/Q.png/K.png)
 //   - 大小王 2 张:       assets/cards/Jokers/{big,small}.png
 //   - 牌背 3 张:         assets/cards/back/{red,blue,black}.png
-//   - 桌面背景:          assets/ui/backgrounds/table_bg.png
+//   - 桌面背景:          assets/ui/backgrounds/table_bg.jpg
 //   - 按钮四态图:        assets/ui/buttons/btn_{normal,hover,pressed,disabled}.png
 //   - 筹码图标 5 枚:     assets/ui/chips/chip_{1,5,10,50,100}.png
 // 用法:
@@ -29,9 +29,9 @@ public:
     const sf::Texture* cardTexture(Suit s, Rank r) const;
     // 牌背纹理:0=红 1=蓝 2=黑(默认红)
     const sf::Texture* backTexture(int index = 0) const;
-    // 桌面背景(游戏场景,1920x1080)
+    // 桌面背景(游戏场景; 任意分辨率, 绘制时自适应缩放至窗口)
     const sf::Texture* background() const;
-    // 主菜单背景(1920x1080),加载失败时回退到桌面背景
+    // 主菜单背景(任意分辨率),加载失败时回退到桌面背景
     const sf::Texture* menuBackground() const;
     // 按钮四态图:0=normal 1=hover 2=pressed 3=disabled (assets/ui/buttons/btn_*.png)
     const sf::Texture* buttonTexture(int state) const;

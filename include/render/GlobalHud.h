@@ -29,7 +29,8 @@ public:
     void draw(sf::RenderWindow& win);
 
     // ---- 窗口关闭请求(标题栏 X / Esc) ----
-    // 局内"一局未结束"(发牌/组牌/比牌)时弹确认窗; 返回 true = 已拦截(不要关窗口)
+    // 局内"一局未结束"(发牌/组牌/比牌)或结算界面但本场还有下一局时弹确认窗;
+    // 返回 true = 已拦截(不要关窗口)
     bool onCloseRequested(bool isEscape);
     bool shouldClose() const { return exitConfirmed_; }   // 已确认退出 -> 关闭窗口
 
@@ -50,7 +51,7 @@ private:
     void applyDevInput();        // 输入框内容 -> 余额
     void applyDevBalance(int v); // 统一写余额: 账号 + (局内活跃房间)本人筹码, 防两处脱节
     void handleDevText(const sf::Event& e);
-    void openExitPopup();        // 打开退出确认弹窗
+    void openExitPopup(bool inRound);   // 打开退出确认弹窗(inRound=true 文案用"本局", false 用"本场")
     void confirmExit();          // [确定]: 按逃跑提前结算(梯度罚金, 直接改筹码) + 标记退出
 
     SceneManager* mgr_;

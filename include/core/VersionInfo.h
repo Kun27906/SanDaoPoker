@@ -4,7 +4,7 @@
 // GAME_VERSION    : 当前版本号(显示在 启动页/大厅/选房 左下角)
 // VERSION_HISTORY : 版本历史(大厅/选房 点击左下角版本号 -> "版本历史"弹窗, 按时间顺序)
 // 维护约定: 新增版本时改 GAME_VERSION, 并在 VERSION_HISTORY 末尾追加一条(时间从早到晚)。
-constexpr const char* GAME_VERSION = "v1.4.1";
+constexpr const char* GAME_VERSION = "v1.4.2";
 
 struct VersionEntry {
     const char* ver;    // 版本号
@@ -30,6 +30,7 @@ constexpr VersionEntry VERSION_HISTORY[] = {
     {"v1.3.3",  "复查并链接了所有素材，对素材进行重大更新，修复了已知的所有问题"},
     {"v1.3.4",  "重新规划了逃跑惩罚逻辑，加入比牌翻牌动画，修复了已知问题"},
     {"v1.4.1",  "加入了自设昵称与头像的系统"},
+    {"v1.4.2",  "更新了游戏背景图，补充逃跑退出机制"},
 };
 
 constexpr int VERSION_HISTORY_COUNT =
