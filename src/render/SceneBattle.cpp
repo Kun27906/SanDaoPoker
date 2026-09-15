@@ -71,12 +71,7 @@ constexpr float HOLD_TIME = 2.5f;     // 本道结果(赢家/牌型)停留时间
 }
 
 SceneBattle::SceneBattle(SceneManager* mgr) : mgr_(mgr) {
-    if (const sf::Texture* bg = AssetManager::instance().background()) {
-        bg_.setTexture(*bg);
-        float sx = static_cast<float>(WW) / bg->getSize().x;
-        float sy = static_cast<float>(WH) / bg->getSize().y;
-        bg_.setScale(sx, sy);
-    }
+    scene_setup::background(bg_, AssetManager::instance().background(), WW, WH);
 
     Room* room = mgr_->room.get();
     playerCount_ = room ? room->playerCount : 0;

@@ -20,12 +20,7 @@ constexpr float PANEL_PAD = 24.f;
 }
 
 SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
-    if (const sf::Texture* bg = AssetManager::instance().background()) {
-        bg_.setTexture(*bg);
-        float sx = static_cast<float>(WW) / bg->getSize().x;
-        float sy = static_cast<float>(WH) / bg->getSize().y;
-        bg_.setScale(sx, sy);
-    }
+    scene_setup::background(bg_, AssetManager::instance().background(), WW, WH);
 
     title_.setCharacterSize(36);
     title_.setColor(C_GOLD);
@@ -64,7 +59,7 @@ SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {
     btnLobby_.setSize(sf::Vector2f(420.f, 60.f));
     btnLobby_.setCallback([this]() { startCoinsPhase(); });   // 播 coins+盈亏动画后自动回大厅
 
-    chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
+    scene_setup::chipBar(chipBar_, WW);
 
     // 局内头像: 本人左下角, 他人右侧居中(较小)
     {

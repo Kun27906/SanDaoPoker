@@ -199,16 +199,7 @@ if(BUILD_TESTS)
     add_test(NAME hand_evaluator COMMAND test_hand_evaluator)
 endif()
 
-# ------------------------------------------------------------
-# 开发工具构建接口 (成员B 2026-09)
-# 用法示例:
-#   cmake --build build --target gen_winrate_table   # 生成胜率表
-#   cmake --build build --target evaluate_ai         # AI 对战评估
-#   cmake --build build --target human_test          # 人性化检验
-#   cmake --build build --target gen_assets          # 素材生成(python)
-# 说明: 工具只依赖 core+ai, 不链接 SFML
-# ------------------------------------------------------------
-option(BUILD_TOOLS "Build dev tools (winrate/evaluate/human)" ON)
+option(BUILD_TOOLS "构建开发工具" ON)
 if(BUILD_TOOLS)
     set(TOOL_COMMON_SOURCES
         ${CORE_SOURCES}
@@ -219,43 +210,36 @@ if(BUILD_TOOLS)
         ${CMAKE_CURRENT_SOURCE_DIR}/src
     )
 
-    # 1. 胜率表生成器(训练): 输出 assets/ai/winrate.bin
+    # 工具目标公共配置
+    function(add_dev_tool name)
+        target_include_directories(${name} PRIVATE ${TOOL_INCLUDE_DIRS})
+        if(MSVC)
+            target_compile_options(${name} PRIVATE /utf-8)
+        endif()
+    endfunction()
+
+    # 胜率表生成器: 输出 assets/ai/winrate.bin
     add_executable(gen_winrate_table
         tools/gen_winrate_table.cpp
         ${TOOL_COMMON_SOURCES})
-    target_include_directories(gen_winrate_table PRIVATE ${TOOL_INCLUDE_DIRS})
-    if(MSVC)
-        target_compile_options(gen_winrate_table PRIVATE /utf-8)
-    endif()
+    add_dev_tool(gen_winrate_table)
 
-    # 2. AI 对战评估器
     add_executable(evaluate_ai
         tools/evaluate_ai.cpp
         ${TOOL_COMMON_SOURCES})
-    target_include_directories(evaluate_ai PRIVATE ${TOOL_INCLUDE_DIRS})
-    if(MSVC)
-        target_compile_options(evaluate_ai PRIVATE /utf-8)
-    endif()
+    add_dev_tool(evaluate_ai)
 
-    # 3. 人性化快速检验
     add_executable(human_test
         tools/human_test.cpp
         ${TOOL_COMMON_SOURCES})
-    target_include_directories(human_test PRIVATE ${TOOL_INCLUDE_DIRS})
-    if(MSVC)
-        target_compile_options(human_test PRIVATE /utf-8)
-    endif()
+    add_dev_tool(human_test)
 
-    # 4. Room/Round 完整对局冒烟(集成回归): 16房间全流程
     add_executable(room_smoke_test
         tools/room_smoke_test.cpp
         ${TOOL_COMMON_SOURCES})
-    target_include_directories(room_smoke_test PRIVATE ${TOOL_INCLUDE_DIRS})
-    if(MSVC)
-        target_compile_options(room_smoke_test PRIVATE /utf-8)
-    endif()
+    add_dev_tool(room_smoke_test)
 
-    # 5. 音效试听拼盘: 把多个 ogg 拼成一段 wav(便于挑选音效)
+    # 音效试听拼盘
     add_executable(audio_montage tools/audio_montage.cpp)
     target_include_directories(audio_montage PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
     target_link_libraries(audio_montage PRIVATE sfml-audio sfml-system)
@@ -263,15 +247,17 @@ if(BUILD_TOOLS)
         target_compile_options(audio_montage PRIVATE /utf-8)
     endif()
 
-    # 4. 素材生成(需 python3 + pillow): 牌面贴图 + UI 素材
+    # 素材生成: 牌面 大小王 牌堆 倒计时条
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_FOUND)
         add_custom_target(gen_assets
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_card_sheet.py
-            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_ui_assets.py
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_jokers.py
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_deck_pile.py
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_countdown_bar.py
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            COMMENT "生成牌面/UI 素材 (需 pillow)")
+            COMMENT "生成素材, 需 pillow")
     else()
-        message(WARNING "未找到 Python3,跳过 gen_assets 素材生成目标")
+        message(STATUS "未找到 Python3, 跳过 gen_assets")
     endif()
 endif()

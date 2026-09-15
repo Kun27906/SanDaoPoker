@@ -56,11 +56,7 @@ SceneDeal::SceneDeal(SceneManager* mgr) : mgr_(mgr) {
     }
 
     // 背景
-    if (const sf::Texture* bg = AssetManager::instance().background()) {
-        bg_.setTexture(*bg);
-        bg_.setScale(static_cast<float>(WW) / bg->getSize().x,
-                     static_cast<float>(WH) / bg->getSize().y);
-    }
+    scene_setup::background(bg_, AssetManager::instance().background(), WW, WH);
 
     // 开局:洗牌 + 发牌 + 收底注(发牌动画只做表现, 真实牌已由 Room 发好)
     mgr_->room->startNewRound();
@@ -77,7 +73,7 @@ SceneDeal::SceneDeal(SceneManager* mgr) : mgr_(mgr) {
 
     // 提示
 
-    chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
+    scene_setup::chipBar(chipBar_, WW);
 
     // 头像: 本人左下, 他人右侧居中
     int pc = mgr_->room->playerCount;

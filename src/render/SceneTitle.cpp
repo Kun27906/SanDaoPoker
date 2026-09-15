@@ -7,12 +7,7 @@ constexpr unsigned WH = 800;
 }
 
 SceneTitle::SceneTitle(SceneManager* mgr) : mgr_(mgr) {
-    if (const sf::Texture* bg = AssetManager::instance().menuBackground()) {
-        bg_.setTexture(*bg);
-        float sx = static_cast<float>(WW) / bg->getSize().x;
-        float sy = static_cast<float>(WH) / bg->getSize().y;
-        bg_.setScale(sx, sy);
-    }
+    scene_setup::background(bg_, AssetManager::instance().menuBackground(), WW, WH);
 
     title_.setText("炸金花三道");
     title_.setCharacterSize(72);
@@ -26,7 +21,7 @@ SceneTitle::SceneTitle(SceneManager* mgr) : mgr_(mgr) {
     subtitle_.centerOrigin();
     subtitle_.setPosition(sf::Vector2f(WW / 2.f, 310.f));
 
-    versionBadge_.setPosition(sf::Vector2f(24.f, 800.f - 40.f));   // 左下角版本号
+    scene_setup::versionBadge(versionBadge_, WH);
 
     btnStart_.setText("开始游戏");
     btnStart_.setPosition(sf::Vector2f(440.f, 420.f));

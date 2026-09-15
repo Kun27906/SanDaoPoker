@@ -64,12 +64,7 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     }
 
     // 背景
-    if (const sf::Texture* bg = AssetManager::instance().background()) {
-        bg_.setTexture(*bg);
-        float sx = static_cast<float>(WW) / bg->getSize().x;
-        float sy = static_cast<float>(WH) / bg->getSize().y;
-        bg_.setScale(sx, sy);
-    }
+    scene_setup::background(bg_, AssetManager::instance().background(), WW, WH);
 
     // 牌背颜色已由 SceneDeal 掷定(本场景不再重置)
 
@@ -136,7 +131,7 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     countdown_ = CountdownBar(COUNTDOWN_SECONDS, sf::Vector2f(390.f, 100.f), sf::Vector2f(500.f, 28.f));
     countdown_.start();
 
-    chipBar_.setPosition(sf::Vector2f(1280.f - 250.f - 20.f, 16.f));
+    scene_setup::chipBar(chipBar_, WW);
 
     // 局内头像: 本人左下角, 他人右侧居中(较小)
     {

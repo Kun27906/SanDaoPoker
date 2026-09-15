@@ -10,12 +10,7 @@ constexpr unsigned WH = 800;
 }
 
 SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
-    if (const sf::Texture* bg = AssetManager::instance().menuBackground()) {
-        bg_.setTexture(*bg);
-        float sx = static_cast<float>(WW) / bg->getSize().x;
-        float sy = static_cast<float>(WH) / bg->getSize().y;
-        bg_.setScale(sx, sy);
-    }
+    scene_setup::background(bg_, AssetManager::instance().menuBackground(), WW, WH);
 
     title_.setText("选择人数");
     title_.setCharacterSize(40);
@@ -34,15 +29,9 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
         });
     }
 
-    chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
-    // 局外: 本人头像(筹码条左侧)
-    selfAvatar_.setRadius(26.f);
-    selfAvatar_.setMinPlateWidth(150.f);   // 预留更长昵称空间
-    selfAvatar_.setSelfStyle(true);        // 名牌与圆心共线, 昵称居中
-    selfAvatar_.setTexture(AssetManager::instance().avatarTexture(0));   // 本人头像素材
-    selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 190.f, 40.f));
-    selfAvatar_.setNickname(Account::instance().ensureNickname());
-    versionBadge_.setPosition(sf::Vector2f(24.f, WH - 40.f));   // 左下角版本号(可点击)
+    scene_setup::chipBar(chipBar_, WW);
+    scene_setup::selfAvatar(selfAvatar_, WW);
+    scene_setup::versionBadge(versionBadge_, WH);
 
     // 点击本人昵称名牌 -> 自设昵称; 点击本人头像圆 -> 上传图片并裁剪
     // (交互与两个弹窗封装在 ProfileEditor, 与选房界面共用)

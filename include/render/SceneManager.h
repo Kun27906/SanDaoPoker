@@ -1,8 +1,9 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <memory>
-#include "core/Room.h"   // 完整类型(unique_ptr<Room> 析构需要)
+#include "core/Room.h"
 #include "render/GlobalHud.h"
+#include "render/SceneSetup.h"
 
 enum class SceneId {
     Title,       // 第一界面: 启动页(开始游戏)
