@@ -1,12 +1,13 @@
 #pragma once
 
-// GAME_VERSION: 当前版本号
-// 维护约定: 新增版本时改 GAME_VERSION, 并在 VERSION_HISTORY 末尾追加一条。
+#include <iterator>
+
+// 当前版本号; 新增版本时改这里并在历史末尾追加一条
 constexpr const char* GAME_VERSION = "v1.4.2";
 
 struct VersionEntry {
-    const char* ver;    // 版本号
-    const char* desc;   // 主要更新
+    const char* ver;
+    const char* desc;
 };
 
 constexpr VersionEntry VERSION_HISTORY[] = {
@@ -31,5 +32,4 @@ constexpr VersionEntry VERSION_HISTORY[] = {
     {"v1.4.2",  "更新了游戏背景图，补充逃跑退出机制"},
 };
 
-constexpr int VERSION_HISTORY_COUNT =
-    static_cast<int>(sizeof(VERSION_HISTORY) / sizeof(VERSION_HISTORY[0]));
+constexpr int VERSION_HISTORY_COUNT = static_cast<int>(std::size(VERSION_HISTORY));

@@ -63,7 +63,7 @@ private:
     static int combIndex(int a, int b, int c);
 
     template <typename Fn>
-    static void forEachSplit(const Card* hand, Fn fn);
+    static void forEachSplit(Fn fn);
 
     static float bestGreedy(const Card* hand, int opponents, int order[9]);
     static float groupScore(const Card* hand, int idx0, int idx1, int idx2, int opponents);
