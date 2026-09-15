@@ -61,6 +61,33 @@ static int cardIndex(Rank r) {
     return -1;                            // 大小王
 }
 
+// 圆形裁剪: 距中心 > 半径的像素 alpha 置 0(边缘 1px 羽化抗锯齿)
+// 默认头像(assets/ui/avatars)与玩家自定义头像(game_data/avatar.png)共用本函数,
+// 保证"头像框外圆之外一律透明" —— 否则方形图四角会溢出圆环(实测 bug)。
+static void cropToCircle(sf::Image& img) {
+    const unsigned w = img.getSize().x, h = img.getSize().y;
+    if (w == 0 || h == 0) return;
+    const float ccx = (w - 1) * 0.5f, ccy = (h - 1) * 0.5f;
+    const float rad = std::min(w, h) * 0.5f;
+    for (unsigned y = 0; y < h; y++) {
+        for (unsigned x = 0; x < w; x++) {
+            const float dx = static_cast<float>(x) - ccx;
+            const float dy = static_cast<float>(y) - ccy;
+            const float d = std::sqrt(dx * dx + dy * dy);
+            const float inside = rad - d;             // >0 = 圆内
+            if (inside <= 0.f) {
+                sf::Color col = img.getPixel(x, y);
+                col.a = 0;
+                img.setPixel(x, y, col);
+            } else if (inside < 1.f) {
+                sf::Color col = img.getPixel(x, y);
+                col.a = static_cast<sf::Uint8>(col.a * inside);
+                img.setPixel(x, y, col);
+            }
+        }
+    }
+}
+
 bool AssetManager::loadCardTextures() {
     bool allOk = true;
     const Suit suits[4] = {Suit::Spade, Suit::Heart, Suit::Club, Suit::Diamond};
@@ -209,27 +236,8 @@ bool AssetManager::loadMiscTextures() {
                 std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", p.c_str());
                 continue;
             }
-            // ---- 圆形裁剪: 距中心 > 半径的像素 alpha 置 0(边缘 1px 羽化抗锯齿) ----
-            const unsigned w = img.getSize().x, h = img.getSize().y;
-            const float ccx = (w - 1) * 0.5f, ccy = (h - 1) * 0.5f;
-            const float rad = std::min(w, h) * 0.5f;
-            for (unsigned y = 0; y < h; y++) {
-                for (unsigned x = 0; x < w; x++) {
-                    float dx = static_cast<float>(x) - ccx;
-                    float dy = static_cast<float>(y) - ccy;
-                    float d = std::sqrt(dx * dx + dy * dy);
-                    float inside = rad - d;             // >0 = 圆内
-                    if (inside <= 0.f) {
-                        sf::Color col = img.getPixel(x, y);
-                        col.a = 0;
-                        img.setPixel(x, y, col);
-                    } else if (inside < 1.f) {
-                        sf::Color col = img.getPixel(x, y);
-                        col.a = static_cast<sf::Uint8>(col.a * inside);
-                        img.setPixel(x, y, col);
-                    }
-                }
-            }
+            // ---- 圆形裁剪(共用助手): 距中心 > 半径的像素 alpha 置 0, 边缘 1px 羽化 ----
+            cropToCircle(img);
             sf::Texture t;
             if (t.loadFromImage(img)) {
                 avatarTex_.push_back(std::move(t));
@@ -330,6 +338,8 @@ bool AssetManager::reloadCustomAvatar() {
         customTex_ = sf::Texture();   // 文件损坏 -> 清空, 回落默认头像
         return false;
     }
+    // ⚠️ 必须与默认头像走同一道圆形裁剪, 否则方形图四角会溢出头像框外圆(实测 bug)
+    cropToCircle(img);
     sf::Texture t;
     if (!t.loadFromImage(img)) {
         customTex_ = sf::Texture();
