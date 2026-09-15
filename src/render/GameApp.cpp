@@ -37,14 +37,17 @@ void GameApp::run() {
         float dt = clock_.restart().asSeconds();
         sf::Event e;
         while (window_.pollEvent(e)) {
+            // 关闭窗口(标题栏 X / Esc): 局内"一局未结束"(发牌/组牌/比牌)时先弹确认窗,
+            // 点[确定]才按逃跑提前结算并退出; 其余场景保持原行为直接退出。
             if (e.type == sf::Event::Closed) {
-                window_.close();
+                if (!sceneManager_.onCloseRequested(false)) window_.close();
             } else if (e.type == sf::Event::KeyPressed && e.key.code == sf::Keyboard::Escape) {
-                window_.close();
+                if (!sceneManager_.onCloseRequested(true)) window_.close();
             }
             sceneManager_.handleEvent(e, window_);
         }
         sceneManager_.update(dt);
+        if (sceneManager_.shouldClose()) window_.close();   // 确认窗点[确定] -> 退出
         window_.clear(sf::Color(20, 24, 30));
         sceneManager_.draw(window_);
         window_.display();

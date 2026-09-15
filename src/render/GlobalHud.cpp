@@ -18,6 +18,16 @@ constexpr float PH = 560.f;
 constexpr float PL = (WW - PW) / 2.f;   // 300
 constexpr float PT = (WH - PH) / 2.f;   // 120
 
+// 退出确认弹窗几何(独立小面板, 居中; 确定/取消 两键并列于底部)
+constexpr float EXIT_W = 720.f;
+constexpr float EXIT_H = 260.f;
+constexpr float EXIT_L = (WW - EXIT_W) / 2.f;   // 280
+constexpr float EXIT_T = (WH - EXIT_H) / 2.f;   // 270
+constexpr float EXIT_TEXT_DY = 84.f;            // 正文相对面板顶的 y
+constexpr float EXIT_BTN_DY = 78.f;             // 按钮中心相对面板底的 y(向上偏移)
+constexpr float EXIT_BTN_W = 180.f;
+constexpr float EXIT_BTN_H = 52.f;
+
 // 主菜单页布局(音量行)
 constexpr float ROW_Y = PT + 200.f;          // 音量行中心 y
 constexpr float VOL_X = PL + 64.f;           // soundSetting 图标中心 x
@@ -87,6 +97,31 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnHome_.setPosition(sf::Vector2f(12.f + PAD * 3.f, 12.f));
     btnHome_.setSize(BTN);
     btnHome_.setCallback([this]() { if (mgr_) mgr_->onHomePressed(); });
+
+    // ---- 退出确认弹窗(局内一局未结束时, 点窗口 X / Esc 弹出) ----
+    exitDialog_.setSize(sf::Vector2f(EXIT_W, EXIT_H));
+    exitDialog_.setPosition(sf::Vector2f(EXIT_L, EXIT_T));
+    exitDialog_.setFillColor(sf::Color(30, 40, 70));
+    exitDialog_.setOutlineColor(sf::Color(255, 215, 0));
+    exitDialog_.setOutlineThickness(3.f);
+
+    exitText_.setText("本局还未结束，您想要退出吗？\n如果退出，将按逃跑提前结算。");
+    exitText_.setCharacterSize(22);
+    exitText_.setColor(sf::Color(235, 235, 235));
+    exitText_.centerOrigin();   // 居中模式: 换文本自动重新居中
+    exitText_.setPosition(sf::Vector2f(WW / 2.f, EXIT_T + EXIT_TEXT_DY));
+
+    btnExitOk_.setText("确定");
+    btnExitOk_.setPosition(sf::Vector2f(WW / 2.f - EXIT_BTN_W - 15.f,
+                                        EXIT_T + EXIT_H - EXIT_BTN_DY - EXIT_BTN_H / 2.f));
+    btnExitOk_.setSize(sf::Vector2f(EXIT_BTN_W, EXIT_BTN_H));
+    btnExitOk_.setCallback([this]() { confirmExit(); });
+
+    btnExitCancel_.setText("取消");
+    btnExitCancel_.setPosition(sf::Vector2f(WW / 2.f + 15.f,
+                                            EXIT_T + EXIT_H - EXIT_BTN_DY - EXIT_BTN_H / 2.f));
+    btnExitCancel_.setSize(sf::Vector2f(EXIT_BTN_W, EXIT_BTN_H));
+    btnExitCancel_.setCallback([this]() { exitPopupOpen_ = false; });
 
     // ---- 弹窗 ----
     overlay_.setSize(sf::Vector2f(WW, WH));
@@ -193,8 +228,51 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     updateKnob();
 }
 
+bool GlobalHud::onCloseRequested(bool isEscape) {
+    // 确认窗已打开: Esc = 取消(关掉确认窗, 不退出); 再点窗口 X = 维持确认窗
+    if (exitPopupOpen_) {
+        if (isEscape) exitPopupOpen_ = false;
+        return true;
+    }
+    if (!mgr_) return false;
+    // 只有"一局未结束"(发牌/组牌/比牌)才需要二次确认; 其余场景(大厅/选房/结算)保持原行为直接退出
+    const SceneId id = mgr_->currentId();
+    if (id != SceneId::Deal && id != SceneId::Arrange && id != SceneId::Battle) return false;
+    if (!mgr_->room) return false;      // 没有进行中的房间 -> 直接退出
+    openExitPopup();
+    return true;
+}
+
+void GlobalHud::openExitPopup() {
+    // 与其它全局弹窗互斥(同时只留一个)
+    popupOpen_ = false;
+    devPopupOpen_ = false;
+    dragging_ = false;
+    devDrag_ = false;
+    exitPopupOpen_ = true;
+}
+
+void GlobalHud::confirmExit() {
+    Room* room = (mgr_ ? mgr_->room.get() : nullptr);
+    if (room) {
+        // 逃跑提前结算: 梯度罚金 = 倍数(按【已完成】局数, 当前这局不计) × 本场底注
+        // 直接改筹码、无动画; Account::add 内部立即存档 -> 下次启动即为扣除后的数值
+        const int penalty = escapePenaltyFor(room->historyCount, room->config.ante);
+        Account::instance().add(-penalty);
+    }
+    exitPopupOpen_ = false;
+    exitConfirmed_ = true;   // GameApp 检测到后关闭窗口
+}
+
 bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     if (mgr_) btnHome_.setVisible(mgr_->homeVisible());
+
+    // 退出确认弹窗优先级最高: 只响应[确定]/[取消]
+    if (exitPopupOpen_) {
+        btnExitOk_.handleEvent(e, win);
+        btnExitCancel_.handleEvent(e, win);
+        return true;
+    }
 
     // dev 弹窗优先于菜单弹窗
     bool devPopup = devPopupOpen_;
@@ -299,6 +377,17 @@ void GlobalHud::draw(sf::RenderWindow& win) {
     btnMusic_.draw(win);
     btnWrench_.draw(win);
     btnHome_.draw(win);
+
+    // 退出确认弹窗(独立面板, 最上层)
+    if (exitPopupOpen_) {
+        win.draw(overlay_);
+        win.draw(exitDialog_);
+        panel_frame::draw(win, sf::FloatRect(exitDialog_.getPosition(), exitDialog_.getSize()));
+        exitText_.draw(win);
+        btnExitOk_.draw(win);
+        btnExitCancel_.draw(win);
+        return;
+    }
 
     if (!devPopupOpen_ && !popupOpen_) return;
     // 弹窗层

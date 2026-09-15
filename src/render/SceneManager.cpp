@@ -59,6 +59,15 @@ void SceneManager::onHomePressed() {
     if (current_) current_->onHomePressed();
 }
 
+bool SceneManager::onCloseRequested(bool isEscape) {
+    if (hud_) return hud_->onCloseRequested(isEscape);
+    return false;
+}
+
+bool SceneManager::shouldClose() const {
+    return hud_ && hud_->shouldClose();
+}
+
 std::unique_ptr<Scene> SceneManager::createScene(SceneId id) {
     switch (id) {
         case SceneId::Title:      return std::make_unique<SceneTitle>(this);
