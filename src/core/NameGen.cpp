@@ -30,14 +30,17 @@ std::mt19937& rng() {
 }
 }
 
-// 生成"xx的xx"格式昵称: 形容词(同法构造, 400 种) + "的" + 二字中心词(400 种)
+// 生成昵称: 形容词(同法构造, 400 种) + 中心词(400 种)。
+// "的"字按 40% 概率省略 -> 四字("xxxx")与五字("xx的xx")两种 id 并存。
 std::string makeNickname() {
     std::uniform_int_distribution<int> dp(0, PRE_N - 1);
     std::uniform_int_distribution<int> ds(0, SUF_N - 1);
     std::uniform_int_distribution<int> ap(0, ADJ_PRE_N - 1);
     std::uniform_int_distribution<int> as(0, ADJ_SUF_N - 1);
-    return std::string(ADJ_PRE[ap(rng())]) + ADJ_SUF[as(rng())] + "的" +
-           PRE[dp(rng())] + SUF[ds(rng())];
+    std::uniform_int_distribution<int> dmid(0, 99);   // 40% 不加"的"
+    const std::string adj = std::string(ADJ_PRE[ap(rng())]) + ADJ_SUF[as(rng())];
+    const std::string ctr = std::string(PRE[dp(rng())]) + SUF[ds(rng())];
+    return (dmid(rng()) < 40) ? (adj + ctr) : (adj + "的" + ctr);
 }
 
 std::string makeUniqueNickname(const std::string* used, int usedCount) {
