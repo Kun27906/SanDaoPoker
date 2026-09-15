@@ -1,13 +1,12 @@
 #pragma once
 
-// GAME_VERSION    : 当前版本号(显示在 启动页/大厅/选房 左下角)
-// VERSION_HISTORY : 版本历史(大厅/选房 点击左下角版本号 -> "版本历史"弹窗, 按时间顺序)
-// 维护约定: 新增版本时改 GAME_VERSION, 并在 VERSION_HISTORY 末尾追加一条(时间从早到晚)。
+// GAME_VERSION: 当前版本号
+// 维护约定: 新增版本时改 GAME_VERSION, 并在 VERSION_HISTORY 末尾追加一条。
 constexpr const char* GAME_VERSION = "v1.4.2";
 
 struct VersionEntry {
-    const char* ver;    // 版本号
-    const char* desc;   // 主要更新
+    const char* ver;  // 版本号
+    const char* desc;  // 主要更新
 };
 
 constexpr VersionEntry VERSION_HISTORY[] = {

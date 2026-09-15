@@ -2,13 +2,13 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 
-// 功能:一行(或多行,支持 \n)文字的显示封装(字体/字号/颜色/位置/对齐)
+// 功能:一行文字的显示封装
 // 用法:
-//   TextBox t("Hello", {100,100}, 28);
-//   t.setColor(sf::Color::White);
-//   t.centerOrigin();        // 进入"居中模式":之后 setPosition 以文字中心为准,
-//                            // 且任何 setText/setCharacterSize 都会自动保持居中
-//   t.draw(window);
+// TextBox t;
+// t.setColor;
+// t.centerOrigin; // 进入"居中模式":之后 setPosition 以文字中心为准,
+// // 且任何 setText/setCharacterSize 都会自动保持居中
+// t.draw;
 
 class TextBox {
 public:
@@ -19,7 +19,7 @@ public:
     void setPosition(const sf::Vector2f& p);
     void setCharacterSize(unsigned s);
     void setColor(const sf::Color& c);
-    void centerOrigin();   // 进入居中模式(自动保持居中)
+    void centerOrigin();  // 进入居中模式
 
     sf::FloatRect getBounds() const { return text_.getLocalBounds(); }
     const sf::String& getString() const { return text_.getString(); }
@@ -27,8 +27,8 @@ public:
     void draw(sf::RenderWindow& win) const;
 
 private:
-    void recenter();   // 按当前文本重新计算居中原点
+    void recenter();  // 按当前文本重新计算居中原点
 
     sf::Text text_;
-    bool centered_ = false;   // 是否处于居中模式
+    bool centered_ = false;  // 是否处于居中模式
 };

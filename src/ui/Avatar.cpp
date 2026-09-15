@@ -3,7 +3,7 @@
 #include <algorithm>
 
 namespace {
-// 圆角矩形(1 矩形 + 1 窄矩形 + 4 圆拼出); 先画描边再画填充
+// 圆角矩形; 先画描边再画填充
 void roundedRect(sf::RenderWindow& win, float x, float y, float w, float h,
                  float rad, sf::Color fill, sf::Color outline) {
     auto paint = [&](float ox, float oy, float ow, float oh, float orad, sf::Color col) {
@@ -18,8 +18,8 @@ void roundedRect(sf::RenderWindow& win, float x, float y, float w, float h,
         for (int i = 0; i < 4; i++) {
             sf::CircleShape cc(orad);
             cc.setFillColor(col);
-            float ccx = (i % 2 == 0) ? ox + orad : ox + ow - orad;
-            float ccy = (i < 2) ? oy + orad : oy + oh - orad;
+            float ccx = (i % 2 == 0) ? ox + orad: ox + ow - orad;
+            float ccy = (i < 2) ? oy + orad: oy + oh - orad;
             cc.setPosition(ccx - orad, ccy - orad);
             win.draw(cc);
         }
@@ -28,7 +28,7 @@ void roundedRect(sf::RenderWindow& win, float x, float y, float w, float h,
     paint(x, y, w, h, rad, fill);
 }
 
-const sf::Color C_FRAME_BG(30, 36, 56);       // 名牌深色底
+const sf::Color C_FRAME_BG(30, 36, 56);  // 名牌深色底
 const sf::Color C_FRAME_EDGE(150, 170, 220);  // 边框/描边亮色
 }
 
@@ -37,7 +37,7 @@ void Avatar::updateText() {
         text_.setFont(font_util::defaultFont());
         fontReady_ = true;
     }
-    cs_ = std::max(12.f, r_ * 0.62f);          // 字体随半径增大
+    cs_ = std::max(12.f, r_ * 0.62f);  // 字体随半径增大
     text_.setCharacterSize(static_cast<unsigned>(cs_));
     text_.setFillColor(sf::Color(240, 245, 255));
 }
@@ -58,26 +58,26 @@ sf::FloatRect Avatar::getBounds() const {
 void Avatar::draw(sf::RenderWindow& win) {
     if (!fontReady_) updateText();
     const float cx = c_.x, cy = c_.y, r = r_;
-    const float border = std::max(3.f, r * 0.12f);   // 边框厚度
-    const float outer = r + border / 2.f;            // 边框外缘半径
+    const float border = std::max(3.f, r * 0.12f);  // 边框厚度
+    const float outer = r + border / 2.f;  // 边框外缘半径
 
     updateText();
     text_.setString(str_util::utf8(name_.c_str()));
     sf::FloatRect tb = text_.getLocalBounds();
     float padX = cs_ * 0.7f;
-    float plateW = tb.width + padX * 2.f;            // 自适应字数
-    if (plateW < minPlateW_) plateW = minPlateW_;    // 本人: 预留更长昵称空间
+    float plateW = tb.width + padX * 2.f;  // 自适应字数
+    if (plateW < minPlateW_) plateW = minPlateW_;  // 本人: 预留更长昵称空间
     float plateH = cs_ * 1.8f;
     float px, py;
     if (selfStyle_) {
-        px = cx + r * 0.9f;         // 本人: 水平轴与圆心共线
+        px = cx + r * 0.9f;  // 本人: 水平轴与圆心共线
         py = cy - plateH / 2.f;
     } else {
-        px = cx + r * 0.35f;        // 他人: 圆环右下角
+        px = cx + r * 0.35f;  // 他人: 圆环右下角
         py = cy + r * 0.30f;
     }
     roundedRect(win, px, py, plateW, plateH, plateH * 0.28f, C_FRAME_BG, C_FRAME_EDGE);
-    plateRect_ = sf::FloatRect(px, py, plateW, plateH);   // 供点击改名命中检测
+    plateRect_ = sf::FloatRect(px, py, plateW, plateH);  // 供点击改名命中检测
 
     float d = outer * 2.f;
     if (tex_ && tex_->getSize().x > 0) {
@@ -103,7 +103,7 @@ void Avatar::draw(sf::RenderWindow& win) {
     float visLeft = cx + outer;
     if (visLeft < px) visLeft = px;
     float visW = px + plateW - visLeft;
-    if (visW < tb.width) visW = tb.width;            // 极端情况兜底
+    if (visW < tb.width) visW = tb.width;  // 极端情况兜底
     float tx = visLeft + (visW - tb.width) / 2.f - tb.left;
     text_.setPosition(tx, py + (plateH - tb.height) / 2.f - tb.top);
     win.draw(text_);

@@ -16,11 +16,11 @@ bool AssetManager::loadAll() {
     if (loaded_) return true;
     loaded_ = loadCardTextures();
     loadMiscTextures();
-    reloadCustomAvatar();   // 本人自定义头像(有则 0 号头像位优先使用)
+    reloadCustomAvatar();  // 本人自定义头像
     return loaded_;
 }
 
-// 花色枚举 -> 目录名(复数)
+// 花色枚举 -> 目录名
 static const char* suitDir(Suit s) {
     switch (s) {
         case Suit::Spade:   return "spades";
@@ -31,7 +31,7 @@ static const char* suitDir(Suit s) {
     return "spades";
 }
 
-// Rank -> 文件名(A/2..10/J/Q/K,见 assets/README.md)
+// Rank -> 文件名
 static const char* rankName(Rank r) {
     switch (r) {
         case Rank::Ace:   return "A";
@@ -50,20 +50,19 @@ static const char* rankName(Rank r) {
     return nullptr;  // 大小王
 }
 
-// Rank -> 贴图数组下标 0..12 (2=0 ... A=12); 大小王返回 -1
+// Rank -> 贴图数组下标 0..12; 大小王返回 -1
 static int cardIndex(Rank r) {
     int v = static_cast<int>(r);
     if (v >= 2 && v <= 10) return v - 2;  // 2..10 -> 0..8
-    if (v == 11) return 9;                // J
-    if (v == 12) return 10;               // Q
-    if (v == 13) return 11;               // K
-    if (v == 14) return 12;               // A
-    return -1;                            // 大小王
+    if (v == 11) return 9;  // J
+    if (v == 12) return 10;  // Q
+    if (v == 13) return 11;  // K
+    if (v == 14) return 12;  // A
+    return -1;  // 大小王
 }
 
-// 圆形裁剪: 距中心 > 半径的像素 alpha 置 0(边缘 1px 羽化抗锯齿)
-// 默认头像(assets/ui/avatars)与玩家自定义头像(game_data/avatar.png)共用本函数,
-// 保证"头像框外圆之外一律透明" —— 否则方形图四角会溢出圆环(实测 bug)。
+// 圆形裁剪: 距中心 > 半径的像素 alpha 置 0
+// 默认头像与玩家自定义头像共用本函数,
 static void cropToCircle(sf::Image& img) {
     const unsigned w = img.getSize().x, h = img.getSize().y;
     if (w == 0 || h == 0) return;
@@ -74,7 +73,7 @@ static void cropToCircle(sf::Image& img) {
             const float dx = static_cast<float>(x) - ccx;
             const float dy = static_cast<float>(y) - ccy;
             const float d = std::sqrt(dx * dx + dy * dy);
-            const float inside = rad - d;             // >0 = 圆内
+            const float inside = rad - d;  // >0 = 圆内
             if (inside <= 0.f) {
                 sf::Color col = img.getPixel(x, y);
                 col.a = 0;
@@ -109,7 +108,7 @@ bool AssetManager::loadCardTextures() {
             }
         }
     }
-    // 大小王(Jokers 文件夹,由 tools/gen_jokers.py 生成)
+  // 大小王
     if (!jokerTex_[0].loadFromFile("assets/cards/Jokers/small.png")) {
         allOk = false;
         std::fprintf(stderr, "[AssetManager] 加载失败: assets/cards/Jokers/small.png\n");
@@ -136,11 +135,11 @@ bool AssetManager::loadMiscTextures() {
     if (!bgTex_.loadFromFile("assets/ui/backgrounds/table_bg.jpg")) {
         std::fprintf(stderr, "[AssetManager] 加载失败: assets/ui/backgrounds/table_bg.jpg\n");
     }
-    // 主菜单背景(单独一张;失败则场景代码回退到 table_bg)
+  // 主菜单背景
     if (!menuTex_.loadFromFile("assets/ui/backgrounds/menu.jpg")) {
         std::fprintf(stderr, "[AssetManager] 加载失败: assets/ui/backgrounds/menu.jpg\n");
     }
-    // 按钮四态图(UI 按钮统一使用)
+  // 按钮四态图
     const char* btnStates[4] = {"normal", "hover", "pressed", "disabled"};
     for (int i = 0; i < 4; i++) {
         char path[128];
@@ -149,25 +148,25 @@ bool AssetManager::loadMiscTextures() {
             std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", path);
         }
     }
-    // 筹码图标(区间命名,自动扫描 assets/ui/chips/chip_*.png)
-    //   格式: chip_<min>-<max>.png | chip_-<max>.png(无下界) | chip_<min>-.png(无上界)
+  // 筹码图标
+  // 格式: chip_<min>-<max>.png | chip_-<max>.png | chip_<min>-.png
     {
         chipDefs_.clear();
         namespace fs = std::filesystem;
         std::error_code ec;
         if (fs::exists("assets/ui/chips", ec)) {
-            for (auto& entry : fs::directory_iterator("assets/ui/chips", ec)) {
+            for (auto& entry: fs::directory_iterator("assets/ui/chips", ec)) {
                 if (!entry.is_regular_file(ec)) continue;
                 if (entry.path().extension() != ".png") continue;
-                std::string stem = entry.path().stem().string();   // "chip_-1000"
+                std::string stem = entry.path().stem().string();  // "chip_-1000"
                 if (stem.rfind("chip_", 0) != 0) continue;
-                std::string range = stem.substr(5);                // "-1000" / "1000-2000" / "15000-"
+                std::string range = stem.substr(5);  // "-1000" / "1000-2000" / "15000-"
                 int lo = INT_MIN, hi = INT_MAX;
                 std::size_t dash = range.find('-');
                 if (dash == std::string::npos) {
                     lo = hi = std::atoi(range.c_str());
                 } else {
-                    std::string a = range.substr(0, dash);   // 空=无下界
+                    std::string a = range.substr(0, dash);  // 空=无下界
                     std::string b = range.substr(dash + 1);  // 空=无上界
                     if (!a.empty()) lo = std::atoi(a.c_str());
                     if (!b.empty()) hi = std::atoi(b.c_str());
@@ -184,13 +183,13 @@ bool AssetManager::loadMiscTextures() {
             }
         }
     }
-    // 界面图标(自动扫描 assets/ui/icons/*.png, 文件名即查询名)
+  // 界面图标
     {
         icons_.clear();
         namespace fs = std::filesystem;
         std::error_code ec;
         if (fs::exists("assets/ui/icons", ec)) {
-            for (auto& entry : fs::directory_iterator("assets/ui/icons", ec)) {
+            for (auto& entry: fs::directory_iterator("assets/ui/icons", ec)) {
                 if (!entry.is_regular_file(ec)) continue;
                 if (entry.path().extension() != ".png") continue;
                 std::string stem = entry.path().stem().string();
@@ -204,7 +203,7 @@ bool AssetManager::loadMiscTextures() {
             }
         }
     }
-    // 牌堆素材(发牌动画, 三色 689x292 堆叠图)
+  // 牌堆素材
     {
         const char* piles[3] = {"red", "blue", "black"};
         for (int i = 0; i < 3; i++) {
@@ -215,22 +214,22 @@ bool AssetManager::loadMiscTextures() {
             }
         }
     }
-    // 头像素材: 自动扫描 assets/ui/avatars/*.png, 加载后按"内切圆"做 alpha 圆形裁剪
-    //   → 得到真正的圆形头像(与 GitHub 头像一致), 方形图四角被切除(非遮挡)
+  // 头像素材: 自动扫描 assets/ui/avatars/*.png, 加载后按"内切圆"做 alpha 圆形裁剪
+  // → 得到真正的圆形头像, 方形图四角被切除
     {
         avatarTex_.clear();
         namespace fs = std::filesystem;
         std::error_code ec;
         std::vector<std::string> paths;
         if (fs::exists("assets/ui/avatars", ec)) {
-            for (auto& entry : fs::directory_iterator("assets/ui/avatars", ec)) {
+            for (auto& entry: fs::directory_iterator("assets/ui/avatars", ec)) {
                 if (!entry.is_regular_file(ec)) continue;
                 if (entry.path().extension() != ".png") continue;
                 paths.push_back(entry.path().string());
             }
         }
         std::sort(paths.begin(), paths.end());
-        for (const std::string& p : paths) {
+        for (const std::string& p: paths) {
             sf::Image img;
             if (!img.loadFromFile(p)) {
                 std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", p.c_str());
@@ -243,13 +242,13 @@ bool AssetManager::loadMiscTextures() {
             }
         }
     }
-    // 桌面小贴图(assets/ui/table/*.png 自动扫描, 文件名(去扩展名)即查询名)
+  // 桌面小贴图即查询名)
     {
         tableTex_.clear();
         namespace fs = std::filesystem;
         std::error_code ec;
         if (fs::exists("assets/ui/table", ec)) {
-            for (auto& entry : fs::directory_iterator("assets/ui/table", ec)) {
+            for (auto& entry: fs::directory_iterator("assets/ui/table", ec)) {
                 if (!entry.is_regular_file(ec)) continue;
                 if (entry.path().extension() != ".png") continue;
                 sf::Texture t;
@@ -267,31 +266,31 @@ bool AssetManager::loadMiscTextures() {
 }
 
 const sf::Texture* AssetManager::cardTexture(Suit s, Rank r) const {
-    // 大小王:Jokers 贴图 [0]=small [1]=big
+  // 大小王:Jokers 贴图 [0]=small [1]=big
     if (r == Rank::SmallJoker) {
-        return jokerTex_[0].getSize().x > 0 ? &jokerTex_[0] : nullptr;
+        return jokerTex_[0].getSize().x > 0 ? &jokerTex_[0]: nullptr;
     }
     if (r == Rank::BigJoker) {
-        return jokerTex_[1].getSize().x > 0 ? &jokerTex_[1] : nullptr;
+        return jokerTex_[1].getSize().x > 0 ? &jokerTex_[1]: nullptr;
     }
     int idx = cardIndex(r);
     if (idx < 0 || idx > 12) return nullptr;
     int si = static_cast<int>(s);
     if (si < 0 || si > 3) return nullptr;
     const sf::Texture& t = cardTex_[si][idx];
-    return t.getSize().x > 0 ? &t : nullptr;
+    return t.getSize().x > 0 ? &t: nullptr;
 }
 
 const sf::Texture* AssetManager::chipForAmount(int amount) const {
-    // 区间规则: lo <= amount < hi (下含上不含); 找到第一个命中区间
-    for (const ChipDef& d : chipDefs_) {
+  // 区间规则: lo <= amount < hi; 找到第一个命中区间
+    for (const ChipDef& d: chipDefs_) {
         if (amount >= d.lo && amount < d.hi) {
-            return d.tex.getSize().x > 0 ? &d.tex : nullptr;
+            return d.tex.getSize().x > 0 ? &d.tex: nullptr;
         }
     }
-    // 兜底:返回第一张(理论不可达,区间应覆盖全值域)
+  // 兜底:返回第一张
     if (!chipDefs_.empty()) {
-        return chipDefs_.front().tex.getSize().x > 0 ? &chipDefs_.front().tex : nullptr;
+        return chipDefs_.front().tex.getSize().x > 0 ? &chipDefs_.front().tex: nullptr;
     }
     return nullptr;
 }
@@ -305,39 +304,38 @@ void AssetManager::rollBack() {
 const sf::Texture* AssetManager::icon(const std::string& name) const {
     auto it = icons_.find(name);
     if (it == icons_.end()) return nullptr;
-    return it->second.getSize().x > 0 ? &it->second : nullptr;
+    return it->second.getSize().x > 0 ? &it->second: nullptr;
 }
 
 const sf::Texture* AssetManager::deckPile(int backIndex) const {
     if (backIndex < 0 || backIndex > 2) backIndex = 0;
-    return pileTex_[backIndex].getSize().x > 0 ? &pileTex_[backIndex] : nullptr;
+    return pileTex_[backIndex].getSize().x > 0 ? &pileTex_[backIndex]: nullptr;
 }
 
 const sf::Texture* AssetManager::avatarTexture(int idx) const {
-    // 0 号位 = 本人: 优先使用玩家自定义头像(未设置/加载失败时回落到默认随机头像)
+  // 0 号位 = 本人: 优先使用玩家自定义头像
     if (idx == 0 && customTex_.getSize().x > 0) return &customTex_;
     if (avatarTex_.empty()) return nullptr;
     int n = static_cast<int>(avatarTex_.size());
-    int i = ((idx % n) + n) % n;                  // 取模循环
-    return avatarTex_[i].getSize().x > 0 ? &avatarTex_[i] : nullptr;
+    int i = ((idx % n) + n) % n;  // 取模循环
+    return avatarTex_[i].getSize().x > 0 ? &avatarTex_[i]: nullptr;
 }
 
 const sf::Texture* AssetManager::customAvatar() const {
-    return customTex_.getSize().x > 0 ? &customTex_ : nullptr;
+    return customTex_.getSize().x > 0 ? &customTex_: nullptr;
 }
 
 bool AssetManager::reloadCustomAvatar() {
-    // 未设置头像时静默返回: 先判存在, 避免 SFML 对缺失文件向 stderr 打印加载失败告警
+  // 未设置头像时静默返回: 先判存在, 避免 SFML 对缺失文件向 stderr 打印加载失败告警
     if (!std::filesystem::exists("game_data/avatar.png")) {
         customTex_ = sf::Texture();
         return false;
     }
     sf::Image img;
     if (!img.loadFromFile("game_data/avatar.png")) {
-        customTex_ = sf::Texture();   // 文件损坏 -> 清空, 回落默认头像
+        customTex_ = sf::Texture();  // 文件损坏 -> 清空, 回落默认头像
         return false;
     }
-    // ⚠️ 必须与默认头像走同一道圆形裁剪, 否则方形图四角会溢出头像框外圆(实测 bug)
     cropToCircle(img);
     sf::Texture t;
     if (!t.loadFromImage(img)) {
@@ -351,25 +349,25 @@ bool AssetManager::reloadCustomAvatar() {
 const sf::Texture* AssetManager::tableTexture(const std::string& name) const {
     auto it = tableTex_.find(name);
     if (it == tableTex_.end()) return nullptr;
-    return it->second.getSize().x > 0 ? &it->second : nullptr;
+    return it->second.getSize().x > 0 ? &it->second: nullptr;
 }
 
 const sf::Texture* AssetManager::backTexture(int index) const {
     if (backTex_.empty()) return nullptr;
-    int i = (index < 0 || index >= static_cast<int>(backTex_.size())) ? 0 : index;
+    int i = (index < 0 || index >= static_cast<int>(backTex_.size())) ? 0: index;
     return &backTex_[i];
 }
 
 const sf::Texture* AssetManager::background() const {
-    return bgTex_.getSize().x > 0 ? &bgTex_ : nullptr;
+    return bgTex_.getSize().x > 0 ? &bgTex_: nullptr;
 }
 
 const sf::Texture* AssetManager::menuBackground() const {
     if (menuTex_.getSize().x > 0) return &menuTex_;
-    return bgTex_.getSize().x > 0 ? &bgTex_ : nullptr;  // 回退到桌面背景
+    return bgTex_.getSize().x > 0 ? &bgTex_: nullptr;  // 回退到桌面背景
 }
 
 const sf::Texture* AssetManager::buttonTexture(int state) const {
     if (state < 0 || state > 3) return nullptr;
-    return btnTex_[state].getSize().x > 0 ? &btnTex_[state] : nullptr;
+    return btnTex_[state].getSize().x > 0 ? &btnTex_[state]: nullptr;
 }

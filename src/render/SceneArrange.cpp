@@ -15,21 +15,21 @@ constexpr unsigned WW = layout::WINDOW_W;
 constexpr unsigned WH = layout::WINDOW_H;
 
 // 布局常量
-constexpr float SLOT_X[3] = {500.f, 630.f, 760.f};   // 槽 x(每道3槽)
-constexpr float LINE_Y[3] = {150.f, 310.f, 470.f};   // 三道 y
+constexpr float SLOT_X[3] = {500.f, 630.f, 760.f};  // 槽 x
+constexpr float LINE_Y[3] = {150.f, 310.f, 470.f};  // 三道 y
 constexpr float HAND_X[9] = {90.f, 210.f, 330.f, 450.f, 570.f,
                              690.f, 810.f, 930.f, 1050.f};  // 手牌 x
 constexpr float HAND_Y = 640.f;
-constexpr float CARD_SCALE = 0.5f;            // 200x280 -> 100x140
-constexpr float CARDW = layout::CARD_UNIT_W * CARD_SCALE;   // 牌宽 100
-constexpr float CARDH = layout::CARD_UNIT_H * CARD_SCALE;   // 牌高 140
-constexpr float COUNTDOWN_SECONDS = 40.f;     // 组牌限时(延长至 40 秒)
+constexpr float CARD_SCALE = 0.5f;  // 200x280 -> 100x140
+constexpr float CARDW = layout::CARD_UNIT_W * CARD_SCALE;  // 牌宽 100
+constexpr float CARDH = layout::CARD_UNIT_H * CARD_SCALE;  // 牌高 140
+constexpr float COUNTDOWN_SECONDS = 40.f;  // 组牌限时
 
 // 拖拽参数
-constexpr float SNAP_DIST = 62.f;    // 吸附: 牌中心距槽中心 < 该值则吸附到槽
-constexpr float DROP_DIST = 88.f;    // 落位判定距离
-constexpr float DRAG_THRESH = 6.f;   // 位移超过该值才算拖拽(否则算单击)
-constexpr float FLY_DUR = 0.26f;     // 飞回动画时长(秒)
+constexpr float SNAP_DIST = 62.f;  // 吸附: 牌中心距槽中心 < 该值则吸附到槽
+constexpr float DROP_DIST = 88.f;  // 落位判定距离
+constexpr float DRAG_THRESH = 6.f;  // 位移超过该值才算拖拽
+constexpr float FLY_DUR = 0.26f;  // 飞回动画时长
 
 sf::RectangleShape makeSlot(const sf::Vector2f& pos, const sf::Vector2f& size) {
     sf::RectangleShape r(size);
@@ -41,8 +41,8 @@ sf::RectangleShape makeSlot(const sf::Vector2f& pos, const sf::Vector2f& size) {
 }
 }
 
-SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
-    // 防御:房间不存在则创建默认 4 人房
+SceneArrange::SceneArrange(SceneManager* mgr): mgr_(mgr) {
+  // 防御:房间不存在则创建默认 4 人房
     if (!mgr_->room) {
         mgr_->room = std::make_unique<Room>();
         mgr_->room->setRoomConfig(7);
@@ -57,18 +57,16 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
             mgr_->room->addPlayer(nm, true);
         }
     }
-    // 发牌(洗牌+发牌+收底注)已由 SceneDeal 完成; 此处仅防御: 若未经发牌场景直接进入则补做
+  // 发牌已由 SceneDeal 完成; 此处仅防御: 若未经发牌场景直接进入则补做
     if (mgr_->room->currentRound == 0) {
         mgr_->room->startNewRound();
-        AssetManager::instance().rollBack();   // 本局牌背颜色
+        AssetManager::instance().rollBack();  // 本局牌背颜色
     }
 
-    // 背景
     scene_setup::background(bg_, AssetManager::instance().background(), WW, WH);
 
-    // 牌背颜色已由 SceneDeal 掷定(本场景不再重置)
+  // 牌背颜色已由 SceneDeal 掷定
 
-    // 标题
     char title[64];
     std::snprintf(title, sizeof(title), "第 %d 局 · 底注 %d",
                   mgr_->room->currentRound, mgr_->room->config.ante);
@@ -78,7 +76,7 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     title_.centerOrigin();
     title_.setPosition(sf::Vector2f(WW / 2.f, 36.f));
 
-    // 手牌:9 张
+  // 手牌:9 张
     const Card* hand = mgr_->room->players[0].hand;
     for (int i = 0; i < 9; i++) {
         handSprites_[i].setCard(hand[i]);
@@ -89,7 +87,7 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
                                      sf::Vector2f(CARDW, CARDH));
     }
 
-    // 三道槽 + 模型初始化
+  // 三道槽 + 模型初始化
     for (int line = 0; line < 3; line++) {
         slotHand_[line].fill(-1);
         for (int pos = 0; pos < 3; pos++) {
@@ -100,7 +98,7 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
         }
     }
 
-    // 道选择按钮
+  // 道选择按钮
     const char* lineNames[3] = {"头道", "中道", "尾道"};
     for (int i = 0; i < 3; i++) {
         lineBtns_[i].setText(lineNames[i]);
@@ -109,14 +107,14 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
         lineBtns_[i].setCallback([this, i]() {
             currentLine_ = i;
             for (int j = 0; j < 3; j++) {
-                // 选中态 = 常驻"按下"贴图(不恢复)
+  // 选中态 = 常驻"按下"贴图
                 lineBtns_[j].setSelected(j == currentLine_);
             }
         });
     }
     lineBtns_[0].setSelected(true);
 
-    // 一键重置 / 交牌
+  // 一键重置 / 交牌
     btnReset_.setText("一键重置");
     btnReset_.setPosition(sf::Vector2f(1140.f, 150.f));
     btnReset_.setSize(sf::Vector2f(110.f, 50.f));
@@ -127,13 +125,13 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
     btnSubmit_.setSize(sf::Vector2f(110.f, 50.f));
     btnSubmit_.setCallback([this]() { submit(); });
 
-    // 倒计时(40 秒)
+  // 倒计时
     countdown_ = CountdownBar(COUNTDOWN_SECONDS, sf::Vector2f(390.f, 100.f), sf::Vector2f(500.f, 28.f));
     countdown_.start();
 
     scene_setup::chipBar(chipBar_, WW);
 
-    // 局内头像: 本人左下角, 他人右侧居中(较小)
+  // 局内头像: 本人左下角, 他人右侧居中
     {
         int pc = mgr_->room->playerCount;
         int na = pc - 1;
@@ -142,12 +140,12 @@ SceneArrange::SceneArrange(SceneManager* mgr) : mgr_(mgr) {
         float totalH = (na - 1) * aiGap;
         for (int i = 0; i < pc && i < MAX_PLAYERS; i++) {
             avatars_[i].setNickname(mgr_->room->players[i].name);
-            avatars_[i].setTexture(AssetManager::instance().avatarTexture(i));   // 头像素材(占位色块)
+            avatars_[i].setTexture(AssetManager::instance().avatarTexture(i));  // 头像素材
             if (i == 0) {
                 avatars_[i].setRadius(28.f);
-                avatars_[i].setMinPlateWidth(150.f);   // 本人: 预留更长昵称空间
-                avatars_[i].setSelfStyle(true);        // 名牌与圆心共线, 昵称居中
-                avatars_[i].setCenter(sf::Vector2f(78.f, 560.f));   // 避开道选择按钮
+                avatars_[i].setMinPlateWidth(150.f);  // 本人: 预留更长昵称空间
+                avatars_[i].setSelfStyle(true);  // 名牌与圆心共线, 昵称居中
+                avatars_[i].setCenter(sf::Vector2f(78.f, 560.f));  // 避开道选择按钮
             } else {
                 avatars_[i].setRadius(aiR);
                 avatars_[i].setCenter(sf::Vector2f(
@@ -193,7 +191,7 @@ void SceneArrange::refreshSlotSprites() {
 
 void SceneArrange::rebuildLines() {
     Player& me = mgr_->room->players[0];
-    me.clearRound();   // 清空 lines(并把 hasArranged 置 false)
+    me.clearRound();  // 清空 lines
     for (int line = 0; line < 3; line++) {
         for (int pos = 0; pos < 3; pos++) {
             if (slotHand_[line][pos] >= 0) {
@@ -208,7 +206,7 @@ void SceneArrange::placeAt(int handIdx, int line, int pos) {
     if (line < 0 || line > 2 || pos < 0 || pos > 2) return;
     if (handIdx < 0 || handIdx > 8) return;
     if (slotHand_[line][pos] == handIdx) return;
-    // 该手牌若已在其它槽, 先移除
+  // 该手牌若已在其它槽, 先移除
     for (int l = 0; l < 3; l++)
         for (int p = 0; p < 3; p++)
             if (slotHand_[l][p] == handIdx) slotHand_[l][p] = -1;
@@ -216,7 +214,7 @@ void SceneArrange::placeAt(int handIdx, int line, int pos) {
     handUsed_[handIdx] = true;
     refreshSlotSprites();
     rebuildLines();
-    SoundManager::instance().playClick();   // 放入槽位:点击音效
+    SoundManager::instance().playClick();  // 放入槽位:点击音效
 }
 
 void SceneArrange::placeCard(int handIdx) {
@@ -246,8 +244,8 @@ void SceneArrange::returnToHand(int line, int pos) {
     if (hi < 0) return;
     slotHand_[line][pos] = -1;
     flyFrom_ = slotPos(line, pos);
-    startFlyBack(hi);                       // 牌"飞回"下方原位置
-    SoundManager::instance().playClick();   // 收回:点击音效
+    startFlyBack(hi);  // 牌"飞回"下方原位置
+    SoundManager::instance().playClick();  // 收回:点击音效
     rebuildLines();
 }
 
@@ -256,7 +254,7 @@ void SceneArrange::beginDrag(int handIdx, int fromLine, int fromPos, const sf::V
     dragFromLine_ = fromLine;
     dragFromPos_ = fromPos;
     sf::Vector2f cardPos = (fromLine >= 0) ? slotPos(fromLine, fromPos)
-                                           : sf::Vector2f(HAND_X[handIdx], HAND_Y);
+: sf::Vector2f(HAND_X[handIdx], HAND_Y);
     dragGrab_ = sf::Vector2f(mouse.x - cardPos.x, mouse.y - cardPos.y);
     dragPos_ = cardPos;
     dragSprite_.setCard(mgr_->room->players[0].hand[handIdx]);
@@ -272,23 +270,23 @@ void SceneArrange::dropDrag() {
     int t = nearestSlot(dragPos_, DROP_DIST);
     bool landed = false;
     if (dragFromLine_ >= 0) {
-        // 来自槽位: 先取出
+  // 来自槽位: 先取出
         slotHand_[dragFromLine_][dragFromPos_] = -1;
         if (t >= 0 && t != dragFromLine_ * 3 + dragFromPos_) {
             int tl = t / 3, tp = t % 3;
             int occ = slotHand_[tl][tp];
             if (occ >= 0) {
-                // 目标已有牌: 交换(占位牌回到来源槽)
+  // 目标已有牌: 交换
                 slotHand_[dragFromLine_][dragFromPos_] = occ;
             }
             slotHand_[tl][tp] = dragHand_;
             landed = true;
         } else {
-            // 落回原槽
+  // 落回原槽
             slotHand_[dragFromLine_][dragFromPos_] = dragHand_;
         }
     } else {
-        // 来自手牌
+  // 来自手牌
         if (t >= 0) {
             int tl = t / 3, tp = t % 3;
             if (slotHand_[tl][tp] < 0) {
@@ -300,7 +298,7 @@ void SceneArrange::dropDrag() {
     }
     refreshSlotSprites();
     rebuildLines();
-    if (landed) SoundManager::instance().playClick();   // 放入槽位:点击音效
+    if (landed) SoundManager::instance().playClick();  // 放入槽位:点击音效
     dragging_ = false;
     pendingDrag_ = false;
     snapSlot_ = -1;
@@ -310,14 +308,14 @@ void SceneArrange::dropDrag() {
 
 void SceneArrange::resetArrange() {
     if (submitted_) return;
-    for (auto& row : slotHand_) row.fill(-1);
+    for (auto& row: slotHand_) row.fill(-1);
     handUsed_.fill(false);
     refreshSlotSprites();
     rebuildLines();
 }
 
 bool SceneArrange::allPlaced() const {
-    for (bool b : handUsed_) {
+    for (bool b: handUsed_) {
         if (!b) return false;
     }
     return true;
@@ -326,15 +324,15 @@ bool SceneArrange::allPlaced() const {
 void SceneArrange::submit() {
     if (submitted_) return;
     if (!allPlaced()) {
-        return;   // 未摆完 9 张: 不能交牌(无提示行)
+        return;  // 未摆完 9 张: 不能交牌
     }
-    SoundManager::instance().stopClock();   // 交牌: 停止倒计时时钟音效
+    SoundManager::instance().stopClock();  // 交牌: 停止倒计时时钟音效
     submitted_ = true;
     Room* room = mgr_->room.get();
-    rebuildLines();                        // 确保 lines 与界面一致
-    room->players[0].hasArranged = true;   // 真人交牌锁定
+    rebuildLines();  // 确保 lines 与界面一致
+    room->players[0].hasArranged = true;  // 真人交牌锁定
 
-    // AI 玩家:接入 AIPlayer 真实决策(难度/风格取自当前配置;胜率表 assets/ai/winrate.bin)
+  // AI 玩家:接入 AIPlayer 真实决策
     for (int p = 1; p < room->playerCount; p++) {
         int order[9];
         AIPlayer::decideOrderAuto(room->players[p].hand, room->playerCount, order);
@@ -347,7 +345,7 @@ void SceneArrange::submit() {
 void SceneArrange::autoSubmit() {
     if (submitted_) return;
     if (flying_) { flying_ = false; handUsed_[flyHand_] = false; }  // 结算在途动画
-    // 超时:把剩余手牌按顺序填入所有空槽
+  // 超时:把剩余手牌按顺序填入所有空槽
     int hi = 0;
     for (int line = 0; line < 3; line++) {
         for (int pos = 0; pos < 3; pos++) {
@@ -365,8 +363,8 @@ void SceneArrange::autoSubmit() {
 }
 
 void SceneArrange::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
-    if (chipBar_.handleEvent(e, win)) return;        // 点击筹码图标 -> chip 音效
-    for (auto& b : lineBtns_) b.handleEvent(e, win);
+    if (chipBar_.handleEvent(e, win)) return;  // 点击筹码图标 -> chip 音效
+    for (auto& b: lineBtns_) b.handleEvent(e, win);
     btnReset_.handleEvent(e, win);
     btnSubmit_.handleEvent(e, win);
 
@@ -376,13 +374,13 @@ void SceneArrange::handleEvent(const sf::Event& e, const sf::RenderWindow& win) 
     if (e.type == sf::Event::MouseButtonPressed && e.mouseButton.button == sf::Mouse::Left) {
         if (flying_) return;
         pressPos_ = mpos;
-        // 先看手牌
+  // 先看手牌
         int hitHand = -1;
         for (int i = 0; i < 9; i++) {
             if (!handUsed_[i] && handSprites_[i].getBounds().contains(mpos)) { hitHand = i; break; }
         }
         if (hitHand >= 0) { beginDrag(hitHand, -1, -1, mpos); return; }
-        // 再看已放置的牌
+  // 再看已放置的牌
         for (int line = 0; line < 3; line++) {
             for (int pos = 0; pos < 3; pos++) {
                 if (slotHand_[line][pos] < 0) continue;
@@ -399,16 +397,16 @@ void SceneArrange::handleEvent(const sf::Event& e, const sf::RenderWindow& win) 
             dragPos_ = sf::Vector2f(mpos.x - dragGrab_.x, mpos.y - dragGrab_.y);
             int t = nearestSlot(dragPos_, SNAP_DIST);
             snapSlot_ = t;
-            if (t >= 0) dragPos_ = slotPos(t / 3, t % 3);   // 吸附到槽
+            if (t >= 0) dragPos_ = slotPos(t / 3, t % 3);  // 吸附到槽
         }
     } else if (e.type == sf::Event::MouseButtonReleased && e.mouseButton.button == sf::Mouse::Left) {
         if (dragging_) {
             dropDrag();
         } else if (pendingDrag_) {
             if (dragFromLine_ >= 0) {
-                returnToHand(dragFromLine_, dragFromPos_);   // 单击已放置牌 -> 收回
+                returnToHand(dragFromLine_, dragFromPos_);  // 单击已放置牌 -> 收回
             } else if (dragHand_ >= 0) {
-                placeCard(dragHand_);                        // 单击手牌 -> 放入当前道
+                placeCard(dragHand_);  // 单击手牌 -> 放入当前道
             }
             pendingDrag_ = false;
             snapSlot_ = -1;
@@ -419,13 +417,13 @@ void SceneArrange::handleEvent(const sf::Event& e, const sf::RenderWindow& win) 
 }
 
 void SceneArrange::update(float dt) {
-    // 飞回动画
+  // 飞回动画
     if (flying_) {
         flyT_ += dt / FLY_DUR;
         if (flyT_ >= 1.f) {
             flyT_ = 1.f;
             flying_ = false;
-            handUsed_[flyHand_] = false;   // 动画结束:牌正式回到手牌区
+            handUsed_[flyHand_] = false;  // 动画结束:牌正式回到手牌区
         } else {
             sf::Vector2f p(flyFrom_.x + (flyTo_.x - flyFrom_.x) * flyT_,
                            flyFrom_.y + (flyTo_.y - flyFrom_.y) * flyT_);
@@ -434,14 +432,14 @@ void SceneArrange::update(float dt) {
     }
     countdown_.update(dt);
 
-    // 红色区(剩余 ≤15%): 循环播放倒计时时钟音效, 直到交牌或时间耗尽
+  // 红色区: 循环播放倒计时时钟音效, 直到交牌或时间耗尽
     if (!submitted_ && countdown_.getRemaining() <= countdown_.getMax() * 0.15f) {
         SoundManager::instance().startClock();
     }
 
     if (countdown_.isFinished() && !timeoutFired_) {
         timeoutFired_ = true;
-        SoundManager::instance().stopClock();   // 时间耗尽: 停止时钟音效
+        SoundManager::instance().stopClock();  // 时间耗尽: 停止时钟音效
         autoSubmit();
     }
 }
@@ -450,7 +448,7 @@ void SceneArrange::draw(sf::RenderWindow& win) {
     if (bg_.getTexture()) win.draw(bg_);
     title_.draw(win);
 
-    // 三道槽:已摆画牌(拖拽来源槽隐藏), 空槽画框, 吸附目标高亮
+  // 三道槽:已摆画牌, 空槽画框, 吸附目标高亮
     for (int line = 0; line < 3; line++) {
         for (int pos = 0; pos < 3; pos++) {
             bool dragOrigin = dragging_ && dragFromLine_ == line && dragFromPos_ == pos;
@@ -471,7 +469,7 @@ void SceneArrange::draw(sf::RenderWindow& win) {
         }
     }
 
-    // 手牌区:未用画牌(正在拖动的隐藏), 已用/飞行中画空框
+  // 手牌区:未用画牌, 已用/飞行中画空框
     for (int i = 0; i < 9; i++) {
         bool draggedFromHand = dragging_ && dragFromLine_ < 0 && dragHand_ == i;
         if (handUsed_[i] || draggedFromHand) {
@@ -481,21 +479,21 @@ void SceneArrange::draw(sf::RenderWindow& win) {
         }
     }
 
-    // 拖动中的牌(最上层; 位置随鼠标实时更新, 含吸附)
+  // 拖动中的牌
     if (dragging_) {
         dragSprite_.setPosition(dragPos_);
         dragSprite_.draw(win);
     }
-    // 飞回中的牌
+  // 飞回中的牌
     if (flying_) flySprite_.draw(win);
 
-    for (auto& b : lineBtns_) b.draw(win);
+    for (auto& b: lineBtns_) b.draw(win);
     btnReset_.draw(win);
     btnSubmit_.draw(win);
     countdown_.draw(win);
     chipBar_.setImmediate(mgr_->room->players[0].chips);
-    chipBar_.draw(win);   // 组牌/比牌期间显示"下注后余额"(发牌时已滚动扣减)
+    chipBar_.draw(win);  // 组牌/比牌期间显示"下注后余额"
     for (int i = 0; i < mgr_->room->playerCount && i < MAX_PLAYERS; i++) {
-        avatars_[i].draw(win);   // 局内头像: 本人左下 / 他人右中
+        avatars_[i].draw(win);  // 局内头像: 本人左下 / 他人右中
     }
 }

@@ -1,4 +1,4 @@
-// 只测: 决策多样性 + 风格对战 (都是贪心, 秒出结果)
+// 只测: 决策多样性 + 风格对战
 #include "ai/AIPlayer.h"
 #include "core/Deck.h"
 #include "core/HandEvaluator.h"
@@ -27,7 +27,7 @@ int main() {
         { "稳健贪心(noise=.3)",   AIPlayer::Difficulty::Greedy, AIPlayer::Style::Conservative, 0.3f },
         { "纯随机",               AIPlayer::Difficulty::Random, AIPlayer::Style::Balanced, 1.0f },
     };
-    for (auto& c : cfgs) {
+    for (auto& c: cfgs) {
         int n = AIPlayer::diversityOf(hand, 4, c.d, c.s, c.noise, 200);
         std::printf("  %-22s: %d 种方案\n", c.name, n);
     }
@@ -58,7 +58,7 @@ int main() {
             lines[0] += sc[0]; lines[1] += sc[1];
             if (sc[0] > sc[1]) wins[0]++; else if (sc[1] > sc[0]) wins[1]++; else draws++;
         }
-        std::printf("  %s vs %s : %d-%d-%d (%.1f%%:%.1f%%)  平均道数 %.3f:%.3f\n",
+        std::printf("  %s vs %s: %d-%d-%d (%.1f%%:%.1f%%)  平均道数 %.3f:%.3f\n",
             names[i], names[j], wins[0], draws, wins[1],
             100.0*wins[0]/500, 100.0*wins[1]/500,
             (double)lines[0]/500, (double)lines[1]/500);

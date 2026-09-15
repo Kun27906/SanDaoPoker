@@ -5,25 +5,25 @@
 #include <cstdio>
 
 CountdownBar::CountdownBar(float maxSeconds, const sf::Vector2f& pos, const sf::Vector2f& size) {
-    maxSeconds_ = maxSeconds > 0.f ? maxSeconds : 1.f;
+    maxSeconds_ = maxSeconds > 0.f ? maxSeconds: 1.f;
     remaining_ = maxSeconds_;
     pos_ = pos;
     size_ = size;
 
-    // 背景槽:深灰底 + 边框(贴图缺失时回退用)
+  // 背景槽:深灰底 + 边框
     bg_.setSize(size);
     bg_.setPosition(pos);
     bg_.setFillColor(sf::Color(60, 60, 60));
     bg_.setOutlineColor(sf::Color(180, 180, 180));
     bg_.setOutlineThickness(2.f);
 
-    // 填充条:初始为满宽,绿色(贴图缺失时回退用)
+  // 填充条:初始为满宽,绿色
     fillWidth_ = size.x - 4.f;
     fill_.setSize(sf::Vector2f(fillWidth_, size.y - 4.f));
     fill_.setPosition(pos.x + 2.f, pos.y + 2.f);
     fill_.setFillColor(sf::Color(60, 180, 80));
 
-    // 秒数文字:显示在条中央
+  // 秒数文字:显示在条中央
     label_.setFont(font_util::defaultFont());
     label_.setCharacterSize(18);
     label_.setFillColor(sf::Color::White);
@@ -59,9 +59,9 @@ void CountdownBar::update(float dt) {
 }
 
 void CountdownBar::draw(sf::RenderWindow& win) {
-    // 剩余比例(基于初始满宽,避免逐帧乘当前宽度导致的指数衰减)
-    // 通过 getRemaining()/getMax() 读取(与外部查询共用同一实现)
-    float ratio = getMax() > 0.f ? (getRemaining() / getMax()) : 0.f;
+  // 剩余比例
+  // 通过 getRemaining/getMax 读取
+    float ratio = getMax() > 0.f ? (getRemaining() / getMax()): 0.f;
     if (ratio < 0.f) ratio = 0.f;
     if (ratio > 1.f) ratio = 1.f;
 
@@ -76,8 +76,8 @@ void CountdownBar::draw(sf::RenderWindow& win) {
     }
 
     const char* fillName = ratio > 0.50f ? "countdown_fill_green"
-                         : ratio > 0.15f ? "countdown_fill_yellow"
-                                         : "countdown_fill_red";
+: ratio > 0.15f ? "countdown_fill_yellow"
+: "countdown_fill_red";
     const sf::Texture* fillTex = AssetManager::instance().tableTexture(fillName);
     if (fillTex) {
         float tw = static_cast<float>(fillTex->getSize().x);
@@ -86,15 +86,15 @@ void CountdownBar::draw(sf::RenderWindow& win) {
         if (visW > 0) {
             sf::Sprite f(*fillTex);
             f.setTextureRect(sf::IntRect(0, 0, visW, static_cast<int>(th)));
-            f.setScale(fillWidth_ / tw, (size_.y - 4.f) / th);   // x 缩放为常数(比例只在裁剪上体现)
+            f.setScale(fillWidth_ / tw, (size_.y - 4.f) / th);  // x 缩放为常数
             f.setPosition(pos_.x + 2.f, pos_.y + 2.f);
             win.draw(f);
         }
     } else {
         fill_.setSize(sf::Vector2f(fillWidth_ * ratio, fill_.getSize().y));
         fill_.setFillColor(ratio > 0.50f ? sf::Color(60, 180, 80)
-                         : ratio > 0.15f ? sf::Color(230, 190, 40)
-                                         : sf::Color(220, 60, 50));
+: ratio > 0.15f ? sf::Color(230, 190, 40)
+: sf::Color(220, 60, 50));
         win.draw(fill_);
     }
 
@@ -103,9 +103,9 @@ void CountdownBar::draw(sf::RenderWindow& win) {
 
 void CountdownBar::setRemainingText() {
     char buf[16];
-    std::snprintf(buf, sizeof(buf), "%.1f", getRemaining());   // 通过访问器读取剩余秒数
+    std::snprintf(buf, sizeof(buf), "%.1f", getRemaining());  // 通过访问器读取剩余秒数
     label_.setString(buf);
-    // 重新居中
+  // 重新居中
     sf::FloatRect lb = label_.getLocalBounds();
     label_.setOrigin(lb.left + lb.width / 2.f, lb.top + lb.height / 2.f);
 }

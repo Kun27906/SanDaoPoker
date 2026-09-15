@@ -19,31 +19,31 @@ AIPlayer::Style AIPlayer::s_style = AIPlayer::Style::Balanced;
 float AIPlayer::s_noise = 0.3f;
 bool AIPlayer::s_profileSet = false;
 
-static const int NUM_COMBO = 24804;     // C(54,3) 全部三张牌组合
-static const int NUM_OPPONENT = 20825;  // C(51,3) 对手组合数(去掉自己的3张)
-static const int SPLIT_COUNT = 1680;    // 9张牌分成3道的分组数
+static const int NUM_COMBO = 24804;  // C 全部三张牌组合
+static const int NUM_OPPONENT = 20825;  // C 对手组合数
+static const int SPLIT_COUNT = 1680;  // 9张牌分成3道的分组数
 
-// 预计算组合表: 每个组合的 (id0,id1,id2), 牌型结果, 位掩码
+// 预计算组合表: 每个组合的, 牌型结果, 位掩码
 struct ComboEntry {
-    int id[3];                 // 牌全局编号, 升序
-    unsigned long long mask;   // 位掩码(54位)
-    HandResult hr;             // 牌型(预计算, 避免重复 evaluate)
+    int id[3];  // 牌全局编号, 升序
+    unsigned long long mask;  // 位掩码
+    HandResult hr;  // 牌型
 };
 
-static std::vector<ComboEntry> g_combos;   // 长度 24804
-static std::unordered_map<unsigned long long, int> g_comboIndex; // (id0<<12|id1<<6|id2) -> idx
+static std::vector<ComboEntry> g_combos;  // 长度 24804
+static std::unordered_map<unsigned long long, int> g_comboIndex; // -> idx
 
-// 与 Deck 生成顺序一致: suit(0..3) x rank(2..14), 然后 SmallJoker=52, BigJoker=53
+// 与 Deck 生成顺序一致: suit x rank, 然后 SmallJoker=52, BigJoker=53
 int AIPlayer::cardId(const Card& c) {
     if (c.isSmallJoker()) return 52;
     if (c.isBigJoker()) return 53;
     return c.getSuitValue() * 13 + (c.getRankValue() - 2);
 }
 
-// 组合排名公式: C(a,1)+C(b,2)+C(c,3)
+// 组合排名公式: C+C+C
 int AIPlayer::combIndex(int a, int b, int c) {
     auto it = g_comboIndex.find(((unsigned long long)a << 12) | ((unsigned long long)b << 6) | (unsigned long long)c);
-    return (it != g_comboIndex.end()) ? it->second : 0;
+    return (it != g_comboIndex.end()) ? it->second: 0;
 }
 
 static Card cardFromId(int id) {
@@ -74,7 +74,7 @@ static void buildComboTable() {
     }
 }
 
-// 对每个组合 i, 遍历所有与之不重叠的组合 j (对手), 精确统计胜/平/负
+// 对每个组合 i, 遍历所有与之不重叠的组合 j, 精确统计胜/平/负
 // 平局算 0.5 胜率. 输出 24804 个 float 到二进制文件
 bool AIPlayer::generateWinRateTable(const std::string& path, bool verbose) {
     buildComboTable();
@@ -85,7 +85,7 @@ bool AIPlayer::generateWinRateTable(const std::string& path, bool verbose) {
         std::fflush(stdout);
     }
 
-    // 并行: 分块到多个线程
+  // 并行: 分块到多个线程
     unsigned hw = std::thread::hardware_concurrency();
     if (hw < 2) hw = 2;
     if (hw > 8) hw = 8;
@@ -98,7 +98,7 @@ bool AIPlayer::generateWinRateTable(const std::string& path, bool verbose) {
                 long long w = 0, d = 0;
                 const ComboEntry& ei = g_combos[i];
                 for (int j = 0; j < NUM_COMBO; j++) {
-                    if ((ei.mask & g_combos[j].mask) != 0) continue;  // 重叠(同一副牌不能出现)
+                    if ((ei.mask & g_combos[j].mask) != 0) continue;  // 重叠
                     int cmp = HandEvaluator::compare(ei.hr, g_combos[j].hr);
                     if (cmp > 0) w++;
                     else if (cmp == 0) d++;
@@ -108,7 +108,7 @@ bool AIPlayer::generateWinRateTable(const std::string& path, bool verbose) {
             }
         });
     }
-    for (auto& th : threads) th.join();
+    for (auto& th: threads) th.join();
 
     for (int i = 0; i < NUM_COMBO; i++) {
         table[i] = (float)(wins[i] + 0.5 * draws[i]) / (float)NUM_OPPONENT;
@@ -156,28 +156,28 @@ float AIPlayer::winRateOf(const Card& a, const Card& b, const Card& c) {
     return s_winrate[combIndex(ids[0], ids[1], ids[2])];
 }
 
-// 胜率表(游戏启动时由 GameApp 加载): 赢过所有对手 ≈ 每个对手独立: p^opponents
+// 胜率表: 赢过所有对手 ≈ 每个对手独立: p^opponents
 float AIPlayer::groupScore(const Card* hand, int idx0, int idx1, int idx2, int opponents) {
     float wr = winRateOf(hand[idx0], hand[idx1], hand[idx2]);
-    if (wr < 0.f) wr = 0.f;   // 表未加载(不应发生;启动时已校验并报错) -> 记为 0 分
+    if (wr < 0.f) wr = 0.f;  // 表未加载 -> 记为 0 分
     return std::pow(wr, (float)opponents);
 }
 
 // 手牌下标 0..8, 头道=前3个, 中道=中间3个, 尾道=最后3个
 template <typename Fn>
-void AIPlayer::forEachSplit(const Card* /*hand*/, Fn fn) {   // hand 未使用(枚举只依赖下标)
+void AIPlayer::forEachSplit(const Card* /*hand*/, Fn fn) {  // hand 未使用
     int order[9];
-    // 枚举头道 (C(9,3)=84)
+  // 枚举头道 =84)
     for (int a = 0; a < 9; a++) {
         for (int b = a + 1; b < 9; b++) {
             for (int c = b + 1; c < 9; c++) {
                 int line0[3] = { a, b, c };
-                // 剩余 6 张
+  // 剩余 6 张
                 int rest[6]; int n = 0;
                 for (int i = 0; i < 9; i++) {
                     if (i != a && i != b && i != c) rest[n++] = i;
                 }
-                // 枚举中道 (C(6,3)=20)
+  // 枚举中道 =20)
                 for (int d = 0; d < 6; d++) {
                     for (int e = d + 1; e < 6; e++) {
                         for (int f = e + 1; f < 6; f++) {
@@ -186,8 +186,8 @@ void AIPlayer::forEachSplit(const Card* /*hand*/, Fn fn) {   // hand 未使用(�
                             for (int i = 0; i < 6; i++) {
                                 if (i != d && i != e && i != f) line2[m++] = rest[i];
                             }
-                            // 头道顺序固定, 中/尾按升序; 三道之间顺序就是头/中/尾
-                            // 为了让排序稳定(避免对称重复), 头道取升序即可
+  // 头道顺序固定, 中/尾按升序; 三道之间顺序就是头/中/尾
+  // 为了让排序稳定, 头道取升序即可
                             for (int k = 0; k < 3; k++) {
                                 order[k] = line0[k];
                                 order[3 + k] = line1[k];
@@ -218,12 +218,12 @@ float AIPlayer::bestGreedy(const Card* hand, int opponents, int order[9]) {
     return bestScore;
 }
 
-// 候选 = 贪心 top-K; 对手模型 = 贪心(同款策略, 更快更公平)
-// 模拟次数 = 难度档位相关 (普通/困难用不同次数)
+// 候选 = 贪心 top-K; 对手模型 = 贪心
+// 模拟次数 = 难度档位相关
 void AIPlayer::monteCarloChoose(const Card* hand, int opponents, int order[9], int sims, int topK) {
     std::mt19937 rng((unsigned)std::random_device{}());
 
-    // 1. 收集贪心评分并排序, 取 top-K
+  // 1. 收集贪心评分并排序, 取 top-K
     struct Cand { float score; int ord[9]; };
     std::vector<Cand> cands;
     cands.reserve(SPLIT_COUNT);
@@ -238,31 +238,31 @@ void AIPlayer::monteCarloChoose(const Card* hand, int opponents, int order[9], i
     std::sort(cands.begin(), cands.end(), [](const Cand& x, const Cand& y) { return x.score > y.score; });
     if ((int)cands.size() > topK) cands.resize(topK);
 
-    // 2. 对每个候选模拟
-    // 剩余牌 = 54 - 9(自己) - opponents*9(对手)
+  // 2. 对每个候选模拟
+  // 剩余牌 = 54 - 9 - opponents*9
     int deckIds[45];
     bool used[54] = { false };
     for (int i = 0; i < 9; i++) used[cardId(hand[i])] = true;
 
     std::vector<float> avg(cands.size(), 0.0f);
     for (int s = 0; s < sims; s++) {
-        // 抽对手的牌
+  // 抽对手的牌
         int n = 0;
         for (int i = 0; i < 54; i++) if (!used[i]) deckIds[n++] = i;
-        // 洗牌取前 opponents*9
+  // 洗牌取前 opponents*9
         std::shuffle(deckIds, deckIds + n, rng);
-        std::vector<Card> oppHands[6];   // 最多 6 个对手? opponents<=5
+        std::vector<Card> oppHands[6];  // 最多 6 个对手? opponents<=5
         for (int o = 0; o < opponents; o++) {
             for (int k = 0; k < 9; k++) {
                 oppHands[o].push_back(cardFromId(deckIds[o * 9 + k]));
             }
         }
-        // 每个对手贪心分组
+  // 每个对手贪心分组
         int oppOrder[6][9];
         for (int o = 0; o < opponents; o++) {
             bestGreedy(oppHands[o].data(), opponents - 1, oppOrder[o]);
         }
-        // 对每个候选, 三道逐道比较
+  // 对每个候选, 三道逐道比较
         for (size_t ci = 0; ci < cands.size(); ci++) {
             float won = 0.0f;
             for (int line = 0; line < 3; line++) {
@@ -292,7 +292,7 @@ void AIPlayer::monteCarloChoose(const Card* hand, int opponents, int order[9], i
     }
     for (size_t i = 0; i < avg.size(); i++) avg[i] /= (float)sims;
 
-    // 3. 选期望赢池最高的
+  // 3. 选期望赢池最高的
     int best = 0;
     for (size_t i = 1; i < avg.size(); i++) {
         if (avg[i] > avg[best]) best = (int)i;
@@ -301,13 +301,13 @@ void AIPlayer::monteCarloChoose(const Card* hand, int opponents, int order[9], i
 }
 
 void AIPlayer::decideOrder(const Card* hand, int playerCount, Difficulty diff, int order[9]) {
-    // 环境变量覆盖: 仅当设置了 SDQ_AI_DIFFICULTY 时生效
+  // 环境变量覆盖: 仅当设置了 SDQ_AI_DIFFICULTY 时生效
     if (userProfileSet()) diff = s_difficulty;
     int opponents = playerCount - 1;
     if (opponents < 1) opponents = 1;
 
     if (diff == Difficulty::Random) {
-        // 随机排列 0..8
+  // 随机排列 0..8
         std::mt19937 rng((unsigned)std::random_device{}());
         for (int i = 0; i < 9; i++) order[i] = i;
         std::shuffle(order, order + 9, rng);
@@ -319,7 +319,7 @@ void AIPlayer::decideOrder(const Card* hand, int playerCount, Difficulty diff, i
         return;
     }
 
-    // MonteCarlo: 模拟次数按对手数调整
+  // MonteCarlo: 模拟次数按对手数调整
     int sims = 20;
     if (opponents >= 3) sims = 100;
     if (opponents >= 5) sims = 60;
@@ -335,7 +335,7 @@ float AIPlayer::styleScore(const float w[3], Style style) {
     switch (style) {
         case Style::Aggressive:   return sum + 0.5f * mx;  // 偏爱一组超强
         case Style::Conservative: return sum + 0.5f * mn;  // 偏爱三组均衡
-        default:                  return sum;              // 均衡(理性)
+        default:                  return sum;  // 均衡
     }
 }
 
@@ -370,7 +370,7 @@ int AIPlayer::bestGreedyStyled(const Card* hand, int opponents, Style style, flo
     });
     std::vector<float> scores;
     scores.reserve(cands.size());
-    for (auto& c : cands) scores.push_back(c.score);
+    for (auto& c: cands) scores.push_back(c.score);
     int pick = humanPick(scores, 5, noise);
     for (int i = 0; i < 9; i++) order[i] = cands[pick].ord[i];
     return pick;
@@ -436,7 +436,6 @@ void AIPlayer::monteCarloStyled(const Card* hand, int opponents, int order[9],
 void AIPlayer::decideOrderStyled(const Card* hand, int playerCount,
                                  Difficulty diff, Style style, float noise,
                                  int order[9]) {
-    // 环境变量覆盖: 仅当设置了 SDQ_AI_* 时生效(界面接入前验证三档用), 不设则行为与历史完全一致
     if (userProfileSet()) {
         diff  = s_difficulty;
         style = s_style;
@@ -502,7 +501,7 @@ const char* AIPlayer::difficultyName(Difficulty d) {
     }
 }
 
-// 键名 -> 难度 (英文键, 大小写不敏感; 兼容 0/1/2)
+// 键名 -> 难度
 bool AIPlayer::difficultyFromKey(const std::string& key, Difficulty& out) {
     std::string k;
     for (size_t i = 0; i < key.size(); i++) {
@@ -516,15 +515,15 @@ bool AIPlayer::difficultyFromKey(const std::string& key, Difficulty& out) {
     return false;
 }
 
-// 用当前配置决策: 界面层把 decideOrderStyled(...) 换成这一个即可
+// 用当前配置决策: 界面层把 decideOrderStyled 换成这一个即可
 void AIPlayer::decideOrderAuto(const Card* hand, int playerCount, int order[9]) {
     decideOrderStyled(hand, playerCount, s_difficulty, s_style, s_noise, order);
 }
 
-// 环境变量 (SDQ_AI_DIFFICULTY / SDQ_AI_STYLE / SDQ_AI_NOISE) 只在首次调用时读一次
+// 环境变量 只在首次调用时读一次
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4996)   // std::getenv: 仅用于可选的调试开关, 非生产路径
+#pragma warning(disable: 4996)  // std::getenv: 仅用于可选的调试开关, 非生产路径
 #endif
 bool AIPlayer::applyEnvConfigOnce() {
     const char* d  = std::getenv("SDQ_AI_DIFFICULTY");

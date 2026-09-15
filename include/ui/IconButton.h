@@ -2,25 +2,25 @@
 #include <SFML/Graphics.hpp>
 #include <functional>
 
-// 用一张方形贴图做按钮(图标素材 100x100 缩放到按钮尺寸),
+// 用一张方形贴图做按钮,
 // 无文字; hover 时图标下方衬一圈半透明白底突出; 按下瞬间触发回调。
 // 用法:
-//   IconButton b;
-//   b.setTexture(AssetManager::instance().icon("menuList"));
-//   b.setPosition({12,12}); b.setSize(40.f);
-//   b.setCallback([](){ ... });
-//   b.handleEvent(event, window); b.draw(window);
+// IconButton b;
+// b.setTexture.icon);
+// b.setPosition; b.setSize;
+// b.setCallback{ ... });
+// b.handleEvent; b.draw;
 class IconButton {
 public:
     IconButton() = default;
 
-    // 贴图(不持有, 由 AssetManager 保管); nullptr 则不画
+  // 贴图; nullptr 则不画
     void setTexture(const sf::Texture* t) { tex_ = t; }
     void setPosition(const sf::Vector2f& p) { pos_ = p; }
     sf::Vector2f getPosition() const { return pos_; }
-    void setSize(float size) { size_ = size; }   // 正方形边长(像素)
+    void setSize(float size) { size_ = size; }  // 正方形边长
     void setCallback(std::function<void()> cb) { callback_ = std::move(cb); }
-    // 是否可见(不可见时不参与事件与绘制)
+  // 是否可见
     void setVisible(bool v) { visible_ = v; }
 
     bool contains(const sf::Vector2f& point) const {

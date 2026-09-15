@@ -11,7 +11,7 @@ void Deck::reset() {
     cards_.clear();
     cards_.reserve(54);  // 预分配空间，避免多次扩容
 
-    // 52张普通牌：4种花色 × 13个点数
+  // 52张普通牌：4种花色 × 13个点数
     for (int s = 0; s < 4; s++) {
         for (int r = 2; r <= 14; r++) {
             cards_.emplace_back(
@@ -21,29 +21,29 @@ void Deck::reset() {
         }
     }
 
-    // 2张王
+  // 2张王
     cards_.emplace_back(Rank::SmallJoker);
     cards_.emplace_back(Rank::BigJoker);
 }
 
-// 用 Mersenne Twister (mt19937) 随机数引擎
-// seed=0 → 用随机设备生成种子（每次不同）
-// seed!=0 → 用固定种子（方便测试复现）
+// 用 Mersenne Twister 随机数引擎
+// seed=0 → 用随机设备生成种子
+// seed!=0 → 用固定种子
 
 void Deck::shuffle(unsigned seed) {
-    // 初始化随机数引擎
+  // 初始化随机数引擎
     std::mt19937 rng;
 
     if (seed == 0) {
-        // 用硬件随机设备生成种子（每次洗牌结果不同）
+  // 用硬件随机设备生成种子
         std::random_device rd;
         rng.seed(rd());
     } else {
-        // 用固定种子（方便调试：每次结果一样）
+  // 用固定种子
         rng.seed(seed);
     }
 
-    // Fisher-Yates 洗牌算法（std::shuffle 内部就是这个）
+  // Fisher-Yates 洗牌算法
     std::shuffle(cards_.begin(), cards_.end(), rng);
 }
 
@@ -52,7 +52,7 @@ void Deck::shuffle(unsigned seed) {
 // 总共需要 numPlayers × 9 张牌
 
 std::vector<std::vector<Card>> Deck::deal(int numPlayers) const {
-    // 参数校验：2~6人，每人9张
+  // 参数校验：2~6人，每人9张
     if (numPlayers < 2 || numPlayers > 6) {
         throw std::invalid_argument("Players must be 2~6");
     }
@@ -62,16 +62,16 @@ std::vector<std::vector<Card>> Deck::deal(int numPlayers) const {
         throw std::runtime_error("Not enough cards in deck");
     }
 
-    // 准备结果：numPlayers 个空的手牌列表
+  // 准备结果：numPlayers 个空的手牌列表
     std::vector<std::vector<Card>> hands(numPlayers);
-    for (auto& h : hands) {
+    for (auto& h: hands) {
         h.reserve(9);
     }
 
-    // 逆时针发牌：从牌堆顶依次取牌，轮流发给每个人
+  // 逆时针发牌：从牌堆顶依次取牌，轮流发给每个人
     int cardIndex = 0;
-    for (int round = 0; round < 9; round++) {           // 9轮
-        for (int p = 0; p < numPlayers; p++) {           // 每轮每人1张
+    for (int round = 0; round < 9; round++) {  // 9轮
+        for (int p = 0; p < numPlayers; p++) {  // 每轮每人1张
             hands[p].push_back(cards_[cardIndex]);
             cardIndex++;
         }

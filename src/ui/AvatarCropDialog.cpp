@@ -8,7 +8,7 @@
 #include <iterator>
 #include <vector>
 
-// WIN32_LEAN_AND_MEAN / NOMINMAX: 避免引入 winsock 与 min/max 宏(与 SFML/std 冲突)
+// WIN32_LEAN_AND_MEAN / NOMINMAX: 避免引入 winsock 与 min/max 宏
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -21,14 +21,14 @@
 namespace {
 constexpr float WW = static_cast<float>(layout::WINDOW_W);
 constexpr float WH = static_cast<float>(layout::WINDOW_H);
-constexpr float PW = 760.f;                 // 弹窗宽
-constexpr float PH = 620.f;                 // 弹窗高
-constexpr float SQUARE_TOP = 180.f;         // 裁剪框顶边
+constexpr float PW = 760.f;  // 弹窗宽
+constexpr float PH = 620.f;  // 弹窗高
+constexpr float SQUARE_TOP = 180.f;  // 裁剪框顶边
 const sf::Color C_PANEL(28, 36, 62);
 const sf::Color C_GOLD(255, 215, 0);
 constexpr const char* AVATAR_OUT = "game_data/avatar.png";
 
-// UTF-8 -> 宽字符(用于以 MSVC 宽路径方式打开非 ASCII 路径的图片)
+// UTF-8 -> 宽字符
 std::wstring toWide(const std::string& u8) {
     if (u8.empty()) return std::wstring();
     int need = MultiByteToWideChar(CP_UTF8, 0, u8.c_str(), -1, nullptr, 0);
@@ -38,19 +38,17 @@ std::wstring toWide(const std::string& u8) {
     return w;
 }
 
-// 弹出系统"打开文件"对话框; 选中则返回 UTF-8 路径
-// owner: 游戏窗口句柄 —— 必须传! 否则对话框可能出现在游戏窗口之后且模态阻塞(表现为"点击无反应")
 bool pickImageFile(std::string& outPath, sf::WindowHandle owner) {
     wchar_t buf[MAX_PATH * 4] = L"";
     OPENFILENAMEW ofn;
     std::memset(&ofn, 0, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
-    ofn.hwndOwner = static_cast<HWND>(owner);      // 属主 = 游戏窗口(保证置顶于游戏之上并正确归属)
+    ofn.hwndOwner = static_cast<HWND>(owner);  // 属主 = 游戏窗口
     ofn.lpstrFilter = L"图片文件 (*.png;*.jpg;*.jpeg;*.bmp)\0*.png;*.jpg;*.jpeg;*.bmp\0所有文件 (*.*)\0*.*\0\0";
     ofn.lpstrFile = buf;
     ofn.nMaxFile = MAX_PATH * 4;
     ofn.lpstrTitle = L"选择头像图片";
-    // OFN_NOCHANGEDIR: 不改变进程当前目录(游戏用相对路径读 assets/ 与 game_data/)
+  // OFN_NOCHANGEDIR: 不改变进程当前目录
     ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
     if (!GetOpenFileNameW(&ofn)) return false;
 
@@ -62,7 +60,7 @@ bool pickImageFile(std::string& outPath, sf::WindowHandle owner) {
     return true;
 }
 
-// 读图: 先按宽路径读入内存, 再交给 SFML 解码(规避 SFML 窄路径的编码问题)
+// 读图: 先按宽路径读入内存, 再交给 SFML 解码
 bool loadImageFile(const std::string& u8path, sf::Image& out) {
     std::wstring w = toWide(u8path);
     if (w.empty()) return false;
@@ -72,7 +70,7 @@ bool loadImageFile(const std::string& u8path, sf::Image& out) {
     if (buf.empty()) return false;
     return out.loadFromMemory(buf.data(), buf.size());
 }
-}   // namespace
+}  // namespace
 
 AvatarCropDialog::AvatarCropDialog() {
     const sf::Font& font = font_util::defaultFont();
@@ -115,7 +113,7 @@ AvatarCropDialog::AvatarCropDialog() {
     btnPick_.setPosition(sf::Vector2f(px + 36.f, py + PH - 82.f));
     btnPick_.setSize(sf::Vector2f(200.f, 52.f));
     btnPick_.setCallback([this]() {
-        if (pickFile() == 1) resetView();        // 选中并解码成功 -> 重置视图
+        if (pickFile() == 1) resetView();  // 选中并解码成功 -> 重置视图
     });
 
     btnCancel_.setText("取消");
@@ -137,12 +135,12 @@ sf::FloatRect AvatarCropDialog::cropRect() const {
 void AvatarCropDialog::open(sf::WindowHandle owner) {
     owner_ = owner;
     const int r = pickFile();
-    if (r == 0) return;                          // 用户取消选择 -> 不打开弹窗
-    open_ = true;                                // 成功/失败都打开(失败时提示可重新选择)
+    if (r == 0) return;  // 用户取消选择 -> 不打开弹窗
+    open_ = true;  // 成功/失败都打开
     if (r == 1) resetView();
 }
 
-// 初始视图: 图片刚好覆盖裁剪框(最小缩放)并居中
+// 初始视图: 图片刚好覆盖裁剪框并居中
 void AvatarCropDialog::resetView() {
     const sf::FloatRect r = cropRect();
     const float iw = static_cast<float>(img_.getSize().x);
@@ -155,7 +153,7 @@ void AvatarCropDialog::resetView() {
     renderPreview();
 }
 
-// 系统选图: 0=用户取消 1=成功 2=加载失败(供 open() 与"选择图片"按钮共用)
+// 系统选图: 0=用户取消 1=成功 2=加载失败 与"选择图片"按钮共用)
 int AvatarCropDialog::pickFile() {
     std::string path;
     if (!pickImageFile(path, owner_)) return 0;
@@ -175,10 +173,10 @@ void AvatarCropDialog::clampView() {
     const float iw = img_.getSize().x * zoom_;
     const float ih = img_.getSize().y * zoom_;
     const sf::FloatRect r = cropRect();
-    if (pos_.x > r.left) pos_.x = r.left;                                  // 左不露白
-    if (pos_.y > r.top) pos_.y = r.top;                                    // 上不露白
-    if (pos_.x + iw < r.left + r.width) pos_.x = r.left + r.width - iw;    // 右不露白
-    if (pos_.y + ih < r.top + r.height) pos_.y = r.top + r.height - ih;    // 下不露白
+    if (pos_.x > r.left) pos_.x = r.left;  // 左不露白
+    if (pos_.y > r.top) pos_.y = r.top;  // 上不露白
+    if (pos_.x + iw < r.left + r.width) pos_.x = r.left + r.width - iw;  // 右不露白
+    if (pos_.y + ih < r.top + r.height) pos_.y = r.top + r.height - ih;  // 下不露白
 }
 
 sf::IntRect AvatarCropDialog::srcRect() const {
@@ -215,7 +213,7 @@ void AvatarCropDialog::renderPreview() {
 }
 
 void AvatarCropDialog::confirm() {
-    if (!hasImage_) return;                      // 未选图: 不响应确定
+    if (!hasImage_) return;  // 未选图: 不响应确定
     sf::RenderTexture rt;
     if (!rt.create(SAVE_SIZE, SAVE_SIZE)) return;
     rt.clear(sf::Color(0, 0, 0, 255));
@@ -240,11 +238,11 @@ void AvatarCropDialog::handleEvent(const sf::Event& e, const sf::RenderWindow& w
 
     if (e.type == sf::Event::MouseWheelScrolled && hasImage_) {
         const float old = zoom_;
-        zoom_ = (e.mouseWheelScroll.delta > 0.f) ? zoom_ * 1.1f : zoom_ / 1.1f;
+        zoom_ = (e.mouseWheelScroll.delta > 0.f) ? zoom_ * 1.1f: zoom_ / 1.1f;
         zoom_ = std::max(minZoom_, std::min(zoom_, minZoom_ * 8.f));
         if (zoom_ != old) {
             const sf::FloatRect r = cropRect();
-            const sf::Vector2f c(r.left + r.width / 2.f, r.top + r.height / 2.f);   // 以框心为锚点
+            const sf::Vector2f c(r.left + r.width / 2.f, r.top + r.height / 2.f);  // 以框心为锚点
             pos_ = c - (c - pos_) * (zoom_ / old);
             clampView();
             renderPreview();
@@ -279,22 +277,22 @@ void AvatarCropDialog::draw(sf::RenderWindow& win) {
     if (!open_) return;
     win.draw(overlay_);
     win.draw(panel_);
-    panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));   // 装饰边框
+    panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));  // 装饰边框
     win.draw(title_);
 
     const sf::FloatRect cr = cropRect();
-    // 裁剪框内: 预览图; 框外: 变暗(四块半透明遮罩)
+  // 裁剪框内: 预览图; 框外: 变暗
     sf::RectangleShape shade;
     shade.setFillColor(sf::Color(0, 0, 0, 120));
     const float px = panel_.getPosition().x, py = panel_.getPosition().y;
     const float pw = panel_.getSize().x, ph = panel_.getSize().y;
     const struct { float x, y, w, h; } blocks[4] = {
-        { px, py, pw, cr.top - py },                                  // 上
+        { px, py, pw, cr.top - py },  // 上
         { px, cr.top + cr.height, pw, py + ph - (cr.top + cr.height) },// 下
-        { px, cr.top, cr.left - px, cr.height },                      // 左
+        { px, cr.top, cr.left - px, cr.height },  // 左
         { cr.left + cr.width, cr.top, px + pw - (cr.left + cr.width), cr.height }  // 右
     };
-    for (const auto& b : blocks) {
+    for (const auto& b: blocks) {
         if (b.w <= 0.f || b.h <= 0.f) continue;
         shade.setSize(sf::Vector2f(b.w, b.h));
         shade.setPosition(sf::Vector2f(b.x, b.y));

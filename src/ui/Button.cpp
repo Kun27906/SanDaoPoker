@@ -11,7 +11,7 @@ Button::Button(const std::string& text, const sf::Vector2f& pos, const sf::Vecto
 
 void Button::setText(const std::string& t) {
     text_.setFont(font_util::defaultFont());
-    // 中文必须显式 UTF-8 转换,否则 SFML 按 ANSI 解码会乱码
+  // 中文必须显式 UTF-8 转换,否则 SFML 按 ANSI 解码会乱码
     text_.setString(str_util::utf8(t.c_str()));
     text_.setCharacterSize(22);
     text_.setFillColor(sf::Color::White);
@@ -49,11 +49,11 @@ bool Button::contains(const sf::Vector2f& point) const {
 }
 
 void Button::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
-    // 鼠标位置(窗口坐标 -> 世界坐标)
+  // 鼠标位置
     sf::Vector2f mpos = win.mapPixelToCoords(sf::Mouse::getPosition(win));
     hovered_ = contains(mpos);
 
-    // 左键按下瞬间触发回调
+  // 左键按下瞬间触发回调
     if (e.type == sf::Event::MouseButtonPressed &&
         e.mouseButton.button == sf::Mouse::Left && hovered_) {
         SoundManager::instance().playClick();  // 按钮点击音
@@ -69,15 +69,15 @@ void Button::draw(sf::RenderWindow& win) {
     win.draw(text_);
 }
 
-// 状态 -> 贴图: 禁用 > 选中(常驻按下) > 悬停 > 正常
+// 状态 -> 贴图: 禁用 > 选中 > 悬停 > 正常
 void Button::refreshSprite() {
     const AssetManager& am = AssetManager::instance();
-    int state = 0;                  // 0=正常
-    if (disabled_)      state = 3;  // 禁用(灰)
+    int state = 0;  // 0=正常
+    if (disabled_)      state = 3;  // 禁用
     else if (selected_) state = 2;  // 选中: 常驻"按下"贴图, 不恢复
-    else if (hovered_)  state = 1;  // 悬停(亮)
+    else if (hovered_)  state = 1;  // 悬停
     const sf::Texture* t = am.buttonTexture(state);
-    if (!t) return;                 // 贴图缺失(不应发生): 保持上次状态
+    if (!t) return;  // 贴图缺失: 保持上次状态
     sprite_.setTexture(*t);
     sprite_.setColor(tint_);
     const sf::Vector2u ts = t->getSize();
@@ -88,7 +88,7 @@ void Button::refreshSprite() {
 }
 
 void Button::centerText() {
-    // 以按钮中心为锚点居中文字
+  // 以按钮中心为锚点居中文字
     sf::FloatRect tb = text_.getLocalBounds();
     text_.setOrigin(tb.left + tb.width / 2.f, tb.top + tb.height / 2.f);
     text_.setPosition(pos_.x + size_.x / 2.f, pos_.y + size_.y / 2.f);

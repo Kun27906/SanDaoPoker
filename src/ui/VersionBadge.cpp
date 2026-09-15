@@ -11,11 +11,11 @@ namespace {
 constexpr float WW = static_cast<float>(layout::WINDOW_W);
 constexpr float WH = static_cast<float>(layout::WINDOW_H);
 
-constexpr float PW = 800.f;              // 弹窗宽
-constexpr float PH = 470.f;              // 弹窗高
+constexpr float PW = 800.f;  // 弹窗宽
+constexpr float PH = 470.f;  // 弹窗高
 constexpr float PL = (WW - PW) / 2.f;
 constexpr float PT = (WH - PH) / 2.f;
-constexpr float ROW_H = 34.f;            // 每条版本行高
+constexpr float ROW_H = 34.f;  // 每条版本行高
 
 const sf::Color C_BG(30, 40, 70);
 const sf::Color C_EDGE(255, 215, 0);
@@ -29,9 +29,9 @@ void centerText(sf::Text& t, float cx, float y) {
 }
 }
 
-VersionBadge::VersionBadge(bool clickable) : clickable_(clickable) {
+VersionBadge::VersionBadge(bool clickable): clickable_(clickable) {
     badge_.setFont(font_util::defaultFont());
-    badge_.setCharacterSize(20);          // 版本号字体(略大)
+    badge_.setCharacterSize(20);  // 版本号字体
     badge_.setFillColor(sf::Color(185, 185, 185));
     badge_.setString(str_util::utf8(GAME_VERSION));
 
@@ -49,7 +49,7 @@ VersionBadge::VersionBadge(bool clickable) : clickable_(clickable) {
     title_.setString(str_util::utf8("版本历史"));
     centerText(title_, WW / 2.f, PT + 24.f);
 
-    // 关闭键: 圆圈 + close 图标
+  // 关闭键: 圆圈 + close 图标
     closeRing_.setRadius(22.f);
     closeRing_.setPosition(PL + PW - 66.f, PT + 22.f);
     closeRing_.setFillColor(sf::Color(255, 215, 0, 30));
@@ -63,7 +63,7 @@ VersionBadge::VersionBadge(bool clickable) : clickable_(clickable) {
         closeIcon_.setPosition(PL + PW - 66.f + 7.f, PT + 22.f + 7.f);
     }
 
-    // 列表区(去掉提示行后上移, 可视行数更多)
+  // 列表区
     listRect_ = sf::FloatRect(PL + 30.f, PT + 78.f, PW - 60.f, PH - 78.f - 28.f);
     listBg_.setSize(sf::Vector2f(listRect_.width, listRect_.height));
     listBg_.setPosition(listRect_.left, listRect_.top);
@@ -104,7 +104,7 @@ void VersionBadge::buildEntries() {
 
 float VersionBadge::maxScroll() const {
     float m = contentH_ - listRect_.height;
-    return m > 0.f ? m : 0.f;
+    return m > 0.f ? m: 0.f;
 }
 
 void VersionBadge::clampScroll() {
@@ -121,7 +121,7 @@ void VersionBadge::setPosition(const sf::Vector2f& p) {
 
 bool VersionBadge::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     if (open_) {
-        // 弹窗打开: 吞掉全部事件
+  // 弹窗打开: 吞掉全部事件
         if (e.type == sf::Event::MouseWheelScrolled) {
             scroll_ -= e.mouseWheelScroll.delta * (ROW_H * 1.2f);
             clampScroll();
@@ -148,7 +148,7 @@ bool VersionBadge::handleEvent(const sf::Event& e, const sf::RenderWindow& win) 
             sf::Vector2i(e.mouseButton.x, e.mouseButton.y));
         if (badgeRect_.contains(mp)) {
             open_ = true;
-            scroll_ = maxScroll();          // 打开时滚到最新版本
+            scroll_ = maxScroll();  // 打开时滚到最新版本
             SoundManager::instance().playClick();
         }
     }
@@ -156,8 +156,8 @@ bool VersionBadge::handleEvent(const sf::Event& e, const sf::RenderWindow& win) 
 }
 
 void VersionBadge::draw(sf::RenderWindow& win) {
-    // 左下角版本号(hover 提亮)
-    badge_.setFillColor(hovered_ ? sf::Color(240, 240, 240) : sf::Color(185, 185, 185));
+  // 左下角版本号
+    badge_.setFillColor(hovered_ ? sf::Color(240, 240, 240): sf::Color(185, 185, 185));
     win.draw(badge_);
     if (!open_) return;
 
@@ -166,7 +166,7 @@ void VersionBadge::draw(sf::RenderWindow& win) {
     panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));  // 装饰边框
     win.draw(title_);
     win.draw(closeRing_);
-    if (!closeIcon_.getTexture()) {          // 惰性获取(场景可能在素材加载前构造)
+    if (!closeIcon_.getTexture()) {  // 惰性获取
         if (const sf::Texture* ic = AssetManager::instance().icon("close")) {
             float s = 30.f / static_cast<float>(ic->getSize().x);
             closeIcon_.setTexture(*ic);
