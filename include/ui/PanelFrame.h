@@ -3,21 +3,19 @@
 #include <algorithm>
 #include "render/AssetManager.h"
 
-// 素材: assets/ui/table/panel_frame.png
-// 用法: 画完弹窗底色/描边后调用一次:
-// panel_frame::draw, panel_.getSize));
+// 弹窗九宫格装饰边框; 素材缺失时静默跳过
 namespace panel_frame {
 
-constexpr float CW = 112.f;   // 角切片宽
-constexpr float CH = 144.f;   // 角切片高
-constexpr float TW = 32.f;    // 中段切片宽
-constexpr float TH = 32.f;    // 中段切片高
-constexpr float SLICE_SCALE = 0.55f;   // 角饰缩放
-constexpr float OUTSET = 6.f;          // 边框外扩
+constexpr float CW = 112.f;
+constexpr float CH = 144.f;
+constexpr float TW = 32.f;
+constexpr float TH = 32.f;
+constexpr float SLICE_SCALE = 0.55f;
+constexpr float OUTSET = 6.f;
 
 inline void draw(sf::RenderWindow& win, const sf::FloatRect& rect) {
     const sf::Texture* t = AssetManager::instance().tableTexture("panel_frame");
-    if (!t) return;   // 素材缺失: 静默跳过
+    if (!t) return;
 
     const float texW = static_cast<float>(t->getSize().x);
     const float texH = static_cast<float>(t->getSize().y);
@@ -29,7 +27,6 @@ inline void draw(sf::RenderWindow& win, const sf::FloatRect& rect) {
     if (maxS < s) s = std::max(0.15f, maxS);
 
     const float cw = CW * s, ch = CH * s;
-    // 外沿矩形 = 弹窗矩形外扩 OUTSET
     const float ox = rect.left - OUTSET;
     const float oy = rect.top - OUTSET;
     const float ow = rect.width + OUTSET * 2.f;
@@ -76,4 +73,4 @@ inline void draw(sf::RenderWindow& win, const sf::FloatRect& rect) {
     }
 }
 
-} // namespace panel_frame
+}
