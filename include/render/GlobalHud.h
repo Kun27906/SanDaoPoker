@@ -28,6 +28,11 @@ public:
     void update(float dt);       // 两段确认计时复原
     void draw(sf::RenderWindow& win);
 
+    // ---- 窗口关闭请求(标题栏 X / Esc) ----
+    // 局内"一局未结束"(发牌/组牌/比牌)时弹确认窗; 返回 true = 已拦截(不要关窗口)
+    bool onCloseRequested(bool isEscape);
+    bool shouldClose() const { return exitConfirmed_; }   // 已确认退出 -> 关闭窗口
+
 private:
     void openPopup();            // menuList 打开菜单弹窗
     void closePopup();
@@ -45,6 +50,8 @@ private:
     void applyDevInput();        // 输入框内容 -> 余额
     void applyDevBalance(int v); // 统一写余额: 账号 + (局内活跃房间)本人筹码, 防两处脱节
     void handleDevText(const sf::Event& e);
+    void openExitPopup();        // 打开退出确认弹窗
+    void confirmExit();          // [确定]: 按逃跑提前结算(梯度罚金, 直接改筹码) + 标记退出
 
     SceneManager* mgr_;
     IconButton btnMenu_, btnMusic_, btnWrench_, btnHome_;
@@ -85,4 +92,11 @@ private:
     bool devInputFocus_ = false;
     std::string devInputStr_;        // 聚焦编辑中的数字串
     bool devPopupOpen_ = false;      // dev 弹窗是否打开
+
+    // ---- 退出确认弹窗(局内一局未结束时, 点 X / Esc 弹出) ----
+    bool exitPopupOpen_ = false;     // 确认窗是否打开
+    bool exitConfirmed_ = false;     // 玩家点[确定] -> GameApp 关闭窗口
+    sf::RectangleShape exitDialog_;  // 独立小面板(复用 overlay_ 遮罩)
+    TextBox exitText_;
+    Button btnExitOk_, btnExitCancel_;
 };

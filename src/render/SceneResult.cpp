@@ -17,18 +17,6 @@ const sf::Color C_PANEL_BG(30, 40, 70);  // 面板底色(与弹窗一致)
 constexpr float PANEL_W = 620.f;
 constexpr float PANEL_PAD = 24.f;
 
-// ====== 逃跑罚金(梯度算法, 用户指定) ======
-// 与本场"已游玩局数"和"本场每局底注"挂钩:
-//   已玩 1-2 局 -> 罚 1 局底注;  3-4 局 -> 2 局;  5-8 局 -> 3 局;  9 局及以上 -> 4 局
-// (本场最长 16 局, 可逃跑时点为本场第 1~15 局结算后; 9 局以上统一按 4 局底注封顶)
-int escapePenaltyFor(int playedRounds, int ante) {
-    int mult;
-    if (playedRounds <= 2)      mult = 1;
-    else if (playedRounds <= 4) mult = 2;
-    else if (playedRounds <= 8) mult = 3;
-    else                        mult = 4;
-    return mult * ante;
-}
 }
 
 SceneResult::SceneResult(SceneManager* mgr) : mgr_(mgr) {

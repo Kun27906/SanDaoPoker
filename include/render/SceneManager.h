@@ -42,6 +42,12 @@ public:
     bool homeVisible() const;   // 组牌/比牌/启动页隐藏
     void onHomePressed();       // 转发给当前场景(选房返回大厅/结算逃跑或返回大厅)
 
+    // ---- 窗口关闭请求(标题栏 X / Esc) ----
+    // 返回 true = 已拦截(局内一局未结束 -> 弹确认窗; 或确认窗已开着), 调用方不要关窗口
+    // 返回 false = 可直接退出
+    bool onCloseRequested(bool isEscape);
+    bool shouldClose() const;   // true = 玩家已在确认窗点[确定] -> 关闭窗口
+
     // ---- 游戏会话状态(跨场景共享) ----
     std::unique_ptr<Room> room;   // 当前房间(选房后创建,组牌/比牌/结算使用)
     int selectedPlayerCount = 4;  // 大厅选的人数(2~6),决定房间列表
