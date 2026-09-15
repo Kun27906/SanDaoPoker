@@ -78,6 +78,7 @@ void Avatar::draw(sf::RenderWindow& win) {
         py = cy + r * 0.30f;
     }
     roundedRect(win, px, py, plateW, plateH, plateH * 0.28f, C_FRAME_BG, C_FRAME_EDGE);
+    plateRect_ = sf::FloatRect(px, py, plateW, plateH);   // 供点击改名命中检测
 
     // ---- 2. 圆形头像(素材已按圆裁剪): 直径 2*outer, 完整填满圆环内侧, 无缝隙 ----
     float d = outer * 2.f;

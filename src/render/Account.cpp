@@ -67,6 +67,11 @@ int Account::add(int delta) {
     return balance_;
 }
 
+void Account::setNickname(const std::string& n) {
+    nickname_ = n;
+    save();
+}
+
 std::string Account::ensureNickname() {
     if (nickname_.empty()) {
         nickname_ = makeNickname();

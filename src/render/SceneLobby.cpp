@@ -44,6 +44,10 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
     selfAvatar_.setNickname(Account::instance().ensureNickname());
     versionBadge_.setPosition(sf::Vector2f(24.f, WH - 40.f));   // 左下角版本号(可点击)
 
+    // 点击本人昵称名牌 -> 自设昵称; 点击本人头像圆 -> 上传图片并裁剪
+    // (交互与两个弹窗封装在 ProfileEditor, 与选房界面共用)
+    profile_.bind(&selfAvatar_);
+
     // 重置账号(右下角; 两段确认: 第一次点击进入确认态, 再点一次执行)
     btnReset_.setText("重置账号");
     btnReset_.setPosition(sf::Vector2f(WW - 200.f, WH - 64.f));
@@ -100,6 +104,8 @@ void SceneLobby::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     }
     if (versionBadge_.handleEvent(e, win)) return;   // 版本历史弹窗打开时拦截
     if (chipBar_.handleEvent(e, win)) return;        // 点击筹码图标 -> chip 音效
+    // 自设昵称/头像: 弹窗打开时独占输入; 否则处理"点击本人昵称名牌/头像圆"
+    if (profile_.handleEvent(e, win)) return;
     for (auto& b : btnSeats_) b.handleEvent(e, win);
     btnReset_.handleEvent(e, win);
 }
@@ -109,6 +115,7 @@ void SceneLobby::onHomePressed() {
 }
 
 void SceneLobby::update(float dt) {
+    profile_.update(dt);   // 昵称弹窗输入框插入符闪烁
     // 确认态 5 秒未二次点击则复原
     if (resetArmed_) {
         resetArmTimer_ += dt;
@@ -137,4 +144,7 @@ void SceneLobby::draw(sf::RenderWindow& win) {
         topUpText_.draw(win);
         btnTopUpOk_.draw(win);
     }
+
+    // 自设昵称 / 自设头像弹窗(最上层)
+    profile_.draw(win);
 }

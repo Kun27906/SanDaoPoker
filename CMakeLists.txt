@@ -85,6 +85,9 @@ set(UI_SOURCES
     src/ui/IconButton.cpp
     src/ui/Avatar.cpp
     src/ui/VersionBadge.cpp
+    src/ui/NicknameDialog.cpp
+    src/ui/AvatarCropDialog.cpp
+    src/ui/ProfileEditor.cpp
 )
 
 # ------------------------------------------------------------
@@ -134,6 +137,13 @@ if(SFML_FOUND)
     endif()
 else()
     message(WARNING "未找到 SFML,先编译纯 C++ 骨架(渲染模块后续接入)")
+endif()
+
+# ------------------------------------------------------------
+# Windows 系统库: 头像上传用的原生"打开文件"对话框(comdlg32!GetOpenFileNameW)
+# ------------------------------------------------------------
+if(WIN32)
+    target_link_libraries(SanDaoPoker PRIVATE comdlg32)
 endif()
 
 # ------------------------------------------------------------

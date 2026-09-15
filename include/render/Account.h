@@ -21,6 +21,7 @@ public:
     int add(int delta);        // 余额增减(delta 可为负),返回新余额并保存
 
     // ---- 昵称(账号数据, 与筹码一同存档; 存档第 2 行) ----
+    void setNickname(const std::string& n);   // 手动设置昵称并立即保存(自设昵称)
     std::string ensureNickname();             // 无则随机生成并保存, 返回
 
     bool needsTopUp() const { return balance_ < 100; }  // 是否触发破产保护

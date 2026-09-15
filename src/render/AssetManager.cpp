@@ -16,6 +16,7 @@ bool AssetManager::loadAll() {
     if (loaded_) return true;
     loaded_ = loadCardTextures();
     loadMiscTextures();
+    reloadCustomAvatar();   // 本人自定义头像(有则 0 号头像位优先使用)
     return loaded_;
 }
 
@@ -306,10 +307,36 @@ const sf::Texture* AssetManager::deckPile(int backIndex) const {
 }
 
 const sf::Texture* AssetManager::avatarTexture(int idx) const {
+    // 0 号位 = 本人: 优先使用玩家自定义头像(未设置/加载失败时回落到默认随机头像)
+    if (idx == 0 && customTex_.getSize().x > 0) return &customTex_;
     if (avatarTex_.empty()) return nullptr;
     int n = static_cast<int>(avatarTex_.size());
     int i = ((idx % n) + n) % n;                  // 取模循环
     return avatarTex_[i].getSize().x > 0 ? &avatarTex_[i] : nullptr;
+}
+
+const sf::Texture* AssetManager::customAvatar() const {
+    return customTex_.getSize().x > 0 ? &customTex_ : nullptr;
+}
+
+bool AssetManager::reloadCustomAvatar() {
+    // 未设置头像时静默返回: 先判存在, 避免 SFML 对缺失文件向 stderr 打印加载失败告警
+    if (!std::filesystem::exists("game_data/avatar.png")) {
+        customTex_ = sf::Texture();
+        return false;
+    }
+    sf::Image img;
+    if (!img.loadFromFile("game_data/avatar.png")) {
+        customTex_ = sf::Texture();   // 文件损坏 -> 清空, 回落默认头像
+        return false;
+    }
+    sf::Texture t;
+    if (!t.loadFromImage(img)) {
+        customTex_ = sf::Texture();
+        return false;
+    }
+    customTex_ = std::move(t);
+    return true;
 }
 
 const sf::Texture* AssetManager::tableTexture(const std::string& name) const {

@@ -19,6 +19,14 @@ public:
     // 本人样式: 名牌与圆心共线且昵称居中于可见区; 他人(false): 名牌置于圆环右下角
     void setSelfStyle(bool s) { selfStyle_ = s; }
     sf::FloatRect getBounds() const;                          // 圆环+名牌整体范围(布局用)
+    // 昵称名牌区域(最近一次 draw 时记录; 点击名牌改名用)
+    sf::FloatRect plateBounds() const { return plateRect_; }
+    // 头像圆内点击判定(点击圆换头像用); margin > 0 时外扩判定半径(点击容差)
+    bool hitCircle(const sf::Vector2f& p, float margin = 0.f) const {
+        const float dx = p.x - c_.x, dy = p.y - c_.y;
+        const float rr = r_ + margin;
+        return (dx * dx + dy * dy) <= rr * rr;
+    }
     void draw(sf::RenderWindow& win);
 
 private:
@@ -30,6 +38,7 @@ private:
     float cs_ = 14.f;
     float minPlateW_ = 0.f;    // 名牌最小宽度(0=纯自适应)
     bool  selfStyle_ = false;  // true=本人(名牌与圆心共线, 昵称居中于可见区)
+    sf::FloatRect plateRect_{};  // 最近一次绘制的名牌矩形(plateBounds 返回)
     sf::Text text_;
     bool fontReady_ = false;
 };
