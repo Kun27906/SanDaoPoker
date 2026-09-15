@@ -7,8 +7,8 @@
 #include <cstdio>
 
 namespace {
-constexpr unsigned WW = 1280;
-constexpr unsigned WH = 800;
+constexpr unsigned WW = layout::WINDOW_W;
+constexpr unsigned WH = layout::WINDOW_H;
 const sf::Color C_WIN(0, 200, 90);       // 盈利鲜绿
 const sf::Color C_LOSE(255, 70, 70);     // 亏损鲜红
 const sf::Color C_GOLD(255, 215, 0);

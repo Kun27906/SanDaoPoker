@@ -1,4 +1,5 @@
 #include "render/GlobalHud.h"
+#include "render/Layout.h"
 #include "render/AssetManager.h"
 #include "ui/PanelFrame.h"
 #include "render/SoundManager.h"
@@ -7,8 +8,8 @@
 #include <cstdlib>
 
 namespace {
-constexpr float WW = 1280.f;
-constexpr float WH = 800.f;
+constexpr float WW = static_cast<float>(layout::WINDOW_W);
+constexpr float WH = static_cast<float>(layout::WINDOW_H);
 constexpr float BTN = 40.f;          // 左上角键尺寸
 constexpr float PAD = 48.f;          // 键间距
 

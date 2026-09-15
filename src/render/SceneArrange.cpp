@@ -11,8 +11,8 @@
 #include <cmath>
 
 namespace {
-constexpr unsigned WW = 1280;
-constexpr unsigned WH = 800;
+constexpr unsigned WW = layout::WINDOW_W;
+constexpr unsigned WH = layout::WINDOW_H;
 
 // 布局常量
 constexpr float SLOT_X[3] = {500.f, 630.f, 760.f};   // 槽 x(每道3槽)
@@ -21,8 +21,8 @@ constexpr float HAND_X[9] = {90.f, 210.f, 330.f, 450.f, 570.f,
                              690.f, 810.f, 930.f, 1050.f};  // 手牌 x
 constexpr float HAND_Y = 640.f;
 constexpr float CARD_SCALE = 0.5f;            // 200x280 -> 100x140
-constexpr float CARDW = 200.f * CARD_SCALE;   // 牌宽 100
-constexpr float CARDH = 280.f * CARD_SCALE;   // 牌高 140 (避开 core/Card.h 的保护宏名冲突)
+constexpr float CARDW = layout::CARD_UNIT_W * CARD_SCALE;   // 牌宽 100
+constexpr float CARDH = layout::CARD_UNIT_H * CARD_SCALE;   // 牌高 140
 constexpr float COUNTDOWN_SECONDS = 40.f;     // 组牌限时(延长至 40 秒)
 
 // 拖拽参数

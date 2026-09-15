@@ -9,8 +9,8 @@
 #include "ai/AIPlayer.h"
 
 namespace {
-constexpr unsigned WW = 1280;
-constexpr unsigned WH = 800;
+constexpr unsigned WW = layout::WINDOW_W;
+constexpr unsigned WH = layout::WINDOW_H;
 
 // ---- 难度选择(成员B): 索引 0/1/2 <-> AIPlayer::Difficulty ----
 AIPlayer::Difficulty diffOf(int idx) {

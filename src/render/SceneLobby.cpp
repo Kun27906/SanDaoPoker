@@ -5,8 +5,8 @@
 #include <array>
 
 namespace {
-constexpr unsigned WW = 1280;
-constexpr unsigned WH = 800;
+constexpr unsigned WW = layout::WINDOW_W;
+constexpr unsigned WH = layout::WINDOW_H;
 }
 
 SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {

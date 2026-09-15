@@ -239,20 +239,11 @@ if(BUILD_TOOLS)
         ${TOOL_COMMON_SOURCES})
     add_dev_tool(room_smoke_test)
 
-    # 音效试听拼盘
-    add_executable(audio_montage tools/audio_montage.cpp)
-    target_include_directories(audio_montage PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-    target_link_libraries(audio_montage PRIVATE sfml-audio sfml-system)
-    if(MSVC)
-        target_compile_options(audio_montage PRIVATE /utf-8)
-    endif()
-
-    # 素材生成: 牌面 大小王 牌堆 倒计时条
+    # 素材生成: 牌面 牌堆 倒计时条
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_FOUND)
         add_custom_target(gen_assets
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_card_sheet.py
-            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_jokers.py
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_deck_pile.py
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_countdown_bar.py
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

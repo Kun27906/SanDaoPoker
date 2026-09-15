@@ -6,8 +6,8 @@
 #include <vector>
 
 namespace {
-constexpr unsigned WW = 1280;
-constexpr unsigned WH = 800;
+constexpr unsigned WW = layout::WINDOW_W;
+constexpr unsigned WH = layout::WINDOW_H;
 
 // ====== 座位表(按用户指定编号) ======
 // 1=你(下方大牌)  2=右中下  3=右中上  4=上方靠右  5=上方靠左  6=左中
@@ -18,8 +18,8 @@ struct Seat {
     float ax, ay;          // 头像圆心(名牌由 Avatar 自绘)
 };
 constexpr float TITLE_BOTTOM = 50.f;   // 标题(第 X 局·比牌 @y22)下边沿 + 余量
-constexpr float CARD_UNIT_W = 200.f;   // 单张牌素材宽
-constexpr float CARD_UNIT_H = 280.f;   // 单张牌素材高
+constexpr float CARD_UNIT_W = layout::CARD_UNIT_W;   // 单张牌素材宽
+constexpr float CARD_UNIT_H = layout::CARD_UNIT_H;   // 单张牌素材高
 
 constexpr Seat SEATS[7] = {            // 下标 = 座位号(0 空置)
     { 0.f,     0.f,    0.f,   0.f,    0.f,    0.f    },   // 0 占位

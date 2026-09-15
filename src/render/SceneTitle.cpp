@@ -2,8 +2,8 @@
 #include "render/AssetManager.h"
 
 namespace {
-constexpr unsigned WW = 1280;
-constexpr unsigned WH = 800;
+constexpr unsigned WW = layout::WINDOW_W;
+constexpr unsigned WH = layout::WINDOW_H;
 }
 
 SceneTitle::SceneTitle(SceneManager* mgr) : mgr_(mgr) {

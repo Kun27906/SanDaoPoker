@@ -1,4 +1,5 @@
 #include "ui/VersionBadge.h"
+#include "render/Layout.h"
 #include "ui/FontUtil.h"
 #include "ui/PanelFrame.h"
 #include "render/AssetManager.h"
@@ -7,8 +8,8 @@
 #include <algorithm>
 
 namespace {
-constexpr float WW = 1280.f;
-constexpr float WH = 800.f;
+constexpr float WW = static_cast<float>(layout::WINDOW_W);
+constexpr float WH = static_cast<float>(layout::WINDOW_H);
 
 constexpr float PW = 800.f;              // 弹窗宽
 constexpr float PH = 470.f;              // 弹窗高

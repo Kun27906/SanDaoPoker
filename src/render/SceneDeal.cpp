@@ -8,16 +8,16 @@
 #include <cstdio>
 
 namespace {
-constexpr unsigned WW = 1280;
-constexpr unsigned WH = 800;
+constexpr unsigned WW = layout::WINDOW_W;
+constexpr unsigned WH = layout::WINDOW_H;
 
 // 手牌槽(与 SceneArrange 一致)
 constexpr float HAND_X[9] = {90.f, 210.f, 330.f, 450.f, 570.f,
                              690.f, 810.f, 930.f, 1050.f};
 constexpr float HAND_Y = 640.f;
 constexpr float CARD_SCALE = 0.5f;         // 200x280 -> 100x140
-constexpr float CARDW = 200.f * CARD_SCALE;
-constexpr float CARDH = 280.f * CARD_SCALE;
+constexpr float CARDW = layout::CARD_UNIT_W * CARD_SCALE;
+constexpr float CARDH = layout::CARD_UNIT_H * CARD_SCALE;
 
 // 牌堆
 constexpr int   LAYERS = 54;               // 牌堆层数(素材)

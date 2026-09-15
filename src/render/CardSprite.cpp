@@ -1,5 +1,6 @@
 #include "render/CardSprite.h"
 #include "render/AssetManager.h"
+#include "render/Layout.h"
 
 void CardSprite::setCard(const Card& card) {
     card_ = card;
@@ -15,12 +16,16 @@ void CardSprite::setPosition(const sf::Vector2f& p) {
 void CardSprite::setScale(float s) {
     scale_ = s;
     sprite_.setScale(s, s);
-    sf::Vector2f sz(200.f * s, 280.f * s);
-    placeholder_.setSize(sz);
+    placeholder_.setSize(getSize());
 }
 
 sf::Vector2f CardSprite::getSize() const {
-    return sf::Vector2f(200.f * scale_, 280.f * scale_);
+    // 尺寸取自当前贴图, 未加载时用基准值
+    if (const sf::Texture* t = sprite_.getTexture()) {
+        return sf::Vector2f(static_cast<float>(t->getSize().x) * scale_,
+                            static_cast<float>(t->getSize().y) * scale_);
+    }
+    return sf::Vector2f(layout::CARD_UNIT_W * scale_, layout::CARD_UNIT_H * scale_);
 }
 
 sf::FloatRect CardSprite::getBounds() const {

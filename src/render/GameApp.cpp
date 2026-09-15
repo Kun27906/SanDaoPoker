@@ -1,4 +1,5 @@
 #include "render/GameApp.h"
+#include "render/Layout.h"
 #include "render/AssetManager.h"
 #include "render/SoundManager.h"
 #include "ai/AIPlayer.h"
@@ -6,8 +7,8 @@
 #include <cstdio>
 
 namespace {
-constexpr unsigned WINDOW_W = 1280;
-constexpr unsigned WINDOW_H = 800;
+constexpr unsigned WINDOW_W = layout::WINDOW_W;
+constexpr unsigned WINDOW_H = layout::WINDOW_H;
 
 // 窗口标题(中文需显式 UTF-8 转换)
 sf::String windowTitle() {

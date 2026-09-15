@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "render/AssetManager.h"
+#include "render/Layout.h"
 #include "render/Account.h"
 #include "ui/Avatar.h"
 #include "ui/ChipBar.h"
