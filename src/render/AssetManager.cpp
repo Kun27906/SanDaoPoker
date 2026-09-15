@@ -106,8 +106,8 @@ bool AssetManager::loadMiscTextures() {
             std::fprintf(stderr, "[AssetManager] 加载失败: %s\n", path);
         }
     }
-    if (!bgTex_.loadFromFile("assets/ui/backgrounds/table_bg.png")) {
-        std::fprintf(stderr, "[AssetManager] 加载失败: assets/ui/backgrounds/table_bg.png\n");
+    if (!bgTex_.loadFromFile("assets/ui/backgrounds/table_bg.jpg")) {
+        std::fprintf(stderr, "[AssetManager] 加载失败: assets/ui/backgrounds/table_bg.jpg\n");
     }
     // 主菜单背景(单独一张;失败则场景代码回退到 table_bg)
     if (!menuTex_.loadFromFile("assets/ui/backgrounds/menu.jpg")) {

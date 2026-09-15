@@ -64,10 +64,11 @@ constexpr RoomConfig ROOM_CONFIGS[ROOM_CONFIG_COUNT] = {
 
 // ====== 逃跑罚金(梯度算法) ======
 // 与本场"已游玩局数"和"本场每局底注"挂钩:
-//   已玩 1-2 局 -> 罚 1 局底注;  3-4 局 -> 2 局;  5-8 局 -> 3 局;  9 局及以上 -> 4 局
+//   0 局(一局都没打完) -> 不罚;  1-2 局 -> 罚 1 局底注;  3-4 局 -> 2 局;  5-8 局 -> 3 局;  9 局及以上 -> 4 局
 // (本场最长 16 局, 可逃跑时点为本场第 1~15 局结算后; 9 局以上统一按 4 局底注封顶)
 // playedRounds 只统计【已结算完成】的局 —— 局内(发牌/组牌/比牌)提前退出时当前这局不计入。
 inline int escapePenaltyFor(int playedRounds, int ante) {
+    if (playedRounds <= 0) return 0;   // 一局都没打完就退出: 不罚
     int mult;
     if (playedRounds <= 2)      mult = 1;
     else if (playedRounds <= 4) mult = 2;

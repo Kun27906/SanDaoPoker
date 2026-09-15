@@ -54,8 +54,8 @@ const char* RULES_TEXT =
     "【比牌结算】三道依次比牌，胜者取对应小池，打满轮次结算本场。\n"
     "【入场资格】余额不足房间第一局注金时，不可进入该房间。\n"
     "【筹码显示】右上角筹码条图标随余额档位变化；每局牌背三色随机。\n"
-    "【逃跑】一局结算后可提前结束本场，罚金按已玩局数梯度计算。\n"
-    "【逃跑罚金】1-2 局罚 1 份底注，3-4 局 2 份，5-8 局 3 份，9 局及以上 4 份。\n"
+    "【逃跑】一局结算后可提前结束本场；局内直接关闭游戏窗口同样按逃跑结算。\n"
+    "【逃跑罚金】一局都没打完不罚；1-2 局罚 1 份底注，3-4 局 2 份，5-8 局 3 份，9 局及以上 4 份。\n"
     "【踢出】每局后余额不足下一局注金将被踢出本场（不扣费）。\n"
     "【破产】余额低于 100 判定破产，返回大厅时自动补足至 500。";
 }
@@ -235,20 +235,28 @@ bool GlobalHud::onCloseRequested(bool isEscape) {
         return true;
     }
     if (!mgr_) return false;
-    // 只有"一局未结束"(发牌/组牌/比牌)才需要二次确认; 其余场景(大厅/选房/结算)保持原行为直接退出
+    Room* room = mgr_->room.get();
+    // 1) 局内(发牌/组牌/比牌): 本局还没打完
+    // 2) 结算界面: 本局已结算, 但本场还有下一局(未打完) -> 同样按逃跑提前结算
     const SceneId id = mgr_->currentId();
-    if (id != SceneId::Deal && id != SceneId::Arrange && id != SceneId::Battle) return false;
-    if (!mgr_->room) return false;      // 没有进行中的房间 -> 直接退出
-    openExitPopup();
+    const bool inRound = (id == SceneId::Deal || id == SceneId::Arrange || id == SceneId::Battle);
+    const bool inMatch = (id == SceneId::Result) && room && !room->isFinished();
+    if (!inRound && !inMatch) return false;
+    if (!room) return false;            // 没有进行中的房间 -> 直接退出
+    openExitPopup(inRound);
     return true;
 }
 
-void GlobalHud::openExitPopup() {
+void GlobalHud::openExitPopup(bool inRound) {
     // 与其它全局弹窗互斥(同时只留一个)
     popupOpen_ = false;
     devPopupOpen_ = false;
     dragging_ = false;
     devDrag_ = false;
+    // 文案主语区分: 局内是"本局"未结束; 结算界面是"本场"未打完(本局已结算)
+    exitText_.setText(inRound
+        ? "本局还未结束，您想要退出吗？\n如果退出，将按逃跑提前结算。"
+        : "本场还未结束，您想要退出吗？\n如果退出，将按逃跑提前结算。");
     exitPopupOpen_ = true;
 }
 

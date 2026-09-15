@@ -32,8 +32,8 @@ ui/table/*.png             桌面小贴图（文件名即查询名，代码用 t
 
 | 文件 | 说明 |
 |------|------|
-| `ui/backgrounds/table_bg.png` | 游戏桌面背景（1920×1080，绿呢桌面） |
-| `ui/backgrounds/menu.jpg` | 主菜单背景（1920×1080，场景画） |
+| `ui/backgrounds/table_bg.jpg` | 游戏桌面背景（1672×941，JPG，绘制时自适应缩放至窗口） |
+| `ui/backgrounds/menu.jpg` | 主菜单背景（1672×940，JPG，绘制时自适应缩放至窗口） |
 | `ui/buttons/btn_normal.png` | 按钮-常态（240×80，亮金渐变） |
 | `ui/buttons/btn_hover.png` | 按钮-悬停 |
 | `ui/buttons/btn_pressed.png` | 按钮-按下 |
