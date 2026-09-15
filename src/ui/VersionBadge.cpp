@@ -1,4 +1,5 @@
 #include "ui/VersionBadge.h"
+#include "render/Layout.h"
 #include "ui/FontUtil.h"
 #include "ui/PanelFrame.h"
 #include "render/AssetManager.h"
@@ -7,8 +8,8 @@
 #include <algorithm>
 
 namespace {
-constexpr float WW = 1280.f;
-constexpr float WH = 800.f;
+constexpr float WW = static_cast<float>(layout::WINDOW_W);
+constexpr float WH = static_cast<float>(layout::WINDOW_H);
 
 constexpr float PW = 800.f;              // 弹窗宽
 constexpr float PH = 470.f;              // 弹窗高
@@ -30,11 +31,10 @@ void centerText(sf::Text& t, float cx, float y) {
 
 VersionBadge::VersionBadge(bool clickable) : clickable_(clickable) {
     badge_.setFont(font_util::defaultFont());
-    badge_.setCharacterSize(20);          // 版本号字体(略大)
+    badge_.setCharacterSize(20);          // 版本号字体
     badge_.setFillColor(sf::Color(185, 185, 185));
     badge_.setString(str_util::utf8(GAME_VERSION));
 
-    // ---- 弹窗 ----
     overlay_.setSize(sf::Vector2f(WW, WH));
     overlay_.setFillColor(sf::Color(0, 0, 0, 170));
     panel_.setSize(sf::Vector2f(PW, PH));
@@ -63,7 +63,7 @@ VersionBadge::VersionBadge(bool clickable) : clickable_(clickable) {
         closeIcon_.setPosition(PL + PW - 66.f + 7.f, PT + 22.f + 7.f);
     }
 
-    // 列表区(去掉提示行后上移, 可视行数更多)
+    // 列表区
     listRect_ = sf::FloatRect(PL + 30.f, PT + 78.f, PW - 60.f, PH - 78.f - 28.f);
     listBg_.setSize(sf::Vector2f(listRect_.width, listRect_.height));
     listBg_.setPosition(listRect_.left, listRect_.top);
@@ -156,18 +156,17 @@ bool VersionBadge::handleEvent(const sf::Event& e, const sf::RenderWindow& win) 
 }
 
 void VersionBadge::draw(sf::RenderWindow& win) {
-    // 左下角版本号(hover 提亮)
+    // 左下角版本号
     badge_.setFillColor(hovered_ ? sf::Color(240, 240, 240) : sf::Color(185, 185, 185));
     win.draw(badge_);
     if (!open_) return;
 
-    // ---- 弹窗 ----
     win.draw(overlay_);
     win.draw(panel_);
     panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));  // 装饰边框
     win.draw(title_);
     win.draw(closeRing_);
-    if (!closeIcon_.getTexture()) {          // 惰性获取(场景可能在素材加载前构造)
+    if (!closeIcon_.getTexture()) {          // 惰性获取
         if (const sf::Texture* ic = AssetManager::instance().icon("close")) {
             float s = 30.f / static_cast<float>(ic->getSize().x);
             closeIcon_.setTexture(*ic);
@@ -178,7 +177,6 @@ void VersionBadge::draw(sf::RenderWindow& win) {
     if (closeIcon_.getTexture()) win.draw(closeIcon_);
     win.draw(listBg_);
 
-    // ---- 列表(子视图裁剪 + 滚轮滚动) ----
     sf::View prev = win.getView();
     win.setView(listView_);
     const float xVer = listRect_.left + 16.f;
@@ -192,7 +190,6 @@ void VersionBadge::draw(sf::RenderWindow& win) {
     }
     win.setView(prev);
 
-    // ---- 滚动条(内容超出时) ----
     float ms = maxScroll();
     if (ms > 0.f) {
         float trackH = listRect_.height - 8.f;

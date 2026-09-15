@@ -5,52 +5,32 @@
 #include <vector>
 #include "core/Card.h"
 
-// ====== AssetManager 资源管理器(阶段2) ======
-// 单例,统一加载和管理游戏素材:
-//   - 扑克牌贴图 52 张:  assets/cards/{spades,hearts,clubs,diamonds}/{A,2..10,J,Q,K}.png
-//     (命名约定见 assets/README.md:文件名即点数名,如 A.png/10.png/J.png/Q.png/K.png)
-//   - 大小王 2 张:       assets/cards/Jokers/{big,small}.png
-//   - 牌背 3 张:         assets/cards/back/{red,blue,black}.png
-//   - 桌面背景:          assets/ui/backgrounds/table_bg.jpg
-//   - 按钮四态图:        assets/ui/buttons/btn_{normal,hover,pressed,disabled}.png
-//   - 筹码图标 5 枚:     assets/ui/chips/chip_{1,5,10,50,100}.png
-// 用法:
-//   AssetManager::instance().loadAll();        // 程序启动时调用一次
-//   const sf::Texture* t = AssetManager::instance().cardTexture(suit, rank);
+// 素材单例: 牌面 牌背 大小王 背景 按钮 筹码 图标
 class AssetManager {
 public:
     static AssetManager& instance();
 
-    // 加载全部素材(可重复调用,内部有保护)
     bool loadAll();
 
-    // ---- 查询接口 ----
-    // 按 A 成员 Card 枚举取牌面纹理;大小王(无贴图)或加载失败返回 nullptr
+    // 牌面纹理, 大小王或加载失败返回 nullptr
     const sf::Texture* cardTexture(Suit s, Rank r) const;
-    // 牌背纹理:0=红 1=蓝 2=黑(默认红)
+    // 牌背: 0 红 1 蓝 2 黑
     const sf::Texture* backTexture(int index = 0) const;
-    // 桌面背景(游戏场景; 任意分辨率, 绘制时自适应缩放至窗口)
     const sf::Texture* background() const;
-    // 主菜单背景(任意分辨率),加载失败时回退到桌面背景
+    // 主菜单背景, 缺失时回落桌面背景
     const sf::Texture* menuBackground() const;
-    // 按钮四态图:0=normal 1=hover 2=pressed 3=disabled (assets/ui/buttons/btn_*.png)
+    // 按钮四态: 0 normal 1 hover 2 pressed 3 disabled
     const sf::Texture* buttonTexture(int state) const;
     const sf::Texture* chipForAmount(int amount) const;
-    // 牌背:当前局随机颜色(0=红 1=蓝 2=黑)
-    void rollBack();                 // 每局开局调用:随机选一种牌背颜色
+    void rollBack();
     int currentBack() const { return backRoll_; }
-    // 界面图标(assets/ui/icons/*.png 自动扫描):按文件名取,如 "menuList"/"musicOn"/"slider"
     const sf::Texture* icon(const std::string& name) const;
-    // 牌堆素材(发牌动画): 按牌背色 0=红 1=蓝 2=黑 取 689x292 堆叠图(54层右侧露边)
+    // 牌堆堆叠图, 按牌背色取
     const sf::Texture* deckPile(int backIndex) const;
-    // 头像素材(assets/ui/avatars/*.png 自动扫描, 100x100): 按序号取(取模循环)
-    // 注: 0 号位 = 本人 -> 若玩家已设自定义头像(game_data/avatar.png)则优先返回它
+    // 头像纹理, 0 号优先返回自定义头像
     const sf::Texture* avatarTexture(int idx) const;
-    // ---- 本人自定义头像(由"点击本人头像"上传裁剪生成, 见 AvatarCropDialog) ----
-    // 本人自定义头像(game_data/avatar.png; 加载后与默认头像同样做圆形裁剪)
-    const sf::Texture* customAvatar() const;   // 已设置则返回纹理, 否则 nullptr
-    bool reloadCustomAvatar();                 // 重新读取 game_data/avatar.png(保存头像后调用)
-    // 桌面小贴图(assets/ui/table/, 400x24): "countdown_bar_bg"/"countdown_fill_green|yellow|red"
+    const sf::Texture* customAvatar() const;
+    bool reloadCustomAvatar();
     const sf::Texture* tableTexture(const std::string& name) const;
 
 private:
@@ -58,22 +38,20 @@ private:
     bool loadCardTextures();
     bool loadMiscTextures();
 
-    // [花色][下标0..12] (0=2 ... 8=10, 9=J, 10=Q, 11=K, 12=A)
     sf::Texture cardTex_[4][13];
-    sf::Texture jokerTex_[2];          // 大小王: [0]=small [1]=big
-    std::vector<sf::Texture> backTex_;   // 3 张牌背
-    sf::Texture bgTex_;                  // 桌面背景
-    sf::Texture menuTex_;                // 主菜单背景
-    sf::Texture btnTex_[4];              // 按钮四态(正常/悬停/按下/禁用; UI 按钮统一使用)
-    // 筹码素材:区间命名 chip_<min>-<max> / chip_-<max>(无下界) / chip_<min>-(无上界)
+    sf::Texture jokerTex_[2];
+    std::vector<sf::Texture> backTex_;
+    sf::Texture bgTex_;
+    sf::Texture menuTex_;
+    sf::Texture btnTex_[4];
+    // 筹码按区间命名
     struct ChipDef { int lo; int hi; sf::Texture tex; };
     std::vector<ChipDef> chipDefs_;
-    // 界面图标:文件名 -> 纹理(自动扫描 assets/ui/icons/*.png)
     std::map<std::string, sf::Texture> icons_;
-    sf::Texture pileTex_[3];             // 牌堆堆叠图(发牌动画, 红/蓝/黑)
-    std::vector<sf::Texture> avatarTex_; // 头像图(自动扫描 assets/ui/avatars/*.png)
-    sf::Texture customTex_;              // 本人自定义头像(game_data/avatar.png; 空 = 未设置)
-    std::map<std::string, sf::Texture> tableTex_;   // 桌面小贴图(assets/ui/table/)
-    int backRoll_ = 0;                   // 当前局牌背颜色(0红 1蓝 2黑)
+    sf::Texture pileTex_[3];
+    std::vector<sf::Texture> avatarTex_;
+    sf::Texture customTex_;
+    std::map<std::string, sf::Texture> tableTex_;
+    int backRoll_ = 0;
     bool loaded_ = false;
 };

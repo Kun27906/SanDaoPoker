@@ -49,7 +49,7 @@ bool Button::contains(const sf::Vector2f& point) const {
 }
 
 void Button::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
-    // 鼠标位置(窗口坐标 -> 世界坐标)
+    // 鼠标位置
     sf::Vector2f mpos = win.mapPixelToCoords(sf::Mouse::getPosition(win));
     hovered_ = contains(mpos);
 
@@ -69,15 +69,15 @@ void Button::draw(sf::RenderWindow& win) {
     win.draw(text_);
 }
 
-// 状态 -> 贴图: 禁用 > 选中(常驻按下) > 悬停 > 正常
+// 状态 -> 贴图: 禁用 > 选中 > 悬停 > 正常
 void Button::refreshSprite() {
     const AssetManager& am = AssetManager::instance();
     int state = 0;                  // 0=正常
-    if (disabled_)      state = 3;  // 禁用(灰)
+    if (disabled_)      state = 3;  // 禁用
     else if (selected_) state = 2;  // 选中: 常驻"按下"贴图, 不恢复
-    else if (hovered_)  state = 1;  // 悬停(亮)
+    else if (hovered_)  state = 1;  // 悬停
     const sf::Texture* t = am.buttonTexture(state);
-    if (!t) return;                 // 贴图缺失(不应发生): 保持上次状态
+    if (!t) return;                 // 贴图缺失: 保持上次状态
     sprite_.setTexture(*t);
     sprite_.setColor(tint_);
     const sf::Vector2u ts = t->getSize();

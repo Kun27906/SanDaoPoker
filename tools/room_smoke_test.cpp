@@ -1,5 +1,4 @@
-// ====== Round/Room 完整对局冒烟验证 (成员D, 集成用) ======
-// 覆盖: 16房间配置 -> 开新局(发牌+收底注) -> 全员随机交牌 -> 结算 -> 多轮 -> 总账
+// 覆盖: 16房间配置 -> 开新局 -> 全员随机交牌 -> 结算 -> 多轮 -> 总账
 #include "core/Room.h"
 #include "core/Round.h"
 #include "core/RuleConfig.h"
@@ -9,12 +8,12 @@
 
 static std::mt19937 rng(12345);
 
-// 随机交牌(模拟玩家/假AI, 不依赖界面)
+// 随机交牌
 static void randomArrange(Room& room, int seedOffset) {
     for (int p = 0; p < room.playerCount; p++) {
         int order[9];
         for (int i = 0; i < 9; i++) order[i] = i;
-        // 前几个玩家用真 AI(胜率表在则加载), 其余随机
+        // 前几个玩家用真 AI, 其余随机
         static bool loaded = AIPlayer::loadWinRateTable("assets/ai/winrate.bin");
         if (p >= 1 && loaded) {
             AIPlayer::decideOrderStyled(room.players[p].hand, room.playerCount,
@@ -50,12 +49,11 @@ int main() {
         bool allOk = true;
         for (int r = 0; r < cfg.rounds; r++) {
             if (!room.startNewRound()) { allOk = false; break; }  // 发牌+收底注
-            // 检查注金扣了(每人1份×ante)且进了池(总池=人数×ante)
+            // 检查注金扣了且进了池
             if (room.pools[0] + room.pools[1] + room.pools[2] != cfg.ante * cfg.players) allOk = false;
             // 全员交牌
             randomArrange(room, r);
             if (!Round::allArranged(room.players, room.playerCount)) { allOk = false; }
-            // 结算
             std::string res = room.settleRound();
             if (res.empty()) allOk = false;
         }

@@ -10,14 +10,14 @@ CountdownBar::CountdownBar(float maxSeconds, const sf::Vector2f& pos, const sf::
     pos_ = pos;
     size_ = size;
 
-    // 背景槽:深灰底 + 边框(贴图缺失时回退用)
+    // 背景槽:深灰底 + 边框
     bg_.setSize(size);
     bg_.setPosition(pos);
     bg_.setFillColor(sf::Color(60, 60, 60));
     bg_.setOutlineColor(sf::Color(180, 180, 180));
     bg_.setOutlineThickness(2.f);
 
-    // 填充条:初始为满宽,绿色(贴图缺失时回退用)
+    // 填充条:初始为满宽,绿色
     fillWidth_ = size.x - 4.f;
     fill_.setSize(sf::Vector2f(fillWidth_, size.y - 4.f));
     fill_.setPosition(pos.x + 2.f, pos.y + 2.f);
@@ -59,13 +59,12 @@ void CountdownBar::update(float dt) {
 }
 
 void CountdownBar::draw(sf::RenderWindow& win) {
-    // 剩余比例(基于初始满宽,避免逐帧乘当前宽度导致的指数衰减)
-    // 通过 getRemaining()/getMax() 读取(与外部查询共用同一实现)
+    // 剩余比例
+    // 通过 getRemaining/getMax 读取
     float ratio = getMax() > 0.f ? (getRemaining() / getMax()) : 0.f;
     if (ratio < 0.f) ratio = 0.f;
     if (ratio > 1.f) ratio = 1.f;
 
-    // ---- 底槽: 贴图优先, 缺失则纯色矩形 ----
     const sf::Texture* bgTex = AssetManager::instance().tableTexture("countdown_bar_bg");
     if (bgTex) {
         sf::Sprite s(*bgTex);
@@ -76,7 +75,6 @@ void CountdownBar::draw(sf::RenderWindow& win) {
         win.draw(bg_);
     }
 
-    // ---- 填充: 三色贴图(绿>50%, 黄15%~50%, 红<15%), 按剩余比例裁切 ----
     const char* fillName = ratio > 0.50f ? "countdown_fill_green"
                          : ratio > 0.15f ? "countdown_fill_yellow"
                                          : "countdown_fill_red";
@@ -88,7 +86,7 @@ void CountdownBar::draw(sf::RenderWindow& win) {
         if (visW > 0) {
             sf::Sprite f(*fillTex);
             f.setTextureRect(sf::IntRect(0, 0, visW, static_cast<int>(th)));
-            f.setScale(fillWidth_ / tw, (size_.y - 4.f) / th);   // x 缩放为常数(比例只在裁剪上体现)
+            f.setScale(fillWidth_ / tw, (size_.y - 4.f) / th);   // x 缩放为常数
             f.setPosition(pos_.x + 2.f, pos_.y + 2.f);
             win.draw(f);
         }

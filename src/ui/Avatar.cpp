@@ -3,7 +3,7 @@
 #include <algorithm>
 
 namespace {
-// 圆角矩形(1 矩形 + 1 窄矩形 + 4 圆拼出); 先画描边再画填充
+// 圆角矩形; 先画描边再画填充
 void roundedRect(sf::RenderWindow& win, float x, float y, float w, float h,
                  float rad, sf::Color fill, sf::Color outline) {
     auto paint = [&](float ox, float oy, float ow, float oh, float orad, sf::Color col) {
@@ -61,7 +61,6 @@ void Avatar::draw(sf::RenderWindow& win) {
     const float border = std::max(3.f, r * 0.12f);   // 边框厚度
     const float outer = r + border / 2.f;            // 边框外缘半径
 
-    // ---- 1. 名牌(最下层: 先画 → 被头像盖住的左端自然被裁掉, 不遮挡头像内容) ----
     updateText();
     text_.setString(str_util::utf8(name_.c_str()));
     sf::FloatRect tb = text_.getLocalBounds();
@@ -80,7 +79,6 @@ void Avatar::draw(sf::RenderWindow& win) {
     roundedRect(win, px, py, plateW, plateH, plateH * 0.28f, C_FRAME_BG, C_FRAME_EDGE);
     plateRect_ = sf::FloatRect(px, py, plateW, plateH);   // 供点击改名命中检测
 
-    // ---- 2. 圆形头像(素材已按圆裁剪): 直径 2*outer, 完整填满圆环内侧, 无缝隙 ----
     float d = outer * 2.f;
     if (tex_ && tex_->getSize().x > 0) {
         sf::Sprite sp(*tex_);
@@ -95,7 +93,6 @@ void Avatar::draw(sf::RenderWindow& win) {
         win.draw(ph);
     }
 
-    // ---- 3. 圆环边框(叠在头像外缘之上, 压住裁剪边缘) ----
     sf::CircleShape ring(r);
     ring.setPosition(cx - r, cy - r);
     ring.setFillColor(sf::Color::Transparent);
@@ -103,7 +100,6 @@ void Avatar::draw(sf::RenderWindow& win) {
     ring.setOutlineThickness(border);
     win.draw(ring);
 
-    // ---- 4. 昵称(最后画): 居中于"未被头像遮挡"的可见区, 不与边框重叠 ----
     float visLeft = cx + outer;
     if (visLeft < px) visLeft = px;
     float visW = px + plateW - visLeft;

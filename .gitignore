@@ -33,6 +33,7 @@ Thumbs.db
 Desktop.ini
 
 build_tests/
+__pycache__/
 
 # ===== 本地玩家存档(账号数据,不入库) =====
 game_data/

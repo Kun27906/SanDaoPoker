@@ -1,4 +1,3 @@
-// ====== 胜率表生成器 (成员B 训练工具) ======
 // 用法: gen_winrate_table [输出路径]
 // 默认输出: assets/ai/winrate.bin
 #include "ai/AIPlayer.h"

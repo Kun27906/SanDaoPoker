@@ -8,9 +8,8 @@
 #include "ui/VersionBadge.h"
 #include <array>
 
-// ====== 第三界面: 选房间(成员C, 原 SceneMenu 重构) ======
-// 从大厅按人数进入后, 只显示该人数对应的房间(ROOM_CONFIGS 过滤),
-// 按钮居中; 点[开始游戏]创建 Room(真人+AI 入场筹码=账号余额)进入组牌。
+// 从大厅按人数进入后, 只显示该人数对应的房间,
+// 按钮居中; 点[开始游戏]创建 Room进入组牌。
 class SceneRoomSelect : public Scene {
 public:
     explicit SceneRoomSelect(SceneManager* mgr);
@@ -26,27 +25,26 @@ private:
     SceneManager* mgr_;
     sf::Sprite bg_;
     TextBox title_;
-    std::array<Button, 6> roomBtns_;  // 同人数最多 5 个房间(+1 冗余)
+    std::array<Button, 6> roomBtns_;  // 同人数最多 5 个房间
     int roomIndex_[6] = {-1, -1, -1, -1, -1, -1};  // 全局配置下标
     int roomCount_ = 0;
     int selected_ = 0;
-    int lastBalance_ = 0;   // 上次余额(检测开发者模式改筹码后, 刷新房间禁用态/筹码显示)
+    int lastBalance_ = 0;   // 上次余额
     Button btnStart_;
     ChipBar chipBar_;
-    Avatar  selfAvatar_;              // 局外: 本人头像(筹码条左侧)
+    Avatar  selfAvatar_;              // 局外: 本人头像
     ProfileEditor profile_;           // 点击本人昵称名牌改名 / 点击本人头像圆上传图片并裁剪
-    VersionBadge versionBadge_{true}; // 左下角版本号(可点击查看版本历史)
+    VersionBadge versionBadge_{true};
 
-    // 入场资格提示弹窗(余额 < 该房间第一局注金 ante 时点击房间弹出)
+    // 入场资格提示弹窗
     bool notEnough_ = false;
-    bool betting_ = false;   // 下注阶段(点[开始游戏]后: bet 音+扣减动画, 播完才进发牌)
+    bool betting_ = false;
     sf::RectangleShape overlay_;
     sf::RectangleShape dialog_;
     TextBox denyTitle_;
     TextBox denyText_;
     Button btnDenyOk_;
 
-    // ---- 难度选择(成员B 接入: 简单/中等/困难) ----
     bool diffOpen_ = false;
     sf::RectangleShape diffDialog_;
     TextBox diffTitle_;

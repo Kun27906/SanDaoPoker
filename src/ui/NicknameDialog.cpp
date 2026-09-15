@@ -1,19 +1,20 @@
 #include "ui/NicknameDialog.h"
+#include "render/Layout.h"
 #include "ui/FontUtil.h"
 #include "ui/PanelFrame.h"
 #include <algorithm>
 #include <cmath>
 
 namespace {
-constexpr float WW = 1280.f;
-constexpr float WH = 800.f;
+constexpr float WW = static_cast<float>(layout::WINDOW_W);
+constexpr float WH = static_cast<float>(layout::WINDOW_H);
 constexpr float PW = 700.f;        // 弹窗宽
 constexpr float PH = 320.f;        // 弹窗高
 const sf::Color C_PANEL(28, 36, 62);
 const sf::Color C_GOLD(255, 215, 0);
 const sf::Color C_HINT(200, 205, 225);
 
-// 统计 UTF-8 字符数(以非续接字节为字符起点)
+// 统计 UTF-8 字符数
 int utf8Count(const std::string& s) {
     int n = 0;
     for (unsigned char c : s) {
@@ -41,7 +42,7 @@ void utf8Append(std::string& s, unsigned cp) {
     }
 }
 
-// 删除最后一个 UTF-8 字符(退格)
+// 删除最后一个 UTF-8 字符
 void utf8PopBack(std::string& s) {
     while (!s.empty() && (static_cast<unsigned char>(s.back()) & 0xC0) == 0x80) {
         s.pop_back();
@@ -118,7 +119,7 @@ bool NicknameDialog::acceptCp(unsigned cp) const {
     if (cp >= 'A' && cp <= 'Z') return true;
     if (cp >= 'a' && cp <= 'z') return true;
     if (cp == '_') return true;
-    if (cp >= 0x4E00 && cp <= 0x9FFF) return true;   // CJK 统一表意文字(中文)
+    if (cp >= 0x4E00 && cp <= 0x9FFF) return true;   // CJK 统一表意文字
     return false;
 }
 

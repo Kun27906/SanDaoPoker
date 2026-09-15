@@ -9,10 +9,9 @@
 #include "ai/AIPlayer.h"
 
 namespace {
-constexpr unsigned WW = 1280;
-constexpr unsigned WH = 800;
+constexpr unsigned WW = layout::WINDOW_W;
+constexpr unsigned WH = layout::WINDOW_H;
 
-// ---- 难度选择(成员B): 索引 0/1/2 <-> AIPlayer::Difficulty ----
 AIPlayer::Difficulty diffOf(int idx) {
     switch (idx) {
         case 0:  return AIPlayer::Difficulty::Random;
@@ -39,12 +38,7 @@ const char* diffDescOf(int idx) {
 }
 
 SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
-    if (const sf::Texture* bg = AssetManager::instance().menuBackground()) {
-        bg_.setTexture(*bg);
-        float sx = static_cast<float>(WW) / bg->getSize().x;
-        float sy = static_cast<float>(WH) / bg->getSize().y;
-        bg_.setScale(sx, sy);
-    }
+    scene_setup::background(bg_, AssetManager::instance().menuBackground(), WW, WH);
 
     int want = mgr_->selectedPlayerCount;
     if (want < 2) want = 2;
@@ -58,23 +52,21 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     title_.centerOrigin();
     title_.setPosition(sf::Vector2f(WW / 2.f, 70.f));
 
-    // 过滤出该人数的房间(保持 ROOM_CONFIGS 原顺序)
     for (int i = 0; i < ROOM_CONFIG_COUNT && roomCount_ < 6; i++) {
         if (ROOM_CONFIGS[i].players == want) {
             roomIndex_[roomCount_++] = i;
         }
     }
-    chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
-    chipBar_.setImmediate(Account::instance().balance());   // 初值(下注滚动不被覆盖)
-    lastBalance_ = Account::instance().balance();           // 余额基线(用于变化检测)
+    scene_setup::chipBar(chipBar_, WW);
+    chipBar_.setImmediate(Account::instance().balance());
+    lastBalance_ = Account::instance().balance();
 
-    // 房间按钮: 居中一列
     for (int i = 0; i < roomCount_; i++) {
         roomBtns_[i].setText(ROOM_CONFIGS[roomIndex_[i]].name);
         roomBtns_[i].setPosition(sf::Vector2f(340.f, 160.f + i * 78.f));
         roomBtns_[i].setSize(sf::Vector2f(600.f, 62.f));
         roomBtns_[i].setCallback([this, i]() {
-            // 入场资格: 余额不足该房间第一局注金(ante)则弹窗提醒,不允许选中
+            // 余额不足第一局注金: 弹窗且不允许选中
             const RoomConfig& cfg = ROOM_CONFIGS[roomIndex_[i]];
             const int bal = Account::instance().balance();
             if (bal < cfg.ante) {
@@ -92,7 +84,6 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     }
     refreshColors();
 
-    // 入场资格弹窗样式
     overlay_.setSize(sf::Vector2f(WW, WH));
     overlay_.setFillColor(sf::Color(0, 0, 0, 160));
     dialog_.setSize(sf::Vector2f(560.f, 230.f));
@@ -115,11 +106,10 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
     btnDenyOk_.setCallback([this]() { notEnough_ = false; });
 
     btnStart_.setText("开始游戏");
-    btnStart_.setPosition(sf::Vector2f(495.f, 590.f));   // 居中(返回大厅改由左上角 home 键)
+    btnStart_.setPosition(sf::Vector2f(495.f, 590.f));
     btnStart_.setSize(sf::Vector2f(290.f, 58.f));
     btnStart_.setCallback([this]() { startGame(); });
 
-    // ---- 难度选择(成员B): 入口按钮 + 居中弹窗 ----
     btnDiffOpen_.setPosition(sf::Vector2f(330.f, 590.f));
     btnDiffOpen_.setSize(sf::Vector2f(150.f, 58.f));
     btnDiffOpen_.setCallback([this]() { openDiffPopup(); });
@@ -157,28 +147,18 @@ SceneRoomSelect::SceneRoomSelect(SceneManager* mgr) : mgr_(mgr) {
 
     refreshDiffColors();
 
-    chipBar_.setPosition(sf::Vector2f(WW - 250.f - 20.f, 16.f));
-    // 局外: 本人头像(筹码条左侧)
-    selfAvatar_.setRadius(26.f);
-    selfAvatar_.setMinPlateWidth(150.f);   // 预留更长昵称空间
-    selfAvatar_.setSelfStyle(true);        // 名牌与圆心共线, 昵称居中
-    selfAvatar_.setTexture(AssetManager::instance().avatarTexture(0));   // 本人头像素材
-    selfAvatar_.setCenter(sf::Vector2f(WW - 250.f - 20.f - 190.f, 40.f));
-    selfAvatar_.setNickname(Account::instance().ensureNickname());
-    versionBadge_.setPosition(sf::Vector2f(24.f, WH - 40.f));   // 左下角版本号(可点击)
+    scene_setup::selfAvatar(selfAvatar_, WW);
+    scene_setup::versionBadge(versionBadge_, WH);
 
-    // 点击本人昵称名牌 -> 自设昵称; 点击本人头像圆 -> 上传图片并裁剪
     profile_.bind(&selfAvatar_);
 }
 
-// ---- 难度选择(成员B) ----
 void SceneRoomSelect::openDiffPopup() {
     diffOpen_ = true;
     refreshDiffColors();
 }
 
 void SceneRoomSelect::applyDifficulty(int idx) {
-    // 三档难度立刻写入 AI 模块(均衡风格 + 0.3 失误率, 保留人味)
     AIPlayer::setProfile(diffOf(idx), AIPlayer::Style::Balanced, 0.3f);
     refreshDiffColors();
 }
@@ -186,7 +166,6 @@ void SceneRoomSelect::applyDifficulty(int idx) {
 void SceneRoomSelect::refreshDiffColors() {
     const int cur = indexOfDiff(AIPlayer::difficulty());
     for (int i = 0; i < 3; i++) {
-        // 选中难度 = 常驻"按下"贴图(不恢复)
         diffBtns_[i].setSelected(i == cur);
     }
     diffDesc_.setText(diffDescOf(cur));
@@ -198,11 +177,9 @@ void SceneRoomSelect::refreshColors() {
     for (int i = 0; i < roomCount_; i++) {
         const RoomConfig& cfg = ROOM_CONFIGS[roomIndex_[i]];
         if (bal < cfg.ante) {
-            // 余额不足该房间第一局注金: 灰色禁用贴图(点击仍弹提示, 由回调处理)
             roomBtns_[i].setDisabled(true);
             roomBtns_[i].setSelected(false);
         } else if (i == selected_) {
-            // 已选中房间 = 常驻"按下"贴图(不恢复)
             roomBtns_[i].setDisabled(false);
             roomBtns_[i].setSelected(true);
         } else {
@@ -214,7 +191,7 @@ void SceneRoomSelect::refreshColors() {
 
 void SceneRoomSelect::startGame() {
     if (roomCount_ <= 0) return;
-    // 入场资格防御: 余额不足第一局注金则弹窗(正常点击房间时已拦截,双保险)
+    // 入场资格防御
     const RoomConfig& cfg = ROOM_CONFIGS[roomIndex_[selected_]];
     const int bal = Account::instance().balance();
     if (bal < cfg.ante) {
@@ -226,14 +203,13 @@ void SceneRoomSelect::startGame() {
         notEnough_ = true;
         return;
     }
-    // 入场筹码 = 账号余额(进入本界面必经大厅, 大厅已保证余额>=100 且破产已弹窗补充)
     Account& acct = Account::instance();
     const int entryChips = acct.balance();
 
     mgr_->room = std::make_unique<Room>();
     if (!mgr_->room->setRoomConfig(roomIndex_[selected_])) return;
 
-    // 昵称: 真人取账号存档昵称(无则生成并保存); AI 随机且同场不重名
+    // 真人取存档昵称, AI 随机且同场不重名
     std::string used[MAX_PLAYERS];
     int uc = 0;
     std::string meName = Account::instance().ensureNickname();
@@ -244,13 +220,11 @@ void SceneRoomSelect::startGame() {
         used[uc++] = nm;
         mgr_->room->addPlayer(nm, true);
     }
-    // 入场筹码: 真人与 AI 同起点 = 账号余额
+    // 真人与 AI 同起点
     for (int i = 0; i < mgr_->room->playerCount; i++) {
         mgr_->room->players[i].chips = entryChips;
     }
 
-    // 下注阶段: 留在本界面播 bet 音效 + 筹码数字滚动扣减;
-    // 播完由 update() 进入发牌动画(下注动画不再混在发牌场景内)
     betting_ = true;
     SoundManager::instance().playBet();
     chipBar_.setImmediate(entryChips);
@@ -258,18 +232,17 @@ void SceneRoomSelect::startGame() {
 }
 
 void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
-    if (diffOpen_) {                   // 难度选择弹窗:只响应弹窗内按钮
+    if (diffOpen_) {
         for (int i = 0; i < 3; i++) diffBtns_[i].handleEvent(e, win);
         btnDiffClose_.handleEvent(e, win);
         return;
     }
-    if (notEnough_) {                  // 入场资格弹窗:只响应确定
+    if (notEnough_) {
         btnDenyOk_.handleEvent(e, win);
         return;
     }
-    if (versionBadge_.handleEvent(e, win)) return;   // 版本历史弹窗打开时拦截
-    if (chipBar_.handleEvent(e, win)) return;        // 点击筹码图标 -> chip 音效
-    // 自设昵称/头像: 弹窗打开时独占输入; 否则处理"点击本人昵称名牌/头像圆"
+    if (versionBadge_.handleEvent(e, win)) return;
+    if (chipBar_.handleEvent(e, win)) return;
     if (profile_.handleEvent(e, win)) return;
     for (int i = 0; i < roomCount_; i++) roomBtns_[i].handleEvent(e, win);
     btnDiffOpen_.handleEvent(e, win);
@@ -277,24 +250,24 @@ void SceneRoomSelect::handleEvent(const sf::Event& e, const sf::RenderWindow& wi
 }
 
 void SceneRoomSelect::onHomePressed() {
-    if (diffOpen_) { diffOpen_ = false; return; }   // 难度弹窗打开时先关弹窗
-    mgr_->changeTo(SceneId::Lobby);   // home 键返回大厅
+    if (diffOpen_) { diffOpen_ = false; return; }
+    mgr_->changeTo(SceneId::Lobby);
 }
 
 void SceneRoomSelect::update(float dt) {
-    chipBar_.update(dt);   // 筹码框数字滚动(下注扣减动画)
-    profile_.update(dt);   // 昵称弹窗输入框插入符闪烁
+    chipBar_.update(dt);
+    profile_.update(dt);
 
-    // 余额变化(如开发者模式里改筹码) -> 立即同步: 房间禁用态 + 顶部筹码显示
+    // 余额变化则同步房间禁用态与顶部筹码
     const int bal = Account::instance().balance();
     if (bal != lastBalance_) {
         lastBalance_ = bal;
-        refreshColors();                          // 房间: 余额不足 -> 灰禁用; 选中态重算
-        if (!betting_) chipBar_.setImmediate(bal);  // 下注滚动动画期间不打断
+        refreshColors();
+        if (!betting_) chipBar_.setImmediate(bal);
     }
 
     if (betting_ && !chipBar_.isRolling()) {
-        mgr_->changeTo(SceneId::Deal);   // 下注音效+扣减动画播完 -> 进入发牌动画
+        mgr_->changeTo(SceneId::Deal);
     }
 }
 
@@ -305,21 +278,21 @@ void SceneRoomSelect::draw(sf::RenderWindow& win) {
     btnDiffOpen_.draw(win);
     btnStart_.draw(win);
     chipBar_.draw(win);
-    selfAvatar_.draw(win);   // 局外本人头像(筹码条左侧)
-    versionBadge_.draw(win); // 左下角版本号 + 版本历史弹窗
-    profile_.draw(win);      // 自设昵称 / 自设头像弹窗(最上层)
-    if (notEnough_) {                  // 入场资格弹窗
+    selfAvatar_.draw(win);
+    versionBadge_.draw(win);
+    profile_.draw(win);
+    if (notEnough_) {
         win.draw(overlay_);
         win.draw(dialog_);
-        panel_frame::draw(win, sf::FloatRect(dialog_.getPosition(), dialog_.getSize()));  // 装饰边框
+        panel_frame::draw(win, sf::FloatRect(dialog_.getPosition(), dialog_.getSize()));
         denyTitle_.draw(win);
         denyText_.draw(win);
         btnDenyOk_.draw(win);
     }
-    if (diffOpen_) {                   // 难度选择弹窗
+    if (diffOpen_) {
         win.draw(overlay_);
         win.draw(diffDialog_);
-        panel_frame::draw(win, sf::FloatRect(diffDialog_.getPosition(), diffDialog_.getSize()));  // 装饰边框
+        panel_frame::draw(win, sf::FloatRect(diffDialog_.getPosition(), diffDialog_.getSize()));
         diffTitle_.draw(win);
         for (int i = 0; i < 3; i++) diffBtns_[i].draw(win);
         diffDesc_.draw(win);

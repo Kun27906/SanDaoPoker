@@ -20,7 +20,7 @@ void Account::load() {
             if (ss && v > 0) {
                 balance_ = v;                 // 第 1 行: 余额
                 std::string nm;
-                if (std::getline(in, nm)) {   // 第 2 行: 昵称(旧存档可能缺失)
+                if (std::getline(in, nm)) {   // 第 2 行: 昵称
                     while (!nm.empty() &&
                            (nm.back() == '\r' || nm.back() == '\n' || nm.back() == ' ')) {
                         nm.pop_back();
@@ -31,7 +31,7 @@ void Account::load() {
             }
         }
     }
-    // 不存在/损坏 -> 初始化为 500 并重建(昵称留空, 首次使用时生成)
+    // 不存在/损坏 -> 初始化为 500 并重建
     balance_ = 500;
     nickname_.clear();
     save();
@@ -52,7 +52,7 @@ void Account::save() const {
 void Account::reset() {
     std::remove(path_.c_str());
     balance_ = 500;
-    nickname_.clear();   // 重置账号同时重置昵称(下次生成新的)
+    nickname_.clear();   // 重置账号同时重置昵称
     save();
 }
 

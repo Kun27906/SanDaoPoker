@@ -1,7 +1,7 @@
 #include "ui/IconButton.h"
 #include "render/SoundManager.h"
 
-// 窗口物理像素 -> 渲染逻辑坐标(与 Button 一致;高 DPI/缩放下不失真)
+// 窗口物理像素 -> 渲染逻辑坐标
 static sf::Vector2f mousePos(const sf::RenderWindow& win) {
     return win.mapPixelToCoords(sf::Mouse::getPosition(win));
 }
@@ -31,7 +31,7 @@ void IconButton::draw(sf::RenderWindow& win) {
     if (!visible_ || !tex_) return;
     const sf::Texture& t = *tex_;
     const float s = size_;
-    // hover: 图标下方衬一圈半透明白底(微圆角方形), 提示可点
+    // hover: 图标下方衬一圈半透明白底, 提示可点
     if (hovered_) {
         sf::RectangleShape back(sf::Vector2f(s, s));
         back.setPosition(pos_);

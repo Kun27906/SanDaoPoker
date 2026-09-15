@@ -1,8 +1,6 @@
 #include "core/Card.h"
 #include <stdexcept>
 
-// ====== 构造函数 ======
-
 Card::Card() : suit_(Suit::Spade), rank_(Rank::SmallJoker) {}
 
 Card::Card(Suit s, Rank r) : suit_(s), rank_(r) {
@@ -19,8 +17,6 @@ Card::Card(Rank jokerRank) : suit_(Suit::Spade), rank_(jokerRank) {
     }
 }
 
-// ====== 获取属性 ======
-
 Suit Card::getSuit() const {
     return suit_;
 }
@@ -28,8 +24,6 @@ Suit Card::getSuit() const {
 Rank Card::getRank() const {
     return rank_;
 }
-
-// ====== 判断是否为大小王 ======
 
 bool Card::isJoker() const {
     return rank_ == Rank::SmallJoker || rank_ == Rank::BigJoker;
@@ -43,17 +37,14 @@ bool Card::isSmallJoker() const {
     return rank_ == Rank::SmallJoker;
 }
 
-// ====== 获取点数的数值大小 ======
 // 2=2, 3=3, ..., 10=10, J=11, Q=12, K=13, A=14
-// 小王=100, 大王=101（确保大于所有普通牌）
+// 小王=100, 大王=101
 
 int Card::getRankValue() const {
     if (rank_ == Rank::BigJoker)   return 101;
     if (rank_ == Rank::SmallJoker) return 100;
     return static_cast<int>(rank_);  // 2~14
 }
-
-// ====== 获取花色的整数值 ======
 
 int Card::getSuitValue() const {
     return static_cast<int>(suit_);

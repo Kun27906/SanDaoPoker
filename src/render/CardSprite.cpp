@@ -1,5 +1,6 @@
 #include "render/CardSprite.h"
 #include "render/AssetManager.h"
+#include "render/Layout.h"
 
 void CardSprite::setCard(const Card& card) {
     card_ = card;
@@ -15,12 +16,16 @@ void CardSprite::setPosition(const sf::Vector2f& p) {
 void CardSprite::setScale(float s) {
     scale_ = s;
     sprite_.setScale(s, s);
-    sf::Vector2f sz(200.f * s, 280.f * s);
-    placeholder_.setSize(sz);
+    placeholder_.setSize(getSize());
 }
 
 sf::Vector2f CardSprite::getSize() const {
-    return sf::Vector2f(200.f * scale_, 280.f * scale_);
+    // 尺寸取自当前贴图, 未加载时用基准值
+    if (const sf::Texture* t = sprite_.getTexture()) {
+        return sf::Vector2f(static_cast<float>(t->getSize().x) * scale_,
+                            static_cast<float>(t->getSize().y) * scale_);
+    }
+    return sf::Vector2f(layout::CARD_UNIT_W * scale_, layout::CARD_UNIT_H * scale_);
 }
 
 sf::FloatRect CardSprite::getBounds() const {
@@ -32,7 +37,7 @@ void CardSprite::updateTexture() {
     const sf::Texture* t = nullptr;
     int bi = am.currentBack();
     if (faceUp_) {
-        // 大小王走 Jokers 贴图(cardTexture 已支持);加载失败时用牌背兜底
+        // 大小王走 Jokers 贴图;加载失败时用牌背兜底
         t = am.cardTexture(card_.getSuit(), card_.getRank());
         if (!t) t = am.backTexture(bi);
     } else {
@@ -42,7 +47,7 @@ void CardSprite::updateTexture() {
         sprite_.setTexture(*t, true);
         placeholder_ = sf::RectangleShape();
     } else {
-        // 无贴图:占位块(浅灰 + 后续画 "?" 由调用方处理)
+        // 无贴图:占位块
         sprite_ = sf::Sprite();
         placeholder_.setFillColor(sf::Color(120, 120, 120));
         placeholder_.setOutlineColor(sf::Color(200, 200, 200));
@@ -51,7 +56,7 @@ void CardSprite::updateTexture() {
 }
 
 void CardSprite::draw(sf::RenderWindow& win) const {
-    // 每次绘制前同步纹理(素材可能后续才加载,保持兼容)
+    // 每次绘制前同步纹理
     const_cast<CardSprite*>(this)->updateTexture();
     if (sprite_.getTexture()) {
         win.draw(sprite_);

@@ -4,9 +4,8 @@
 #include "ui/TextBox.h"
 #include "ui/VersionBadge.h"
 
-// ====== 第一界面: 启动页(成员C) ======
 // 只显示标题 + [开始游戏]; 后续可在此扩展设置/调试入口。
-// 点击开始游戏 -> 进入第二界面(大厅 SceneLobby)
+// 点击开始游戏 -> 进入第二界面
 
 class SceneTitle : public Scene {
 public:
@@ -20,6 +19,6 @@ private:
     sf::Sprite bg_;
     TextBox title_;
     TextBox subtitle_;
-    VersionBadge versionBadge_{false};   // 左下角版本号(启动页不可点击)
+    VersionBadge versionBadge_{false};   // 左下角版本号
     Button btnStart_;
 };

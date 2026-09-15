@@ -1,4 +1,5 @@
 #include "render/GlobalHud.h"
+#include "render/Layout.h"
 #include "render/AssetManager.h"
 #include "ui/PanelFrame.h"
 #include "render/SoundManager.h"
@@ -7,44 +8,39 @@
 #include <cstdlib>
 
 namespace {
-constexpr float WW = 1280.f;
-constexpr float WH = 800.f;
-constexpr float BTN = 40.f;          // 左上角键尺寸
-constexpr float PAD = 48.f;          // 键间距
+constexpr float WW = static_cast<float>(layout::WINDOW_W);
+constexpr float WH = static_cast<float>(layout::WINDOW_H);
+constexpr float BTN = 40.f;
+constexpr float PAD = 48.f;
 
-// 弹窗几何(加高: 440 -> 560)
 constexpr float PW = 680.f;
 constexpr float PH = 560.f;
-constexpr float PL = (WW - PW) / 2.f;   // 300
-constexpr float PT = (WH - PH) / 2.f;   // 120
+constexpr float PL = (WW - PW) / 2.f;
+constexpr float PT = (WH - PH) / 2.f;
 
-// 退出确认弹窗几何(独立小面板, 居中; 确定/取消 两键并列于底部)
 constexpr float EXIT_W = 720.f;
 constexpr float EXIT_H = 260.f;
-constexpr float EXIT_L = (WW - EXIT_W) / 2.f;   // 280
-constexpr float EXIT_T = (WH - EXIT_H) / 2.f;   // 270
-constexpr float EXIT_TEXT_DY = 84.f;            // 正文相对面板顶的 y
-constexpr float EXIT_BTN_DY = 78.f;             // 按钮中心相对面板底的 y(向上偏移)
+constexpr float EXIT_L = (WW - EXIT_W) / 2.f;
+constexpr float EXIT_T = (WH - EXIT_H) / 2.f;
+constexpr float EXIT_TEXT_DY = 84.f;
+constexpr float EXIT_BTN_DY = 78.f;
 constexpr float EXIT_BTN_W = 180.f;
 constexpr float EXIT_BTN_H = 52.f;
 
-// 主菜单页布局(音量行)
-constexpr float ROW_Y = PT + 200.f;          // 音量行中心 y
-constexpr float VOL_X = PL + 64.f;           // soundSetting 图标中心 x
-constexpr float TRACK_L = PL + 150.f;        // 滑轨左端
-constexpr float TRACK_W = 410.f;             // 滑轨长度
-constexpr float KNOB = 34.f;                 // slider 显示尺寸
+constexpr float ROW_Y = PT + 200.f;
+constexpr float VOL_X = PL + 64.f;
+constexpr float TRACK_L = PL + 150.f;
+constexpr float TRACK_W = 410.f;
+constexpr float KNOB = 34.f;
 
-// 开发者模式弹窗布局(与主菜单同尺寸)
-constexpr float DEV_BTN_Y = PT + 250.f;           // 未启用: [启用开发者模式] 按钮中心 y
-constexpr float DEV_BTN_Y_ON = PT + PH - 74.f;    // 已启用: [关闭开发者模式] 按钮下移居中(不压滑条)
-constexpr float DEV_INPUT_Y = PT + 165.f;         // 输入框中心 y
+constexpr float DEV_BTN_Y = PT + 250.f;
+constexpr float DEV_BTN_Y_ON = PT + PH - 74.f;
+constexpr float DEV_INPUT_Y = PT + 165.f;
 constexpr float DEV_INPUT_W = 380.f;
 constexpr float DEV_INPUT_H = 54.f;
-constexpr float DEV_ROW_Y = PT + 280.f;           // dev 滑条行中心 y
-constexpr float DEV_MAX = 100000.f;               // 可调筹码上限
+constexpr float DEV_ROW_Y = PT + 280.f;
+constexpr float DEV_MAX = 100000.f;
 
-// 游戏规则速览(干练,按《项目游戏规则.docx》+ 现行机制总结; 每行 <= 30 字)
 const char* RULES_TEXT =
     "【游戏目标】9 张手牌分成头/中/尾三道，逐道比大小，赢得越多越好。\n"
     "【牌型大小】豹子>同花顺>金花>顺子>对子>散牌。\n"
@@ -63,7 +59,6 @@ const char* RULES_TEXT =
 GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     AssetManager& am = AssetManager::instance();
 
-    // ---- 左上角四键 ----
     btnMenu_.setTexture(am.icon("menuList"));
     btnMenu_.setPosition(sf::Vector2f(12.f, 12.f));
     btnMenu_.setSize(BTN);
@@ -73,7 +68,7 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnMusic_.setPosition(sf::Vector2f(12.f + PAD, 12.f));
     btnMusic_.setSize(BTN);
     btnMusic_.setCallback([this]() {
-        SoundManager::instance().toggleBgm();   // 只开关背景音乐,音效不受影响
+        SoundManager::instance().toggleBgm();
         btnMusic_.setTexture(AssetManager::instance().icon(
             SoundManager::instance().bgmOn() ? "musicOn" : "musicOff"));
     });
@@ -82,7 +77,7 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnWrench_.setPosition(sf::Vector2f(12.f + PAD * 2.f, 12.f));
     btnWrench_.setSize(BTN);
     btnWrench_.setCallback([this]() {
-        // 发牌/组牌/比牌界面禁用开发者模式: 播 error 音效, 不弹窗
+        // 局内禁用开发者模式
         if (mgr_) {
             SceneId id = mgr_->currentId();
             if (id == SceneId::Deal || id == SceneId::Arrange || id == SceneId::Battle) {
@@ -98,7 +93,6 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnHome_.setSize(BTN);
     btnHome_.setCallback([this]() { if (mgr_) mgr_->onHomePressed(); });
 
-    // ---- 退出确认弹窗(局内一局未结束时, 点窗口 X / Esc 弹出) ----
     exitDialog_.setSize(sf::Vector2f(EXIT_W, EXIT_H));
     exitDialog_.setPosition(sf::Vector2f(EXIT_L, EXIT_T));
     exitDialog_.setFillColor(sf::Color(30, 40, 70));
@@ -108,7 +102,7 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     exitText_.setText("本局还未结束，您想要退出吗？\n如果退出，将按逃跑提前结算。");
     exitText_.setCharacterSize(22);
     exitText_.setColor(sf::Color(235, 235, 235));
-    exitText_.centerOrigin();   // 居中模式: 换文本自动重新居中
+    exitText_.centerOrigin();
     exitText_.setPosition(sf::Vector2f(WW / 2.f, EXIT_T + EXIT_TEXT_DY));
 
     btnExitOk_.setText("确定");
@@ -123,7 +117,6 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnExitCancel_.setSize(sf::Vector2f(EXIT_BTN_W, EXIT_BTN_H));
     btnExitCancel_.setCallback([this]() { exitPopupOpen_ = false; });
 
-    // ---- 弹窗 ----
     overlay_.setSize(sf::Vector2f(WW, WH));
     overlay_.setFillColor(sf::Color(0, 0, 0, 160));
     panel_.setSize(sf::Vector2f(PW, PH));
@@ -137,7 +130,6 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnClose_.setPosition(sf::Vector2f(PL + PW - 60.f, PT + 20.f));
     btnClose_.setCallback([this]() { closePopup(); });
 
-    // ---- 主菜单页: 音量行 ----
     btnVolIcon_.setTexture(am.icon("soundSetting"));
     btnVolIcon_.setSize(46.f);
     btnVolIcon_.setPosition(sf::Vector2f(VOL_X - 23.f, ROW_Y - 23.f));
@@ -161,7 +153,6 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnRules_.setSize(sf::Vector2f(PW - 200.f, 56.f));
     btnRules_.setCallback([this]() { showRulesPage(); });
 
-    // ---- 规则页 ----
     rulesTitle_.setText("游戏规则");
     rulesTitle_.setCharacterSize(30);
     rulesTitle_.setColor(sf::Color(255, 220, 130));
@@ -178,31 +169,27 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     btnRulesBack_.setSize(sf::Vector2f(160.f, 48.f));
     btnRulesBack_.setCallback([this]() { showMainPage(); });
 
-    // ---- 开发者模式弹窗 ----
     btnDevToggle_.setText("启用开发者模式");
     btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f, DEV_BTN_Y - 30.f));
     btnDevToggle_.setSize(sf::Vector2f(380.f, 60.f));
     btnDevToggle_.setCallback([this]() {
         if (devOn_) {
-            // 已启用: 点一下即关闭
             devOn_ = false;
             devArm_ = false;
             devInputFocus_ = false;
         } else if (!devArm_) {
-            // 两段确认: 第一次进入确认态, 5 秒内再点一次才真正启用
+            // 两段确认, 5 秒内再点一次才启用
             devArm_ = true;
             devArmTimer_ = 0.f;
         } else {
-            // 第二次: 真正启用
             devArm_ = false;
             devOn_ = true;
             devInputStr_.clear();
             devInputFocus_ = false;
         }
-        refreshDevToggle();   // 统一刷新按钮外观(修复: 关闭弹窗后残留红色确认态)
+        refreshDevToggle();
     });
 
-    // dev 滑条(0 ~ 100000)
     devTrackRect_ = sf::FloatRect(TRACK_L, DEV_ROW_Y - 5.f, TRACK_W, 10.f);
     devTrack_.setSize(sf::Vector2f(TRACK_W, 10.f));
     devTrack_.setPosition(sf::Vector2f(TRACK_L, DEV_ROW_Y - 5.f));
@@ -215,45 +202,41 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     devKnob_.setTexture(am.icon("slider"));
     devKnob_.setSize(KNOB);
 
-    // 输入框
     devInputBox_.setSize(sf::Vector2f(DEV_INPUT_W, DEV_INPUT_H));
     devInputBox_.setPosition(sf::Vector2f(WW / 2.f - DEV_INPUT_W / 2.f, DEV_INPUT_Y - DEV_INPUT_H / 2.f));
     devInputBox_.setFillColor(sf::Color(20, 26, 46));
     devInputBox_.setOutlineColor(sf::Color(140, 160, 210));
     devInputBox_.setOutlineThickness(2.f);
 
-    // 初始音量
     vol_ = static_cast<float>(SoundManager::instance().volume());
     savedVol_ = vol_;
     updateKnob();
 }
 
 bool GlobalHud::onCloseRequested(bool isEscape) {
-    // 确认窗已打开: Esc = 取消(关掉确认窗, 不退出); 再点窗口 X = 维持确认窗
+    // 确认窗已开: Esc 取消, 再点关闭键维持确认窗
     if (exitPopupOpen_) {
         if (isEscape) exitPopupOpen_ = false;
         return true;
     }
     if (!mgr_) return false;
     Room* room = mgr_->room.get();
-    // 1) 局内(发牌/组牌/比牌): 本局还没打完
-    // 2) 结算界面: 本局已结算, 但本场还有下一局(未打完) -> 同样按逃跑提前结算
+    // 局内未打完, 或结算界面但本场还有下一局
     const SceneId id = mgr_->currentId();
     const bool inRound = (id == SceneId::Deal || id == SceneId::Arrange || id == SceneId::Battle);
     const bool inMatch = (id == SceneId::Result) && room && !room->isFinished();
     if (!inRound && !inMatch) return false;
-    if (!room) return false;            // 没有进行中的房间 -> 直接退出
+    if (!room) return false;
     openExitPopup(inRound);
     return true;
 }
 
 void GlobalHud::openExitPopup(bool inRound) {
-    // 与其它全局弹窗互斥(同时只留一个)
     popupOpen_ = false;
     devPopupOpen_ = false;
     dragging_ = false;
     devDrag_ = false;
-    // 文案主语区分: 局内是"本局"未结束; 结算界面是"本场"未打完(本局已结算)
+    // 局内说本局, 结算界面说本场
     exitText_.setText(inRound
         ? "本局还未结束，您想要退出吗？\n如果退出，将按逃跑提前结算。"
         : "本场还未结束，您想要退出吗？\n如果退出，将按逃跑提前结算。");
@@ -263,29 +246,25 @@ void GlobalHud::openExitPopup(bool inRound) {
 void GlobalHud::confirmExit() {
     Room* room = (mgr_ ? mgr_->room.get() : nullptr);
     if (room) {
-        // 逃跑提前结算: 梯度罚金 = 倍数(按【已完成】局数, 当前这局不计) × 本场底注
-        // 直接改筹码、无动画; Account::add 内部立即存档 -> 下次启动即为扣除后的数值
+        // 逃跑罚金 = 倍数 x 本场底注; 直接改筹码, Account::add 内部立即存档
         const int penalty = escapePenaltyFor(room->historyCount, room->config.ante);
         Account::instance().add(-penalty);
     }
     exitPopupOpen_ = false;
-    exitConfirmed_ = true;   // GameApp 检测到后关闭窗口
+    exitConfirmed_ = true;
 }
 
 bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     if (mgr_) btnHome_.setVisible(mgr_->homeVisible());
 
-    // 退出确认弹窗优先级最高: 只响应[确定]/[取消]
     if (exitPopupOpen_) {
         btnExitOk_.handleEvent(e, win);
         btnExitCancel_.handleEvent(e, win);
         return true;
     }
 
-    // dev 弹窗优先于菜单弹窗
     bool devPopup = devPopupOpen_;
     if (!devPopup && !popupOpen_) {
-        // 常态: 四键 -> 场景
         btnMenu_.handleEvent(e, win);
         btnMusic_.handleEvent(e, win);
         btnWrench_.handleEvent(e, win);
@@ -293,10 +272,7 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
         return false;
     }
 
-    // ---- 弹窗打开: 拦截 ----
     if (devPopup) {
-        // ---- 开发者模式弹窗 ----
-        // 键盘输入(启用后且输入框聚焦)
         if (devOn_ && devInputFocus_) {
             handleDevText(e);
         }
@@ -304,7 +280,6 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
             e.mouseButton.button == sf::Mouse::Left) {
             sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseButton.x,
                                                                 e.mouseButton.y));
-            // 输入框聚焦判定
             sf::FloatRect ib(devInputBox_.getPosition(), devInputBox_.getSize());
             devInputFocus_ = ib.contains(mp);
             if (devInputFocus_ && devInputStr_.empty()) {
@@ -313,7 +288,6 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
             if (!devInputFocus_ && devInputStr_.empty()) {
                 devInputStr_.clear();
             }
-            // dev 滑条拖动
             if (devOn_) {
                 float hw = KNOB / 2.f + 8.f;
                 sf::FloatRect hit(devTrackRect_.left - hw, DEV_ROW_Y - hw,
@@ -336,7 +310,6 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
         return true;
     }
 
-    // ---- 菜单弹窗 ----
     if (e.type == sf::Event::MouseButtonPressed &&
         e.mouseButton.button == sf::Mouse::Left) {
         sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseButton.x,
@@ -369,7 +342,7 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
 }
 
 void GlobalHud::update(float dt) {
-    // 两段确认 5 秒未二次点击则复原
+    // 两段确认超过 5 秒复原
     if (devArm_) {
         devArmTimer_ += dt;
         if (devArmTimer_ >= 5.f) {
@@ -386,7 +359,6 @@ void GlobalHud::draw(sf::RenderWindow& win) {
     btnWrench_.draw(win);
     btnHome_.draw(win);
 
-    // 退出确认弹窗(独立面板, 最上层)
     if (exitPopupOpen_) {
         win.draw(overlay_);
         win.draw(exitDialog_);
@@ -398,10 +370,9 @@ void GlobalHud::draw(sf::RenderWindow& win) {
     }
 
     if (!devPopupOpen_ && !popupOpen_) return;
-    // 弹窗层
     win.draw(overlay_);
     win.draw(panel_);
-    panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));  // 装饰边框
+    panel_frame::draw(win, sf::FloatRect(panel_.getPosition(), panel_.getSize()));
     sf::CircleShape ring(24.f);
     ring.setPosition(sf::Vector2f(PL + PW - 60.f + 20.f - 24.f,
                                   PT + 20.f + 20.f - 24.f));
@@ -421,7 +392,6 @@ void GlobalHud::draw(sf::RenderWindow& win) {
         btnRulesBack_.draw(win);
         return;
     }
-    // 主菜单页
     TextBox ttl("菜单", sf::Vector2f(WW / 2.f, PT + 52.f), 28);
     ttl.setColor(sf::Color(255, 220, 130));
     ttl.centerOrigin();
@@ -441,10 +411,8 @@ void GlobalHud::draw(sf::RenderWindow& win) {
     btnRules_.draw(win);
 }
 
-// 开发者模式弹窗绘制(与主菜单弹窗同尺寸)
 void GlobalHud::drawDevPopup(sf::RenderWindow& win) {
     if (!devOn_) {
-        // ---- 未启用: 提示 + 启用按钮 ----
         TextBox ttl("工具", sf::Vector2f(WW / 2.f, PT + 52.f), 28);
         ttl.setColor(sf::Color(255, 220, 130));
         ttl.centerOrigin();
@@ -461,7 +429,6 @@ void GlobalHud::drawDevPopup(sf::RenderWindow& win) {
         btnDevToggle_.draw(win);
         return;
     }
-    // ---- 已启用: 标注 + 输入框 + 筹码+滑条 + 关闭按钮 ----
     TextBox ttl("开发者模式", sf::Vector2f(WW / 2.f, PT + 44.f), 28);
     ttl.setColor(sf::Color(255, 220, 130));
     ttl.centerOrigin();
@@ -471,20 +438,18 @@ void GlobalHud::drawDevPopup(sf::RenderWindow& win) {
     badge.centerOrigin();
     badge.draw(win);
 
-    // 输入框(聚焦显示编辑串; 未聚焦显示当前余额)
     win.draw(devInputBox_);
     TextBox label("直接输入筹码数（0 ~ 100000）", sf::Vector2f(WW / 2.f, DEV_INPUT_Y - DEV_INPUT_H / 2.f - 18.f), 16);
     label.setColor(sf::Color(180, 190, 220));
     label.centerOrigin();
     label.draw(win);
     std::string shown = devInputFocus_ ? devInputStr_ : std::to_string(Account::instance().balance());
-    if (devInputFocus_) shown += "|";   // 简易光标
+    if (devInputFocus_) shown += "|";
     TextBox inputText(shown, sf::Vector2f(WW / 2.f, DEV_INPUT_Y), 24);
     inputText.setColor(sf::Color(255, 255, 255));
     inputText.centerOrigin();
     inputText.draw(win);
 
-    // 筹码图标 + 滑条(0~100000)
     int bal = Account::instance().balance();
     if (const sf::Texture* ct = AssetManager::instance().chipForAmount(bal)) {
         sf::Sprite chip(*ct);
@@ -508,36 +473,32 @@ void GlobalHud::drawDevPopup(sf::RenderWindow& win) {
 }
 
 void GlobalHud::openPopup() {
-    devPopupOpen_ = false;   // 互斥
+    devPopupOpen_ = false;
     popupOpen_ = true;
     showRules_ = false;
 }
 
 void GlobalHud::openDevPopup() {
-    popupOpen_ = false;      // 互斥
+    popupOpen_ = false;
     devPopupOpen_ = true;
     devArm_ = false;
     devArmTimer_ = 0.f;
     devInputFocus_ = false;
     devInputStr_.clear();
-    // 每次打开都按当前启用状态重置外观(修复: 上次确认态残留红色文案/配色)
     refreshDevToggle();
 }
 
-// 统一刷新"启用/关闭开发者模式"按钮: 文字 + 位置 随 devOn_/devArm_ 变化
-// (贴图按钮: 常态用原色, 已进入"再点一次确认"的警告态用红色着色)
 void GlobalHud::refreshDevToggle() {
     if (devOn_) {
         btnDevToggle_.setText("关闭开发者模式");
         btnDevToggle_.setTint(sf::Color::White);
     } else if (devArm_) {
         btnDevToggle_.setText("再点一次确认启用");
-        btnDevToggle_.setTint(sf::Color(255, 140, 140));   // 警告态: 红色着色
+        btnDevToggle_.setTint(sf::Color(255, 140, 140));
     } else {
         btnDevToggle_.setText("启用开发者模式");
         btnDevToggle_.setTint(sf::Color::White);
     }
-    // 启用态按钮在下方居中
     btnDevToggle_.setPosition(sf::Vector2f(WW / 2.f - 190.f,
                                            (devOn_ ? DEV_BTN_Y_ON : DEV_BTN_Y) - 30.f));
 }
@@ -601,12 +562,10 @@ void GlobalHud::setBalanceFromMouse(float mx) {
     if (t > 1.f) t = 1.f;
     int v = static_cast<int>(t * DEV_MAX);
     applyDevBalance(v);
-    if (devInputFocus_) devInputStr_ = std::to_string(v);  // 同步输入框显示
+    if (devInputFocus_) devInputStr_ = std::to_string(v);
 }
 
-// 开发者模式统一写余额入口:
-//   除账号存档外, 若当前存在"进行中"的房间, 同步写入本人局内筹码 —— 否则账号与房间筹码
-//   会各存一份(结算/踢出判定/下局扣注读局内筹码, 大厅与HUD读账号), 出现显示跳变与账目错乱。
+// 统一写余额: 账号存档 + 在场房间本人筹码, 防两处脱节
 void GlobalHud::applyDevBalance(int v) {
     Account::instance().setBalance(v);
     if (mgr_ && mgr_->room && !mgr_->room->isFinished()) {
@@ -625,16 +584,15 @@ void GlobalHud::applyDevInput() {
     devInputStr_ = std::to_string(v);
 }
 
-// 输入框键盘处理(数字/退格, 即输即改)
 void GlobalHud::handleDevText(const sf::Event& e) {
     if (e.type == sf::Event::TextEntered) {
         sf::Uint32 c = e.text.unicode;
         if (c >= '0' && c <= '9') {
-            if (devInputStr_.size() < 6) {   // 上限 100000(6 位)
+            if (devInputStr_.size() < 6) {
                 devInputStr_.push_back(static_cast<char>(c));
             }
             applyDevInput();
-        } else if (c == 8) {                 // Backspace
+        } else if (c == 8) {
             if (!devInputStr_.empty()) {
                 devInputStr_.pop_back();
             }

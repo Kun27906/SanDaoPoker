@@ -17,7 +17,7 @@ SceneManager::SceneManager(sf::RenderWindow& window) : window_(window) {
 void SceneManager::changeTo(SceneId id) {
     current_ = createScene(id);
     currentId_ = id;
-    // 背景音乐随场景切换(仅 bgmOn 时播放;同一曲不重播)
+    // 背景音乐随场景切换
     switch (id) {
         case SceneId::Deal:
         case SceneId::Arrange:
@@ -32,13 +32,13 @@ void SceneManager::changeTo(SceneId id) {
 }
 
 void SceneManager::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
-    // 全局工具栏先处理;弹窗打开时返回 true 拦截(不穿透到场景)
+    // 全局工具栏先处理;弹窗打开时返回 true 拦截
     if (hud_ && hud_->handleEvent(e, win)) return;
     if (current_) current_->handleEvent(e, win);
 }
 
 void SceneManager::update(float dt) {
-    if (hud_) hud_->update(dt);   // 全局 UI(两段确认计时等)
+    if (hud_) hud_->update(dt);   // 全局 UI
     if (current_) current_->update(dt);
 }
 

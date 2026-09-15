@@ -22,7 +22,7 @@ void ChipBar::setPosition(const sf::Vector2f& pos) {
     pos_ = pos;
 }
 
-// 立即设定显示值(无动画)
+// 立即设定显示值
 void ChipBar::setImmediate(int v) {
     shown_ = v;
     from_ = v;
@@ -32,7 +32,7 @@ void ChipBar::setImmediate(int v) {
     inited_ = true;
 }
 
-// 从当前显示值滚动到 v(缓出: 先快后慢, 像计数器)
+// 从当前显示值滚动到 v
 void ChipBar::rollTo(int v, float seconds) {
     if (!inited_) { setImmediate(v); return; }
     if (v == shown_) { target_ = v; rolling_ = false; return; }
@@ -56,7 +56,7 @@ void ChipBar::update(float dt) {
     shown_ = from_ + static_cast<int>((target_ - from_) * e);
 }
 
-// 点击左端筹码图标 -> 播放 chip 音效(筹码图案素材可见处均可点)
+// 点击左端筹码图标 -> 播放 chip 音效
 bool ChipBar::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
     if (e.type != sf::Event::MouseButtonPressed ||
         e.mouseButton.button != sf::Mouse::Left) {
@@ -75,7 +75,7 @@ bool ChipBar::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
 void ChipBar::draw(sf::RenderWindow& win) {
     sf::FloatRect box(pos_, sf::Vector2f(W, H));
 
-    // 1. 渐变背景(上深蓝->下亮蓝紫, 垂直渐变)
+    // 1. 渐变背景
     sf::VertexArray grad(sf::Quads, 4);
     grad[0].position = sf::Vector2f(box.left, box.top);
     grad[1].position = sf::Vector2f(box.left + box.width, box.top);
@@ -87,7 +87,7 @@ void ChipBar::draw(sf::RenderWindow& win) {
     grad[3].color = sf::Color(70, 110, 200, 235);
     win.draw(grad);
 
-    // 2. 外边框(亮金; 滚动中加亮提示)
+    // 2. 外边框
     sf::RectangleShape border(sf::Vector2f(box.width, box.height));
     border.setPosition(box.left, box.top);
     border.setFillColor(sf::Color::Transparent);
@@ -95,7 +95,7 @@ void ChipBar::draw(sf::RenderWindow& win) {
     border.setOutlineThickness(rolling_ ? 3.f : 2.f);
     win.draw(border);
 
-    // 3. 左端筹码图标(按当前显示值所在区间档位取素材; 滚动时图标随数字换档)
+    // 3. 左端筹码图标
     int shownForIcon = rolling_ ? shown_ : target_;
     if (const sf::Texture* t = AssetManager::instance().chipForAmount(shownForIcon)) {
         sf::Sprite chip(*t);
@@ -105,13 +105,13 @@ void ChipBar::draw(sf::RenderWindow& win) {
         win.draw(chip);
     }
 
-    // 4. 分隔竖线(数字与图标分开)
+    // 4. 分隔竖线
     sf::RectangleShape sep(sf::Vector2f(2.f, box.height - 14.f));
     sep.setPosition(box.left + 52.f, box.top + 7.f);
     sep.setFillColor(sf::Color(255, 255, 255, 160));
     win.draw(sep);
 
-    // 5. 数字(滚动中显示中间值)
+    // 5. 数字
     if (shown_ != cachedShown_) {
         char buf[24];
         std::snprintf(buf, sizeof(buf), "%d", shown_);

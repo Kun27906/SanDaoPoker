@@ -16,7 +16,7 @@ void ProfileEditor::bind(Avatar* selfAvatar) {
         if (self_) self_->setNickname(nm);
     });
 
-    // 头像保存: 重新读取 game_data/avatar.png + 刷新本人头像纹理(avatarTexture(0) 优先自定义)
+    // 头像保存: 重新读取 game_data/avatar.png + 刷新本人头像纹理 优先自定义)
     crop_.setOnSaved([this]() {
         AssetManager::instance().reloadCustomAvatar();
         if (self_) self_->setTexture(AssetManager::instance().avatarTexture(0));
@@ -36,8 +36,8 @@ bool ProfileEditor::handleEvent(const sf::Event& e, const sf::RenderWindow& win)
     if (!self_) return false;
 
     // 点击本人昵称名牌 -> 改名; 点击本人头像圆 -> 上传裁剪新头像
-    //  - 坐标用 mapPixelToCoords 换算(与 Button/ChipBar/VersionBadge 一致)
-    //  - 命中区域外扩 HIT_PAD: 名牌是细长条(高约 29px)、头像圆也小, 给一点点击容差更好按
+    // - 坐标用 mapPixelToCoords 换算
+    // - 命中区域外扩 HIT_PAD: 名牌是细长条、头像圆也小, 给一点点击容差更好按
     if (e.type == sf::Event::MouseButtonPressed && e.mouseButton.button == sf::Mouse::Left) {
         const sf::Vector2f mp = win.mapPixelToCoords(sf::Vector2i(e.mouseButton.x, e.mouseButton.y));
         sf::FloatRect pb = self_->plateBounds();
