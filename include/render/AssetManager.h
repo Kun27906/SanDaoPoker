@@ -44,7 +44,11 @@ public:
     // 牌堆素材(发牌动画): 按牌背色 0=红 1=蓝 2=黑 取 689x292 堆叠图(54层右侧露边)
     const sf::Texture* deckPile(int backIndex) const;
     // 头像素材(assets/ui/avatars/*.png 自动扫描, 100x100): 按序号取(取模循环)
+    // 注: 0 号位 = 本人 -> 若玩家已设自定义头像(game_data/avatar.png)则优先返回它
     const sf::Texture* avatarTexture(int idx) const;
+    // ---- 本人自定义头像(由"点击本人头像"上传裁剪生成, 见 AvatarCropDialog) ----
+    const sf::Texture* customAvatar() const;   // 已设置则返回纹理, 否则 nullptr
+    bool reloadCustomAvatar();                 // 重新读取 game_data/avatar.png(保存头像后调用)
     // 桌面小贴图(assets/ui/table/, 400x24): "countdown_bar_bg"/"countdown_fill_green|yellow|red"
     const sf::Texture* tableTexture(const std::string& name) const;
 
@@ -67,6 +71,7 @@ private:
     std::map<std::string, sf::Texture> icons_;
     sf::Texture pileTex_[3];             // 牌堆堆叠图(发牌动画, 红/蓝/黑)
     std::vector<sf::Texture> avatarTex_; // 头像图(自动扫描 assets/ui/avatars/*.png)
+    sf::Texture customTex_;              // 本人自定义头像(game_data/avatar.png; 空 = 未设置)
     std::map<std::string, sf::Texture> tableTex_;   // 桌面小贴图(assets/ui/table/)
     int backRoll_ = 0;                   // 当前局牌背颜色(0红 1蓝 2黑)
     bool loaded_ = false;

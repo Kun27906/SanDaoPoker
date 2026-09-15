@@ -44,6 +44,16 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
     selfAvatar_.setNickname(Account::instance().ensureNickname());
     versionBadge_.setPosition(sf::Vector2f(24.f, WH - 40.f));   // 左下角版本号(可点击)
 
+    // 点击本人昵称名牌 -> 自设昵称(中文/字母/下划线/数字); 点击本人头像圆 -> 上传图片并裁剪
+    nickDlg_.setOnConfirm([this](const std::string& nm) {
+        Account::instance().setNickname(nm);        // 写入账号并存档
+        selfAvatar_.setNickname(nm);                // 界面立即生效
+    });
+    cropDlg_.setOnSaved([this]() {
+        AssetManager::instance().reloadCustomAvatar();
+        selfAvatar_.setTexture(AssetManager::instance().avatarTexture(0));   // 0 号位=本人(优先自定义)
+    });
+
     // 重置账号(右下角; 两段确认: 第一次点击进入确认态, 再点一次执行)
     btnReset_.setText("重置账号");
     btnReset_.setPosition(sf::Vector2f(WW - 200.f, WH - 64.f));
@@ -94,12 +104,33 @@ SceneLobby::SceneLobby(SceneManager* mgr) : mgr_(mgr) {
 }
 
 void SceneLobby::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
+    // 自设昵称 / 自设头像弹窗打开时独占输入
+    if (nickDlg_.isOpen()) {
+        nickDlg_.handleEvent(e, win);
+        return;
+    }
+    if (cropDlg_.isOpen()) {
+        cropDlg_.handleEvent(e, win);
+        return;
+    }
     if (pendingTopUp_) {
         btnTopUpOk_.handleEvent(e, win);   // 破产弹窗只响应确定
         return;
     }
     if (versionBadge_.handleEvent(e, win)) return;   // 版本历史弹窗打开时拦截
     if (chipBar_.handleEvent(e, win)) return;        // 点击筹码图标 -> chip 音效
+    // 点击本人昵称名牌 -> 改名; 点击本人头像圆 -> 上传裁剪新头像
+    if (e.type == sf::Event::MouseButtonPressed && e.mouseButton.button == sf::Mouse::Left) {
+        const sf::Vector2f mp(static_cast<float>(e.mouseButton.x), static_cast<float>(e.mouseButton.y));
+        if (selfAvatar_.plateBounds().contains(mp)) {
+            nickDlg_.open(Account::instance().ensureNickname());
+            return;
+        }
+        if (selfAvatar_.hitCircle(mp)) {
+            cropDlg_.open();
+            return;
+        }
+    }
     for (auto& b : btnSeats_) b.handleEvent(e, win);
     btnReset_.handleEvent(e, win);
 }
@@ -109,6 +140,7 @@ void SceneLobby::onHomePressed() {
 }
 
 void SceneLobby::update(float dt) {
+    nickDlg_.update(dt);   // 输入框插入符闪烁
     // 确认态 5 秒未二次点击则复原
     if (resetArmed_) {
         resetArmTimer_ += dt;
@@ -137,4 +169,8 @@ void SceneLobby::draw(sf::RenderWindow& win) {
         topUpText_.draw(win);
         btnTopUpOk_.draw(win);
     }
+
+    // 自设昵称 / 自设头像弹窗(最上层)
+    nickDlg_.draw(win);
+    cropDlg_.draw(win);
 }
