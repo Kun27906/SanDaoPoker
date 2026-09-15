@@ -47,6 +47,7 @@ public:
     // 注: 0 号位 = 本人 -> 若玩家已设自定义头像(game_data/avatar.png)则优先返回它
     const sf::Texture* avatarTexture(int idx) const;
     // ---- 本人自定义头像(由"点击本人头像"上传裁剪生成, 见 AvatarCropDialog) ----
+    // 本人自定义头像(game_data/avatar.png; 加载后与默认头像同样做圆形裁剪)
     const sf::Texture* customAvatar() const;   // 已设置则返回纹理, 否则 nullptr
     bool reloadCustomAvatar();                 // 重新读取 game_data/avatar.png(保存头像后调用)
     // 桌面小贴图(assets/ui/table/, 400x24): "countdown_bar_bg"/"countdown_fill_green|yellow|red"
