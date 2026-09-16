@@ -139,6 +139,30 @@ else()
     message(WARNING "未找到 SFML,先编译纯 C++ 骨架(渲染模块后续接入)")
 endif()
 
+# MSVC 运行库自动拷贝到 exe 目录: 干净系统免装 VC++ 运行库, 双击即跑
+# (与上方 SFML DLL 同思路; 由编译器路径推导 VC/Redist/MSVC/<ver>/x64/Microsoft.VC*.CRT)
+if(MSVC AND WIN32)
+    get_filename_component(_sdp_cl_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
+    get_filename_component(_sdp_vc_root "${_sdp_cl_dir}/../../../../../.." ABSOLUTE)
+    file(GLOB _sdp_crt_vers "${_sdp_vc_root}/Redist/MSVC/14.*")
+    list(SORT _sdp_crt_vers)
+    list(LENGTH _sdp_crt_vers _sdp_crt_n)
+    if(_sdp_crt_n GREATER 0)
+        math(EXPR _sdp_crt_last "${_sdp_crt_n} - 1")
+        list(GET _sdp_crt_vers ${_sdp_crt_last} _sdp_crt_latest)
+        file(GLOB MSVC_CRT_DLLS "${_sdp_crt_latest}/x64/Microsoft.VC*.CRT/*.dll")
+    endif()
+    if(MSVC_CRT_DLLS)
+        add_custom_command(TARGET SanDaoPoker POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${MSVC_CRT_DLLS}
+                $<TARGET_FILE_DIR:SanDaoPoker>)
+        message(STATUS "已配置 MSVC 运行库自动拷贝到 exe 目录")
+    else()
+        message(WARNING "未找到 MSVC 运行库(VC\\Redist), 目标机可能需要自行安装 VC++ 运行库")
+    endif()
+endif()
+
 # ------------------------------------------------------------
 # Windows 系统库: 头像上传用的原生"打开文件"对话框(comdlg32!GetOpenFileNameW)
 # ------------------------------------------------------------
