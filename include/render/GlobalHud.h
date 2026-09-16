@@ -27,6 +27,8 @@ private:
     void toggleMute();
     void showRulesPage();
     void showMainPage();
+    void rebuildRulesText();
+    void drawRulesText(sf::RenderWindow& win);
     void openDevPopup();
     void refreshDevToggle();
     void drawDevPopup(sf::RenderWindow& win);
@@ -56,7 +58,13 @@ private:
     IconButton knob_;
     Button btnRules_;
     TextBox rulesTitle_;
-    TextBox rulesText_;
+    sf::Text rulesText_;
+    sf::RenderTexture rulesRtex_;
+    sf::Sprite rulesSprite_;
+    float rulesContentH_ = 0.f;
+    float rulesScrollY_ = 0.f;
+    float rulesScrollMax_ = 0.f;
+    bool rulesRtexDirty_ = true;
     Button btnRulesBack_;
     sf::FloatRect trackRect_;
     float vol_ = 100.f;

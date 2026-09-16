@@ -5,7 +5,9 @@
 #include "render/SoundManager.h"
 #include "render/Account.h"
 #include "render/SceneManager.h"
+#include "ui/FontUtil.h"
 #include <cstdlib>
+#include <vector>
 
 namespace {
 constexpr float WW = static_cast<float>(layout::WINDOW_W);
@@ -41,6 +43,17 @@ constexpr float DEV_INPUT_H = 54.f;
 constexpr float DEV_ROW_Y = PT + 280.f;
 constexpr float DEV_MAX = 100000.f;
 
+// 规则页文本区与滚动条
+constexpr unsigned RULES_FONT_SIZE = 19;
+constexpr float RULES_X = PL + 44.f;
+constexpr float RULES_Y = PT + 110.f;
+constexpr float RULES_W = PW - 88.f;
+constexpr float RULES_H = PH - 110.f - 104.f;
+constexpr float RULES_WRAP_W = RULES_W - 24.f;
+constexpr float RULES_SCROLL_STEP = 56.f;
+constexpr float RULES_BAR_W = 6.f;
+constexpr float RULES_BAR_X = PL + PW - 26.f;
+
 const char* RULES_TEXT =
     "【游戏目标】9 张手牌分成头/中/尾三道，逐道比大小，赢得越多越好。\n"
     "【牌型大小】豹子>同花顺>金花>顺子>对子>散牌。\n"
@@ -54,7 +67,100 @@ const char* RULES_TEXT =
     "【逃跑罚金】一局都没打完不罚；1-2 局罚 1 份底注，3-4 局 2 份，5-8 局 3 份，9 局及以上 4 份。\n"
     "【踢出】每局后余额不足下一局注金将被踢出本场（不扣费）。\n"
     "【破产】余额低于 100 判定破产，返回大厅时自动补足至 500。";
+
+// 中文折行: 按宽度断行, 收尾标点不落行首。ASCII 连续串视为一个词整体换行
+
+std::vector<std::string> splitUtf8(const std::string& s) {
+    std::vector<std::string> out;
+    for (size_t i = 0; i < s.size();) {
+        const unsigned char c = static_cast<unsigned char>(s[i]);
+        size_t len = 1;
+        if (c >= 0xF0) len = 4;
+        else if (c >= 0xE0) len = 3;
+        else if (c >= 0xC0) len = 2;
+        if (i + len > s.size()) len = 1;
+        out.push_back(s.substr(i, len));
+        i += len;
+    }
+    return out;
 }
+
+bool isWordChar(char c) {
+    return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') ||
+           (c >= 'a' && c <= 'z') || c == '-' || c == '.';
+}
+
+bool isClosingPunct(const std::string& cp) {
+    static const char* kSet[] = { "，", "。", "、", "；", "：", "！", "？", "）",
+                                  "】", "》", "」", "』", "”", "’" };
+    for (const char* s : kSet) {
+        if (cp == s) return true;
+    }
+    if (cp.size() == 1) {
+        const char c = cp[0];
+        return c == ',' || c == '.' || c == ';' || c == ':' ||
+               c == '!' || c == '?' || c == ')' || c == ']' || c == '%';
+    }
+    return false;
+}
+
+std::vector<std::string> wrapCjkText(const std::string& src, const sf::Font& font,
+                                     unsigned size, float maxW) {
+    sf::Text meas;
+    meas.setFont(font);
+    meas.setCharacterSize(size);
+    std::vector<std::string> lines;
+    std::string cur;
+
+    auto widthOf = [&](const std::string& s) -> float {
+        if (s.empty()) return 0.f;
+        meas.setString(str_util::utf8(s.c_str()));
+        return meas.getLocalBounds().width;
+    };
+    auto flush = [&]() {
+        while (!cur.empty() && cur.back() == ' ') cur.pop_back();
+        if (!cur.empty()) lines.push_back(cur);
+        cur.clear();
+    };
+
+    size_t p = 0;
+    while (p <= src.size()) {
+        const size_t q = src.find('\n', p);
+        const std::string para = src.substr(p, (q == std::string::npos) ? std::string::npos : q - p);
+
+        // 分词: ASCII 连续串为一个词, 其余逐字符
+        std::vector<std::string> tokens;
+        std::string word;
+        for (const std::string& cp : splitUtf8(para)) {
+            if (cp.size() == 1 && isWordChar(cp[0])) {
+                word += cp;
+                continue;
+            }
+            if (!word.empty()) { tokens.push_back(word); word.clear(); }
+            tokens.push_back(cp);
+        }
+        if (!word.empty()) tokens.push_back(word);
+
+        for (const std::string& tk : tokens) {
+            if (tk == " ") {
+                if (!cur.empty() && widthOf(cur + tk) <= maxW) cur += tk;
+                continue;
+            }
+            if (!cur.empty() && !isClosingPunct(tk) && widthOf(cur + tk) > maxW) {
+                flush();
+            }
+            cur += tk;
+            // 收尾标点允许悬挂, 但累计悬挂过多时收行
+            if (widthOf(cur) > maxW + 20.f) flush();
+        }
+        flush();
+        if (q == std::string::npos) break;
+        p = q + 1;
+    }
+    return lines;
+}
+
+} // namespace
 
 GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     AssetManager& am = AssetManager::instance();
@@ -159,10 +265,7 @@ GlobalHud::GlobalHud(SceneManager* mgr) : mgr_(mgr) {
     rulesTitle_.centerOrigin();
     rulesTitle_.setPosition(sf::Vector2f(WW / 2.f, PT + 52.f));
 
-    rulesText_.setText(RULES_TEXT);
-    rulesText_.setCharacterSize(19);
-    rulesText_.setColor(sf::Color(230, 230, 230));
-    rulesText_.setPosition(sf::Vector2f(PL + 44.f, PT + 110.f));
+    rebuildRulesText();
 
     btnRulesBack_.setText("返回");
     btnRulesBack_.setPosition(sf::Vector2f(WW / 2.f - 80.f, PT + PH - 96.f));
@@ -331,6 +434,11 @@ bool GlobalHud::handleEvent(const sf::Event& e, const sf::RenderWindow& win) {
                                                             e.mouseMove.y));
         setVolumeFromMouse(mp.x);
     }
+    if (e.type == sf::Event::MouseWheelScrolled && showRules_ && rulesScrollMax_ > 0.f) {
+        rulesScrollY_ -= e.mouseWheelScroll.delta * RULES_SCROLL_STEP;
+        if (rulesScrollY_ < 0.f) rulesScrollY_ = 0.f;
+        if (rulesScrollY_ > rulesScrollMax_) rulesScrollY_ = rulesScrollMax_;
+    }
     btnClose_.handleEvent(e, win);
     if (showRules_) {
         btnRulesBack_.handleEvent(e, win);
@@ -388,7 +496,7 @@ void GlobalHud::draw(sf::RenderWindow& win) {
     }
     if (showRules_) {
         rulesTitle_.draw(win);
-        rulesText_.draw(win);
+        drawRulesText(win);
         btnRulesBack_.draw(win);
         return;
     }
@@ -516,8 +624,82 @@ void GlobalHud::closePopup() {
     dragging_ = false;
 }
 
-void GlobalHud::showRulesPage() { showRules_ = true; dragging_ = false; }
+void GlobalHud::showRulesPage() { showRules_ = true; dragging_ = false; rulesScrollY_ = 0.f; }
 void GlobalHud::showMainPage()  { showRules_ = false; }
+
+// 折行后写入 rulesText_, 并算出总高与滚动范围
+void GlobalHud::rebuildRulesText() {
+    const sf::Font& font = font_util::defaultFont();
+    const std::vector<std::string> lines = wrapCjkText(RULES_TEXT, font,
+                                                       RULES_FONT_SIZE, RULES_WRAP_W);
+
+    std::string wrapped;
+    for (size_t i = 0; i < lines.size(); ++i) {
+        if (i > 0) wrapped += '\n';
+        wrapped += lines[i];
+    }
+
+    sf::Text probe;
+    probe.setFont(font);
+    probe.setCharacterSize(RULES_FONT_SIZE);
+    probe.setString(str_util::utf8(wrapped.c_str()));
+    const sf::FloatRect b = probe.getLocalBounds();
+    // 段高含顶部偏移; 尾部留 8px 余量防止末行贴边
+    rulesContentH_ = b.top + b.height + 8.f;
+
+    rulesScrollMax_ = rulesContentH_ - RULES_H;
+    if (rulesScrollMax_ < 0.f) rulesScrollMax_ = 0.f;
+    rulesScrollY_ = 0.f;
+    rulesRtexDirty_ = true;
+
+    rulesText_.setFont(font);
+    rulesText_.setCharacterSize(RULES_FONT_SIZE);
+    rulesText_.setFillColor(sf::Color(230, 230, 230));
+    rulesText_.setString(str_util::utf8(wrapped.c_str()));
+    rulesText_.setPosition(sf::Vector2f(RULES_X, RULES_Y));
+}
+
+// 放得下直接绘制; 放不下渲染到离屏纹理, 按滚动偏移取窗口显示, 并画滚动条
+void GlobalHud::drawRulesText(sf::RenderWindow& win) {
+    if (rulesScrollMax_ <= 0.f) {
+        win.draw(rulesText_);
+        return;
+    }
+    if (rulesRtexDirty_) {
+        const unsigned texW = static_cast<unsigned>(RULES_W) + 2u;
+        const unsigned texH = static_cast<unsigned>(rulesContentH_) + 2u;
+        if (rulesRtex_.getSize().x != texW || rulesRtex_.getSize().y != texH) {
+            rulesRtex_.create(texW, texH);
+        }
+        rulesRtex_.clear(sf::Color::Transparent);
+        rulesText_.setPosition(0.f, 0.f);
+        rulesRtex_.draw(rulesText_);
+        rulesText_.setPosition(sf::Vector2f(RULES_X, RULES_Y));
+        rulesRtex_.display();
+        rulesRtexDirty_ = false;
+    }
+    rulesSprite_.setTexture(rulesRtex_.getTexture());
+    rulesSprite_.setTextureRect(sf::IntRect(0, static_cast<int>(rulesScrollY_ + 0.5f),
+                                            static_cast<int>(RULES_W),
+                                            static_cast<int>(RULES_H)));
+    rulesSprite_.setPosition(RULES_X, RULES_Y);
+    win.draw(rulesSprite_);
+
+    // 滚动条: 底槽 + 金色滑块
+    sf::RectangleShape bar(sf::Vector2f(RULES_BAR_W, RULES_H));
+    bar.setPosition(RULES_BAR_X, RULES_Y);
+    bar.setFillColor(sf::Color(46, 58, 96));
+    win.draw(bar);
+
+    float thumbH = RULES_H * (RULES_H / rulesContentH_);
+    if (thumbH < 30.f) thumbH = 30.f;
+    if (thumbH > RULES_H) thumbH = RULES_H;
+    const float t = rulesScrollY_ / rulesScrollMax_;
+    sf::RectangleShape thumb(sf::Vector2f(RULES_BAR_W, thumbH));
+    thumb.setPosition(RULES_BAR_X, RULES_Y + t * (RULES_H - thumbH));
+    thumb.setFillColor(sf::Color(255, 215, 0));
+    win.draw(thumb);
+}
 
 void GlobalHud::updateKnob() {
     float x = TRACK_L + vol_ / 100.f * TRACK_W - KNOB / 2.f;
