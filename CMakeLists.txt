@@ -42,6 +42,21 @@ endif()
 set(SFML_DIR "${SFML_ROOT}/lib/cmake/SFML")
 find_package(SFML 2.6 COMPONENTS graphics window system audio network QUIET)
 
+# SFML 官方包只提供 Debug / Release 两套库(没有 RelWithDebInfo / MinSizeRel)。
+# CMake 在 RelWithDebInfo 配置下会回退到 SFML 的 Debug 库, 而本工程自身链接的是 Release CRT,
+# 结果一个进程里同时加载两套 CRT(ucrtbase+ucrtbased、MSVCP140+MSVCP140D),
+# 启动即触发调试断言(Debug Assertion Failed / fopen.cpp)而崩溃。
+# 注意: Visual Studio 文件夹模式的 "x64-Release" 配置用的就是 RelWithDebInfo, 必然踩中。
+# 这里把所有非 Debug 配置显式映射到 SFML 的 Release 库。
+if(SFML_FOUND)
+    foreach(_sdp_sfml_tgt sfml-graphics sfml-window sfml-system sfml-audio sfml-network sfml-main)
+        if(TARGET ${_sdp_sfml_tgt})
+            set_property(TARGET ${_sdp_sfml_tgt} PROPERTY MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
+            set_property(TARGET ${_sdp_sfml_tgt} PROPERTY MAP_IMPORTED_CONFIG_MINSIZEREL Release)
+        endif()
+    endforeach()
+endif()
+
 # ------------------------------------------------------------
 # 源文件清单(按模块分组,与 src/<模块>/ 目录一一对应)
 # 注:RuleConfig.h 为纯头文件(位于 include/core/),无需编译
